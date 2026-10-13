@@ -5,6 +5,19 @@ Todas as mudancas notaveis neste projeto serao documentadas neste arquivo.
 O formato e baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adota o [Versionamento Semantico](https://semver.org/lang/pt-BR/).
 
+## [1.7.0] - 2026-10-13
+
+### Adicionado
+- Novo tema Minimalista Branco com Verde Esmeralda (Clean & Minimal), projetado para máxima legibilidade e clareza.
+- Exportador de relatório diário em PDF estilizado para impressão e compartilhamento com nutricionistas.
+- Modal interativo "O que há de novo" acessível diretamente pelo topo da interface.
+- Novas capturas de tela em alta resolução no README.md cobrindo todos os módulos no novo padrão visual.
+
+### Modificado
+- Reformulação completa da hierarquia visual com base nas diretrizes do Web Interface Guidelines e WCAG AA.
+- Otimização do layout flexível para dispositivos móveis, eliminando quebras em telas estreitas (412px).
+- Sincronização automatizada dos recursos estáticos com a distribuição do aplicativo Android (.APK).
+
 ## [1.4.0] - 2026-10-13
 
 ### Adicionado
