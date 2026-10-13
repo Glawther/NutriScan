@@ -298,24 +298,38 @@ async def scan_label_photo_endpoint(request: Request):
     ocr_engine = "nutriscan_regex_br"
 
     if "application/json" in content_type:
-        body = await request.json()
-        raw_text = body.get("raw_text")
-        sample_id = body.get("sample_id")
-        product_name = body.get("product_name")
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        raw_text = str(body.get("raw_text") or "").strip() or None
+        sample_id = str(body.get("sample_id") or "").strip() or None
+        product_name = str(body.get("product_name") or "").strip() or None
         if body.get("portion_g") is not None:
-            portion_g = float(body.get("portion_g") or 100.0)
+            try:
+                portion_g = float(body.get("portion_g") or 100.0)
+            except (ValueError, TypeError):
+                portion_g = 100.0
         image_base64 = body.get("image_base64")
         if image_base64 and not raw_text:
-            encoded = image_base64.split(",")[-1]
-            img_bytes = base64.b64decode(encoded)
-            raw_text, ocr_engine, detected_id = extract_text_from_image_bytes(img_bytes, "upload.png")
-            sample_id = sample_id or detected_id
+            try:
+                encoded = str(image_base64).split(",")[-1]
+                img_bytes = base64.b64decode(encoded)
+                raw_text, ocr_engine, detected_id = extract_text_from_image_bytes(img_bytes, "upload.png")
+                sample_id = sample_id or detected_id
+            except Exception:
+                pass
     else:
-        form = await request.form()
+        try:
+            form = await request.form()
+        except Exception:
+            form = {}
         if form.get("portion_g"):
             try:
                 portion_g = float(str(form.get("portion_g")).replace(",", "."))
-            except ValueError:
+            except (ValueError, TypeError):
                 portion_g = 100.0
         sample_id = str(form.get("sample_id") or "").strip() or None
         raw_text = str(form.get("raw_text") or "").strip() or None
@@ -323,13 +337,16 @@ async def scan_label_photo_endpoint(request: Request):
 
         upload = form.get("file")
         if upload is not None and hasattr(upload, "read"):
-            img_bytes = await upload.read()
-            fname = getattr(upload, "filename", "rotulo.png") or "rotulo.png"
-            extracted_text, ocr_engine, detected_id = extract_text_from_image_bytes(img_bytes, fname)
-            if not raw_text:
-                raw_text = extracted_text
-            if not sample_id and detected_id:
-                sample_id = detected_id
+            try:
+                img_bytes = await upload.read()
+                fname = getattr(upload, "filename", "rotulo.png") or "rotulo.png"
+                extracted_text, ocr_engine, detected_id = extract_text_from_image_bytes(img_bytes, fname)
+                if not raw_text:
+                    raw_text = extracted_text
+                if not sample_id and detected_id:
+                    sample_id = detected_id
+            except Exception:
+                pass
 
     if sample_id and sample_id in SAMPLE_LABELS:
         spec = SAMPLE_LABELS[sample_id]
@@ -397,21 +414,32 @@ async def scan_plate_photo_endpoint(request: Request):
     sample_id: Optional[str] = None
 
     if "application/json" in content_type:
-        body = await request.json()
-        sample_id = body.get("sample_id")
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        sample_id = str(body.get("sample_id") or "").strip() or None
         image_base64 = body.get("image_base64")
         if image_base64:
-            encoded = image_base64.split(",")[-1]
             try:
+                encoded = str(image_base64).split(",")[-1]
                 img_bytes = base64.b64decode(encoded)
             except Exception:
                 img_bytes = None
     else:
-        form = await request.form()
+        try:
+            form = await request.form()
+        except Exception:
+            form = {}
         sample_id = str(form.get("sample_id") or "").strip() or None
         upload = form.get("file")
         if upload is not None and hasattr(upload, "read"):
-            img_bytes = await upload.read()
+            try:
+                img_bytes = await upload.read()
+            except Exception:
+                img_bytes = None
 
     goals = get_diet_goals()
     daily_goals = {

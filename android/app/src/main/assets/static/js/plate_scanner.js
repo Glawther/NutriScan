@@ -21,6 +21,11 @@
         sodio_mg: 2000,
     };
 
+    const escapeHtml = (typeof window !== "undefined" && window.escapeHtml) ? window.escapeHtml : function (str) {
+        if (str === null || str === undefined) return "";
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    };
+
     // Default TACO-derived catalog for food items and plate presets (values per 100g)
     const TACO_DATABASE = [
         {
@@ -632,12 +637,12 @@
     function updateItemGrams(index, deltaOrValue, isDelta = true) {
         if (!currentPlateState.items[index]) return;
         const current = Number(currentPlateState.items[index].grams) || 0;
-        let next = isDelta ? current + deltaOrValue : Number(deltaOrValue);
+        let next = isDelta ? current + Number(deltaOrValue) : Number(deltaOrValue);
         if (isNaN(next) || next < 0) next = 0;
         if (next > 2000) next = 2000;
         currentPlateState.items[index].grams = Math.round(next);
         renderPlateDashboard();
-        if (typeof window.triggerHaptic === "function") {
+        if (typeof window !== "undefined" && typeof window.triggerHaptic === "function") {
             window.triggerHaptic(20);
         }
     }
@@ -649,7 +654,7 @@
         if (index >= 0 && index < currentPlateState.items.length) {
             currentPlateState.items.splice(index, 1);
             renderPlateDashboard();
-            if (typeof window.triggerHaptic === "function") {
+            if (typeof window !== "undefined" && typeof window.triggerHaptic === "function") {
                 window.triggerHaptic(35);
             }
         }
@@ -668,7 +673,7 @@
             box: { top: 50, left: 50, width: 25, height: 25 },
         });
         renderPlateDashboard();
-        if (typeof window.triggerHaptic === "function") {
+        if (typeof window !== "undefined" && typeof window.triggerHaptic === "function") {
             window.triggerHaptic(40);
         }
     }
@@ -693,31 +698,35 @@
             currentPlateState.imageUrl = dataUrl;
 
             // Try backend API endpoint POST /api/v1/scan-plate-photo
-            try {
-                const formData = new FormData();
-                formData.append("file", file);
+            const isOnlineNow = typeof window.isOnline === "function" ? window.isOnline() : (typeof navigator === "undefined" || navigator.onLine !== false);
+            if (isOnlineNow) {
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
 
-                const response = await fetch("/api/v1/scan-plate-photo", {
-                    method: "POST",
-                    body: formData,
-                });
+                    const response = await fetch("/api/v1/scan-plate-photo", {
+                        method: "POST",
+                        body: formData,
+                    });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.items && data.items.length > 0) {
-                        currentPlateState.plateTitle = data.plate_title || "Prato Escaneado";
-                        currentPlateState.items = data.items;
-                        renderPlateDashboard();
-                        if (statusEl) {
-                            statusEl.textContent = "Alimentos identificados com sucesso!";
-                            statusEl.classList.remove("loading");
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.items && data.items.length > 0) {
+                            currentPlateState.plateTitle = data.plate_title || "Prato Escaneado";
+                            currentPlateState.items = data.items;
+                            renderPlateDashboard();
+                            if (statusEl) {
+                                statusEl.textContent = "Alimentos identificados com sucesso!";
+                                statusEl.classList.remove("loading");
+                            }
+                            return;
                         }
-                        return;
                     }
+                } catch (_) {
+                    // Endpoint unavailable or offline fallback
                 }
-            } catch (_) {
-                // Endpoint unavailable or offline fallback
             }
+
 
             // Fallback: Default to Prato Feito items on custom photo
             currentPlateState.plateTitle = "Foto do Prato Enviada";
@@ -763,18 +772,21 @@
             sodium_mg: it.calculated.sodio_mg,
         }));
 
+        const isOnlineNow = typeof window.isOnline === "function" ? window.isOnline() : (typeof navigator === "undefined" || navigator.onLine !== false);
         let savedCount = 0;
-        for (const entry of entriesToAdd) {
-            try {
-                const res = await fetch("/api/v1/diet/diary", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(entry),
-                });
-                if (res.ok) {
-                    savedCount++;
-                }
-            } catch (_) {}
+        if (isOnlineNow) {
+            for (const entry of entriesToAdd) {
+                try {
+                    const res = await fetch("/api/v1/diet/diary", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(entry),
+                    });
+                    if (res.ok) {
+                        savedCount++;
+                    }
+                } catch (_) {}
+            }
         }
 
         // Fallback or offline sync with localStorage
@@ -787,12 +799,15 @@
             if (raw) {
                 try {
                     const localState = JSON.parse(raw);
-                    let maxId = localState.entries.length > 0 ? Math.max(...localState.entries.map((e) => e.id)) : 0;
-                    entriesToAdd.forEach((e) => {
-                        maxId++;
-                        localState.entries.push({ id: maxId, ...e });
-                    });
-                    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(localState));
+                    if (localState && typeof localState === "object") {
+                        if (!Array.isArray(localState.entries)) localState.entries = [];
+                        let maxId = localState.entries.length > 0 ? Math.max(...localState.entries.map((e) => Number(e.id) || 0)) : 0;
+                        entriesToAdd.forEach((e) => {
+                            maxId++;
+                            localState.entries.push({ id: maxId, ...e });
+                        });
+                        localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(localState));
+                    }
                 } catch (_) {}
             }
         }
@@ -823,6 +838,7 @@
      * Renders the entire plate scanner dashboard and Bento cards
      */
     function renderPlateDashboard() {
+        if (typeof document === "undefined") return;
         const { totals, items, micronutrients } = calculatePlateTotals(currentPlateState.items);
 
         // 1. Update Preview Image and Bounding Chips
@@ -837,11 +853,12 @@
             overlayEl.innerHTML = items
                 .map((it, idx) => {
                     const box = it.box || { top: 30 + idx * 15, left: 30 + idx * 10, width: 25, height: 25 };
+                    const safeName = escapeHtml(it.name);
                     return `
                         <div class="plate-bound-box" style="top: ${box.top}%; left: ${box.left}%;" data-idx="${idx}">
                             <span class="plate-bound-badge">
                                 <span class="badge-dot"></span>
-                                ${it.name} (${it.grams}g)
+                                ${safeName} (${Number(it.grams) || 0}g)
                             </span>
                         </div>
                     `;
@@ -876,10 +893,12 @@
             } else {
                 itemsListEl.innerHTML = items
                     .map(
-                        (it, idx) => `
+                        (it, idx) => {
+                            const safeName = escapeHtml(it.name);
+                            return `
                     <div class="plate-item-row" data-index="${idx}">
                         <div class="item-meta">
-                            <strong class="item-name">${it.name}</strong>
+                            <strong class="item-name">${safeName}</strong>
                             <div class="item-macros">
                                 <span class="macro-badge kcal">${Math.round(it.calculated.kcal)} kcal</span>
                                 <span class="macro-badge carb">C: ${it.calculated.carbs_g}g</span>
@@ -888,22 +907,24 @@
                             </div>
                         </div>
                         <div class="item-stepper-wrap">
-                            <div class="stepper-controls" role="group" aria-label="Ajustar gramas de ${it.name}">
+                            <div class="stepper-controls" role="group" aria-label="Ajustar gramas de ${safeName}">
                                 <button type="button" class="btn-step btn-step-minus" data-action="minus" data-idx="${idx}" aria-label="Diminuir 10g">−</button>
                                 <div class="stepper-input-box">
-                                    <input type="number" class="stepper-input" data-idx="${idx}" value="${it.grams}" min="0" max="1500" step="10" inputmode="numeric" aria-label="Gramas" />
+                                    <input type="number" class="stepper-input" data-idx="${idx}" value="${Number(it.grams) || 0}" min="0" max="1500" step="10" inputmode="numeric" aria-label="Gramas" />
                                     <span class="stepper-unit">g</span>
                                 </div>
                                 <button type="button" class="btn-step btn-step-plus" data-action="plus" data-idx="${idx}" aria-label="Aumentar 10g">+</button>
                             </div>
-                            <button type="button" class="btn-remove-item" data-idx="${idx}" title="Remover este alimento do prato" aria-label="Remover ${it.name}">✕</button>
+                            <button type="button" class="btn-remove-item" data-idx="${idx}" title="Remover este alimento do prato" aria-label="Remover ${safeName}">✕</button>
                         </div>
                     </div>
-                `
+                `;
+                        }
                     )
                     .join("");
             }
         }
+
 
         // 4. Render Micronutrients Bento Card with % IDR progress meters
         const microGridEl = document.getElementById("plate-micros-grid");
@@ -1015,10 +1036,10 @@
                 suggestionsBox.innerHTML = matches
                     .map(
                         (m) => `
-                    <button type="button" class="taco-suggest-item" data-id="${m.id}">
+                    <button type="button" class="taco-suggest-item" data-id="${escapeHtml(m.id)}">
                         <div class="suggest-info">
-                            <strong>${m.name}</strong>
-                            <span class="suggest-meta">${m.category} • ${m.kcal_100g} kcal/100g • Prot: ${m.prot_100g}g</span>
+                            <strong>${escapeHtml(m.name)}</strong>
+                            <span class="suggest-meta">${escapeHtml(m.category)} • ${Number(m.kcal_100g)} kcal/100g • Prot: ${Number(m.prot_100g)}g</span>
                         </div>
                         <span class="suggest-add-badge">+ Adicionar</span>
                     </button>

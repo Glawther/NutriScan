@@ -74,6 +74,7 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                 """
                 CREATE TABLE IF NOT EXISTS diet_goals (
                     id INTEGER PRIMARY KEY CHECK (id = 1),
+                    gender TEXT NOT NULL DEFAULT 'masculino',
                     goal_type TEXT NOT NULL DEFAULT 'cutting',
                     weight_kg REAL NOT NULL DEFAULT 78.0,
                     height_cm REAL NOT NULL DEFAULT 176.0,
@@ -87,6 +88,10 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                 )
                 """
             )
+            goals_info = conn.execute("PRAGMA table_info(diet_goals)").fetchall()
+            goals_columns = {row["name"] for row in goals_info}
+            if "gender" not in goals_columns:
+                conn.execute("ALTER TABLE diet_goals ADD COLUMN gender TEXT NOT NULL DEFAULT 'masculino'")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS diet_diary (
@@ -204,9 +209,9 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                 conn.execute(
                     """
                     INSERT INTO diet_goals (
-                        id, goal_type, weight_kg, height_cm, age, activity_level,
+                        id, gender, goal_type, weight_kg, height_cm, age, activity_level,
                         daily_kcal_limit, carbs_limit_g, proteins_limit_g, fat_limit_g, sodium_limit_mg
-                    ) VALUES (1, 'cutting', 78.0, 176.0, 29, 'moderado', 2000.0, 200.0, 150.0, 65.0, 2000.0)
+                    ) VALUES (1, 'masculino', 'cutting', 78.0, 176.0, 29, 'moderado', 2000.0, 200.0, 150.0, 65.0, 2000.0)
                     """
                 )
             conn.commit()
@@ -336,43 +341,73 @@ def calculate_mifflin_goals(
     age: int,
     activity_level: str,
     goal_type: str,
+    gender: str = "masculino",
 ) -> Dict[str, float]:
-    bmr = 10.0 * weight_kg + 6.25 * height_cm - 5.0 * age + 5.0
+    weight = float(weight_kg or 70.0)
+    height = float(height_cm or 170.0)
+    age_num = int(age or 25)
+    is_male = str(gender).lower() in ("masculino", "m")
+
+    # TMB Mifflin-St Jeor
+    # TMB Masculino: 10 * weight + 6.25 * height - 5 * age + 5
+    # TMB Feminino: 10 * weight + 6.25 * height - 5 * age - 161
+    if is_male:
+        bmr = 10.0 * weight + 6.25 * height - 5.0 * age_num + 5.0
+    else:
+        bmr = 10.0 * weight + 6.25 * height - 5.0 * age_num - 161.0
+
     multipliers = {
         "sedentario": 1.2,
         "leve": 1.375,
         "moderado": 1.55,
         "intenso": 1.725,
     }
-    tdee = bmr * multipliers.get(activity_level, 1.55)
+    tdee = bmr * multipliers.get(str(activity_level).lower(), 1.2)
 
-    if goal_type == "cutting":
-        kcal = max(1200.0, round(tdee - 450.0, -1))
-        prot = round(weight_kg * 2.0)
-        fat = round(weight_kg * 0.85)
-    elif goal_type == "bulking":
-        kcal = round(tdee + 350.0, -1)
-        prot = round(weight_kg * 2.0)
-        fat = round(weight_kg * 1.0)
+    # Ajustes de objetivo: cutting: -400 kcal, manutencao: 0 kcal, bulking: +350 kcal
+    goal_norm = str(goal_type).lower()
+    if goal_norm == "cutting":
+        goal_adjustment = -400.0
+    elif goal_norm == "bulking":
+        goal_adjustment = 350.0
     else:
-        kcal = round(tdee, -1)
-        prot = round(weight_kg * 1.8)
-        fat = round(weight_kg * 0.9)
+        goal_adjustment = 0.0
 
-    remaining_kcal_for_carbs = max(200.0, kcal - (prot * 4.0) - (fat * 9.0))
-    carbs = round(remaining_kcal_for_carbs / 4.0)
+    # Piso de segurança nutricional: mínimo de 1200 kcal para mulheres e 1500 kcal para homens
+    safety_floor = 1500.0 if is_male else 1200.0
+    daily_kcal_limit = max(safety_floor, float(round(tdee + goal_adjustment)))
+
+    # Macros:
+    # Proteína: 2.0 g/kg para cutting/bulking, 1.6 g/kg para manutenção
+    is_cutting_or_bulking = goal_norm in ("cutting", "bulking")
+    protein_factor = 2.0 if is_cutting_or_bulking else 1.6
+    prot = float(round(weight * protein_factor))
+
+    # Gordura: 0.8 g/kg
+    fat = float(round(weight * 0.8))
+
+    # Carboidratos restantes: (daily_kcal_limit - prot * 4 - fat * 9) / 4 (mínimo 0g)
+    remaining_kcal_for_carbs = daily_kcal_limit - (prot * 4.0 + fat * 9.0)
+    carbs = float(max(0, round(remaining_kcal_for_carbs / 4.0)))
+
+    # Hidratação diária recomendada: 35 ml/kg
+    water_goal_ml = float(round(weight * 35.0))
 
     return {
-        "daily_kcal_limit": float(kcal),
+        "tmb": float(round(bmr)),
+        "tdee": float(round(tdee)),
+        "daily_kcal_limit": float(daily_kcal_limit),
         "carbs_limit_g": float(carbs),
         "proteins_limit_g": float(prot),
         "fat_limit_g": float(fat),
+        "water_goal_ml": float(water_goal_ml),
         "sodium_limit_mg": 2000.0,
     }
 
 
 def update_diet_goals(req: DietGoalsUpdateRequest, db_path: str = DATABASE_PATH) -> DietGoals:
     current = get_diet_goals(db_path=db_path)
+    gender_val = req.gender if req.gender is not None else getattr(current, "gender", "masculino")
 
     if req.auto_calculate:
         calc = calculate_mifflin_goals(
@@ -381,6 +416,7 @@ def update_diet_goals(req: DietGoalsUpdateRequest, db_path: str = DATABASE_PATH)
             age=req.age,
             activity_level=req.activity_level,
             goal_type=req.goal_type,
+            gender=gender_val,
         )
         kcal_limit = calc["daily_kcal_limit"]
         carbs_limit = calc["carbs_limit_g"]
@@ -400,6 +436,7 @@ def update_diet_goals(req: DietGoalsUpdateRequest, db_path: str = DATABASE_PATH)
             conn.execute(
                 """
                 UPDATE diet_goals SET
+                    gender = ?,
                     goal_type = ?,
                     weight_kg = ?,
                     height_cm = ?,
@@ -413,6 +450,7 @@ def update_diet_goals(req: DietGoalsUpdateRequest, db_path: str = DATABASE_PATH)
                 WHERE id = 1
                 """,
                 (
+                    gender_val,
                     req.goal_type,
                     req.weight_kg,
                     req.height_cm,
@@ -670,7 +708,8 @@ def get_water_for_date(date_str: Optional[str] = None, db_path: str = DATABASE_P
 
 def log_water(amount_ml: int, date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
     init_db(db_path)
-    d_str = date_str or today_str()
+    d_str = (str(date_str).strip()[:10] if date_str else None) or today_str()
+    clamped_amount = max(0, min(int(amount_ml or 0), 10000))
     now_iso = datetime.now(timezone.utc).isoformat()
 
     with _db_lock:
@@ -681,7 +720,7 @@ def log_water(amount_ml: int, date_str: Optional[str] = None, db_path: str = DAT
                 INSERT INTO diet_water (date_str, amount_ml, created_at)
                 VALUES (?, ?, ?)
                 """,
-                (d_str, amount_ml, now_iso),
+                (d_str, clamped_amount, now_iso),
             )
             conn.commit()
         finally:
@@ -707,7 +746,10 @@ def reset_water_for_date(date_str: Optional[str] = None, db_path: str = DATABASE
 def get_7day_trends(end_date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
     init_db(db_path)
     if end_date_str:
-        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+        try:
+            end_dt = datetime.strptime(str(end_date_str).strip()[:10], "%Y-%m-%d")
+        except (ValueError, TypeError):
+            end_dt = datetime.now()
     else:
         end_dt = datetime.now()
 

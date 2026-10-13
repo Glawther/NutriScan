@@ -32,7 +32,19 @@ window.shareNutriScanText = function (title, text) {
     }
 };
 
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+window.escapeHtml = escapeHtml;
+
 const IS_FILE_PROTOCOL = typeof window !== "undefined" && window.location && window.location.protocol === "file:";
+const isOnline = () => !IS_FILE_PROTOCOL && (typeof navigator === "undefined" || navigator.onLine !== false);
 const ASSET_BASE = IS_FILE_PROTOCOL ? "samples" : "/static/samples";
 
 const OFFLINE_SAMPLES = {
@@ -221,12 +233,6 @@ function switchTab(rawTabName) {
 window.switchTab = switchTab;
 
 function getLocalDietData() {
-    const saved = localStorage.getItem("nutriscan_diet_state_v1");
-    if (saved) {
-        try {
-            return JSON.parse(saved);
-        } catch (_) {}
-    }
     const initial = {
         goals: {
             goal_type: "cutting",
@@ -243,7 +249,30 @@ function getLocalDietData() {
         },
         entries: [],
     };
-    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(initial));
+    try {
+        const saved = localStorage.getItem("nutriscan_diet_state_v1");
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+                if (!Array.isArray(parsed.entries)) parsed.entries = [];
+                if (!parsed.goals || typeof parsed.goals !== "object") {
+                    parsed.goals = { ...initial.goals };
+                } else {
+                    parsed.goals = { ...initial.goals, ...parsed.goals };
+                    parsed.goals.daily_kcal_limit = Number(parsed.goals.daily_kcal_limit) || 2000;
+                    parsed.goals.carbs_limit_g = Number(parsed.goals.carbs_limit_g) || 200;
+                    parsed.goals.proteins_limit_g = Number(parsed.goals.proteins_limit_g) || 150;
+                    parsed.goals.fat_limit_g = Number(parsed.goals.fat_limit_g) || 65;
+                    parsed.goals.sodium_limit_mg = Number(parsed.goals.sodium_limit_mg) || 2000;
+                    parsed.goals.water_goal_ml = Number(parsed.goals.water_goal_ml) || 2730;
+                }
+                return parsed;
+            }
+        }
+    } catch (_) {}
+    try {
+        localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(initial));
+    } catch (_) {}
     return initial;
 }
 
@@ -321,7 +350,12 @@ function calculateMifflinStJeor(gender, weightKg, heightCm, age, activityLevel, 
 function getUserProfile() {
     try {
         const stored = localStorage.getItem("nutriscan_user_profile_v1");
-        return stored ? JSON.parse(stored) : null;
+        if (!stored) return null;
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            return parsed;
+        }
+        return null;
     } catch (_) {
         return null;
     }
@@ -534,19 +568,22 @@ function renderDietToday(summary) {
     const rowsHtml = summary.entries
         .map((e) => {
             const srcLabel = sourceNames[e.source_type] || "Registro";
+            const safeMeal = escapeHtml(e.meal_type);
+            const safeName = escapeHtml(e.product_name);
+            const safeId = parseInt(e.id, 10) || 0;
             return `
             <tr>
-                <td><span class="meal-badge">${e.meal_type}</span></td>
+                <td><span class="meal-badge">${safeMeal}</span></td>
                 <td>
-                    <strong>${e.product_name}</strong>
-                    <span class="source-tag">${srcLabel}</span>
+                    <strong>${safeName}</strong>
+                    <span class="source-tag">${escapeHtml(srcLabel)}</span>
                 </td>
-                <td>${e.portion_g}g</td>
-                <td><strong>${e.kcal} kcal</strong></td>
-                <td>${e.carbohydrates_g}g</td>
-                <td class="text-emerald"><strong>${e.proteins_g}g</strong></td>
-                <td>${e.fat_g}g</td>
-                <td><button class="btn-delete" aria-label="Remover ${e.product_name} da dieta" onclick="removeDiaryItem(${e.id})">Remover</button></td>
+                <td>${Number(e.portion_g) || 0}g</td>
+                <td><strong>${Number(e.kcal) || 0} kcal</strong></td>
+                <td>${Number(e.carbohydrates_g) || 0}g</td>
+                <td class="text-emerald"><strong>${Number(e.proteins_g) || 0}g</strong></td>
+                <td>${Number(e.fat_g) || 0}g</td>
+                <td><button class="btn-delete" aria-label="Remover ${safeName} da dieta" onclick="removeDiaryItem(${safeId})">Remover</button></td>
             </tr>`;
         })
         .join("");
@@ -577,16 +614,18 @@ let currentDietDate = getLocalDateString();
 async function loadDietToday(dateStr = currentDietDate) {
     currentDietDate = dateStr;
     updateDateDisplay(currentDietDate);
-    try {
-        const res = await fetch(`/api/v1/diet/today?date=${dateStr}`);
-        if (res.ok) {
-            const data = await res.json();
-            renderDietToday(data);
-            await loadWaterData(dateStr);
-            await load7DayTrends();
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch(`/api/v1/diet/today?date=${dateStr}`);
+            if (res.ok) {
+                const data = await res.json();
+                renderDietToday(data);
+                await loadWaterData(dateStr);
+                await load7DayTrends();
+                return;
+            }
+        } catch (_) {}
+    }
     const state = getLocalDietData();
     renderDietToday(buildOfflineSummary(state));
     await loadWaterData(dateStr);
@@ -613,21 +652,23 @@ async function loadWaterData(dateStr = currentDietDate) {
     let consumed = 0;
     const profile = getUserProfile();
     const state = getLocalDietData();
-    const weight = profile?.weight_kg || state?.goals?.weight_kg || 78;
+    const weight = Number(profile?.weight_kg || state?.goals?.weight_kg) || 78;
     const goal = Math.round(weight * 35) || 2500;
 
-    try {
-        const res = await fetch(`/api/v1/diet/water?date=${dateStr}`);
-        if (res.ok) {
-            const data = await res.json();
-            consumed = data.amount_ml || 0;
-            try {
-                localStorage.setItem(`nutriscan_water_${dateStr}`, String(consumed));
-            } catch (_) {}
-            renderWater({ amount_ml: consumed, goal_ml: data.goal_ml || goal, pct: data.pct });
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch(`/api/v1/diet/water?date=${dateStr}`);
+            if (res.ok) {
+                const data = await res.json();
+                consumed = data.amount_ml || 0;
+                try {
+                    localStorage.setItem(`nutriscan_water_${dateStr}`, String(consumed));
+                } catch (_) {}
+                renderWater({ amount_ml: consumed, goal_ml: data.goal_ml || goal, pct: data.pct });
+                return;
+            }
+        } catch (_) {}
+    }
 
     // Fallback offline / WebView (APK)
     try {
@@ -668,13 +709,15 @@ async function addWaterAmount(amountMl) {
         localStorage.setItem(`nutriscan_water_${currentDietDate}`, String(current));
     } catch (_) {}
 
-    try {
-        await fetch("/api/v1/diet/water", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount_ml: amountMl, date_str: currentDietDate }),
-        });
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            await fetch("/api/v1/diet/water", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount_ml: amountMl, date_str: currentDietDate }),
+            });
+        } catch (_) {}
+    }
 
     await loadWaterData(currentDietDate);
     await load7DayTrends();
@@ -687,23 +730,27 @@ async function resetWaterAmount() {
         localStorage.setItem(`nutriscan_water_${currentDietDate}`, "0");
     } catch (_) {}
 
-    try {
-        await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
+        } catch (_) {}
+    }
 
     await loadWaterData(currentDietDate);
     await load7DayTrends();
 }
 
 async function load7DayTrends() {
-    try {
-        const res = await fetch("/api/v1/diet/trends");
-        if (res.ok) {
-            const data = await res.json();
-            renderTrends(data);
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch(`/api/v1/diet/trends?end_date=${currentDietDate}`);
+            if (res.ok) {
+                const data = await res.json();
+                renderTrends(data);
+                return;
+            }
+        } catch (_) {}
+    }
 
     // Fallback de tendencias dos ultimos 7 dias no cliente (100% offline)
     const days = [];
@@ -718,7 +765,7 @@ async function load7DayTrends() {
     for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
-        const dStr = d.toISOString().slice(0, 10);
+        const dStr = getLocalDateString(d);
         const wday = weekdays[d.getDay()];
 
         let dayKcal = 0;
@@ -771,7 +818,7 @@ function renderTrends(data) {
     if (badge) badge.textContent = `${Math.round(data.compliance_rate || 100)}% na meta`;
 
     const maxKcal = Math.max(...data.days.map((d) => Math.max(d.total_kcal, d.kcal_limit)), 2200);
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getLocalDateString();
 
     container.innerHTML = data.days
         .map((d) => {
@@ -790,36 +837,45 @@ function renderTrends(data) {
 }
 
 window.removeDiaryItem = async function (entryId) {
-    try {
-        const res = await fetch(`/api/v1/diet/diary/${entryId}`, { method: "DELETE" });
-        if (res.ok) {
-            await loadDietToday();
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch(`/api/v1/diet/diary/${entryId}`, { method: "DELETE" });
+            if (res.ok) {
+                await loadDietToday();
+                return;
+            }
+        } catch (_) {}
+    }
     const state = getLocalDietData();
-    state.entries = state.entries.filter((e) => e.id !== entryId);
-    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+    state.entries = (state.entries || []).filter((e) => e.id !== entryId);
+    try {
+        localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+    } catch (_) {}
     renderDietToday(buildOfflineSummary(state));
 };
 
 async function addDiaryEntryToDiet(payload) {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(50);
-    try {
-        const res = await fetch("/api/v1/diet/diary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-            await loadDietToday();
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch("/api/v1/diet/diary", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+                await loadDietToday();
+                return;
+            }
+        } catch (_) {}
+    }
     const state = getLocalDietData();
-    const nextId = state.entries.length > 0 ? Math.max(...state.entries.map((e) => e.id)) + 1 : 1;
+    const existingIds = (state.entries || []).map((e) => Number(e.id) || 0);
+    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
     state.entries.push({ id: nextId, ...payload });
-    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+    try {
+        localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+    } catch (_) {}
     renderDietToday(buildOfflineSummary(state));
 }
 window.addDiaryEntryToDiet = addDiaryEntryToDiet;
@@ -840,42 +896,47 @@ async function saveDietGoals(autoCalculate = false) {
         sodium_limit_mg: parseFloat(document.getElementById("limit-sodium").value) || 2000,
     };
 
-    try {
-        const res = await fetch("/api/v1/diet/goals", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-            await loadDietToday();
-            if (currentOcrResult) await runPhotoLabelScan(false);
-            const fb = document.getElementById("goals-feedback");
-            fb.textContent = autoCalculate
-                ? "Meta calculada pelo peso/altura e aplicada à dieta de hoje."
-                : "Limite diário atualizado.";
-            setTimeout(() => (fb.textContent = ""), 3500);
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch("/api/v1/diet/goals", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+                await loadDietToday();
+                if (currentOcrResult) await runPhotoLabelScan(false);
+                const fb = document.getElementById("goals-feedback");
+                if (fb) {
+                    fb.textContent = autoCalculate
+                        ? "✓ Metas calculadas e salvas com sucesso!"
+                        : "✓ Metas diárias atualizadas!";
+                    fb.style.display = "block";
+                    setTimeout(() => (fb.textContent = ""), 3500);
+                }
+                return;
+            }
+        } catch (_) {}
+    }
 
     const state = getLocalDietData();
     if (autoCalculate) {
-        const bmr = 10 * payload.weight_kg + 6.25 * payload.height_cm - 5 * payload.age + 5;
-        const mult = { sedentario: 1.2, leve: 1.375, moderado: 1.55, intenso: 1.725 }[payload.activity_level] || 1.55;
-        const tdee = bmr * mult;
-        const kcal =
-            payload.goal_type === "cutting"
-                ? Math.max(1200, Math.round((tdee - 450) / 10) * 10)
-                : payload.goal_type === "bulking"
-                ? Math.round((tdee + 350) / 10) * 10
-                : Math.round(tdee / 10) * 10;
-        const prot = Math.round(payload.weight_kg * 2.0);
-        const fat = Math.round(payload.weight_kg * 0.85);
-        const carbs = Math.max(50, Math.round((kcal - prot * 4 - fat * 9) / 4));
-        payload.daily_kcal_limit = kcal;
-        payload.proteins_limit_g = prot;
-        payload.fat_limit_g = fat;
-        payload.carbs_limit_g = carbs;
+        const userProf = getUserProfile() || {};
+        const gender = userProf.gender || "masculino";
+        const calc = calculateMifflinStJeor(
+            gender,
+            payload.weight_kg,
+            payload.height_cm,
+            payload.age,
+            payload.activity_level,
+            payload.goal_type
+        );
+        payload.daily_kcal_limit = calc.daily_kcal_limit;
+        payload.proteins_limit_g = calc.proteins_limit_g;
+        payload.fat_limit_g = calc.fat_limit_g;
+        payload.carbs_limit_g = calc.carbs_limit_g;
+        payload.water_goal_ml = calc.water_goal_ml;
+        payload.sodium_limit_mg = calc.sodium_limit_mg;
     }
     state.goals = payload;
     localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
@@ -1089,7 +1150,7 @@ function renderAnvisaSeals(anvisa) {
             (w) => `
             <div class="anvisa-lupa">
                 <span class="anvisa-lupa-icon">LUPA ANVISA</span>
-                <span>${w}</span>
+                <span>${escapeHtml(w)}</span>
             </div>`
         )
         .join("");
@@ -1118,7 +1179,7 @@ function renderProduct(prod) {
     const allergensEl = document.getElementById("prod-allergens");
     if (prod.allergens && prod.allergens.length > 0) {
         allergensEl.innerHTML = prod.allergens
-            .map((a) => `<span class="allergen-tag">Alergênico: ${a}</span>`)
+            .map((a) => `<span class="allergen-tag">Alergênico: ${escapeHtml(a)}</span>`)
             .join("");
     } else {
         allergensEl.innerHTML = `<span class="threshold-note">Sem alergênicos destacados na base.</span>`;
@@ -1155,9 +1216,9 @@ function renderProduct(prod) {
         .map(
             ([label, val, ref]) => `
         <tr>
-            <td>${label}</td>
-            <td><strong>${val}</strong></td>
-            <td class="threshold-note">${ref}</td>
+            <td>${escapeHtml(label)}</td>
+            <td><strong>${escapeHtml(val)}</strong></td>
+            <td class="threshold-note">${escapeHtml(ref)}</td>
         </tr>`
         )
         .join("");
@@ -1173,10 +1234,10 @@ function renderProduct(prod) {
                 (item) => `
             <div class="additive-item">
                 <div>
-                    <span class="additive-code">${item.code}</span>
-                    <span>${item.name}</span>
+                    <span class="additive-code">${escapeHtml(item.code)}</span>
+                    <span>${escapeHtml(item.name)}</span>
                 </div>
-                <span class="additive-func">${item.function}</span>
+                <span class="additive-func">${escapeHtml(item.function)}</span>
             </div>`
             )
             .join("");
@@ -1187,27 +1248,29 @@ async function scanProduct(queryOrBarcode) {
     const clean = queryOrBarcode.trim();
     if (!clean) return;
 
-    try {
-        let product = null;
-        if (/^\d{8,14}$/.test(clean)) {
-            const res = await fetch(`/api/v1/product/${encodeURIComponent(clean)}`);
-            if (res.ok) {
-                product = await res.json();
+    if (isOnline()) {
+        try {
+            let product = null;
+            if (/^\d{8,14}$/.test(clean)) {
+                const res = await fetch(`/api/v1/product/${encodeURIComponent(clean)}`);
+                if (res.ok) {
+                    product = await res.json();
+                }
             }
-        }
-        if (!product) {
-            const sRes = await fetch(`/api/v1/search?q=${encodeURIComponent(clean)}`);
-            if (sRes.ok) {
-                const list = await sRes.json();
-                if (list.length > 0) product = list[0];
+            if (!product) {
+                const sRes = await fetch(`/api/v1/search?q=${encodeURIComponent(clean)}`);
+                if (sRes.ok) {
+                    const list = await sRes.json();
+                    if (list.length > 0) product = list[0];
+                }
             }
-        }
-        if (product) {
-            renderProduct(product);
-            await loadHistory();
-            return;
-        }
-    } catch (_) {}
+            if (product) {
+                renderProduct(product);
+                await loadHistory();
+                return;
+            }
+        } catch (_) {}
+    }
 
     const found =
         OFFLINE_CATALOG.find((p) => p.barcode === clean || p.product_name.toLowerCase().includes(clean.toLowerCase())) ||
@@ -1216,14 +1279,16 @@ async function scanProduct(queryOrBarcode) {
 }
 
 async function loadHistory() {
-    try {
-        const res = await fetch("/api/v1/history");
-        if (res.ok) {
-            cachedHistory = await res.json();
-            populateCompareSelectors();
-            return;
-        }
-    } catch (_) {}
+    if (isOnline()) {
+        try {
+            const res = await fetch("/api/v1/history");
+            if (res.ok) {
+                cachedHistory = await res.json();
+                populateCompareSelectors();
+                return;
+            }
+        } catch (_) {}
+    }
     cachedHistory = OFFLINE_CATALOG;
     populateCompareSelectors();
 }
@@ -1237,7 +1302,7 @@ function populateCompareSelectors() {
     const currentB = selB.value || "7891000053508";
 
     const optionsHtml = cachedHistory
-        .map((p) => `<option value="${p.barcode}">${p.product_name} (${p.brand}) [${p.barcode}]</option>`)
+        .map((p) => `<option value="${escapeHtml(p.barcode)}">${escapeHtml(p.product_name)} (${escapeHtml(p.brand)}) [${escapeHtml(p.barcode)}]</option>`)
         .join("");
 
     selA.innerHTML = optionsHtml;
@@ -1251,18 +1316,18 @@ function renderCompareMiniCard(elId, prod) {
     const el = document.getElementById(elId);
     const warnings =
         prod.anvisa.warnings_count > 0
-            ? prod.anvisa.warnings_list.map((w) => `<span class="anvisa-lupa" style="font-size:11px;padding:4px 8px;">${w}</span>`).join(" ")
+            ? prod.anvisa.warnings_list.map((w) => `<span class="anvisa-lupa" style="font-size:11px;padding:4px 8px;">${escapeHtml(w)}</span>`).join(" ")
             : `<span class="anvisa-clean">Sem alerta frontal ANVISA</span>`;
     el.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
             <div>
-                <span class="ean-badge">EAN ${prod.barcode}</span>
-                <h3 style="font-size:15px;margin-top:4px;">${prod.product_name}</h3>
-                <p class="threshold-note">${prod.brand} • ${prod.quantity}</p>
+                <span class="ean-badge">EAN ${escapeHtml(prod.barcode)}</span>
+                <h3 style="font-size:15px;margin-top:4px;">${escapeHtml(prod.product_name)}</h3>
+                <p class="threshold-note">${escapeHtml(prod.brand)} • ${escapeHtml(prod.quantity)}</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-                <span class="ns-step ns-${prod.nutriscore_grade.toLowerCase()} active" style="padding:4px 10px;">Nutri-Score ${prod.nutriscore_grade}</span>
-                <span class="nova-badge nova-${prod.nova_group}">NOVA ${prod.nova_group}</span>
+                <span class="ns-step ns-${escapeHtml(String(prod.nutriscore_grade).toLowerCase())} active" style="padding:4px 10px;">Nutri-Score ${escapeHtml(prod.nutriscore_grade)}</span>
+                <span class="nova-badge nova-${Number(prod.nova_group) || 3}">NOVA ${Number(prod.nova_group) || 3}</span>
             </div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">${warnings}</div>
@@ -1273,44 +1338,47 @@ async function runComparison() {
     const codeA = document.getElementById("compare-select-a").value || "3017620422003";
     const codeB = document.getElementById("compare-select-b").value || "7891000053508";
 
-    try {
-        const res = await fetch(
-            `/api/v1/compare?barcode_a=${encodeURIComponent(codeA)}&barcode_b=${encodeURIComponent(codeB)}`
-        );
-        if (!res.ok) return;
-        const data = await res.json();
+    if (isOnline()) {
+        try {
+            const res = await fetch(
+                `/api/v1/compare?barcode_a=${encodeURIComponent(codeA)}&barcode_b=${encodeURIComponent(codeB)}`
+            );
+            if (res.ok) {
+                const data = await res.json();
 
-        renderCompareMiniCard("comp-card-a", data.product_a);
-        renderCompareMiniCard("comp-card-b", data.product_b);
+                renderCompareMiniCard("comp-card-a", data.product_a);
+                renderCompareMiniCard("comp-card-b", data.product_b);
 
-        document.getElementById("th-prod-a").textContent = data.product_a.product_name;
-        document.getElementById("th-prod-b").textContent = data.product_b.product_name;
+                document.getElementById("th-prod-a").textContent = data.product_a.product_name;
+                document.getElementById("th-prod-b").textContent = data.product_b.product_name;
 
-        document.getElementById("compare-deltas-tbody").innerHTML = data.deltas
-            .map((d) => {
-                const sign = d.diff > 0 ? `+${d.diff}` : `${d.diff}`;
-                let favName = "Empate técnico";
-                if (d.favorable_barcode === data.product_a.barcode) {
-                    favName = `<span class="text-emerald">${data.product_a.product_name}</span>`;
-                } else if (d.favorable_barcode === data.product_b.barcode) {
-                    favName = `<span class="text-emerald">${data.product_b.product_name}</span>`;
-                }
-                return `
-                <tr>
-                    <td><strong>${d.label}</strong></td>
-                    <td>${d.value_a} ${d.unit}</td>
-                    <td>${d.value_b} ${d.unit}</td>
-                    <td><code>${sign} ${d.unit}</code></td>
-                    <td>${favName}</td>
-                </tr>`;
-            })
-            .join("");
+                document.getElementById("compare-deltas-tbody").innerHTML = data.deltas
+                    .map((d) => {
+                        const sign = d.diff > 0 ? `+${d.diff}` : `${d.diff}`;
+                        let favName = "Empate técnico";
+                        if (d.favorable_barcode === data.product_a.barcode) {
+                            favName = `<span class="text-emerald">${escapeHtml(data.product_a.product_name)}</span>`;
+                        } else if (d.favorable_barcode === data.product_b.barcode) {
+                            favName = `<span class="text-emerald">${escapeHtml(data.product_b.product_name)}</span>`;
+                        }
+                        return `
+                        <tr>
+                            <td><strong>${escapeHtml(d.label)}</strong></td>
+                            <td>${Number(d.value_a)} ${escapeHtml(d.unit)}</td>
+                            <td>${Number(d.value_b)} ${escapeHtml(d.unit)}</td>
+                            <td><code>${sign} ${escapeHtml(d.unit)}</code></td>
+                            <td>${favName}</td>
+                        </tr>`;
+                    })
+                    .join("");
 
-        document.getElementById("compare-notes").innerHTML = data.summary_notes
-            .map((n) => `<div>• ${n}</div>`)
-            .join("");
-        return;
-    } catch (_) {}
+                document.getElementById("compare-notes").innerHTML = data.summary_notes
+                    .map((n) => `<div>• ${escapeHtml(n)}</div>`)
+                    .join("");
+                return;
+            }
+        } catch (_) {}
+    }
 
     const prodA = OFFLINE_CATALOG.find((p) => p.barcode === codeA) || OFFLINE_CATALOG[0];
     const prodB = OFFLINE_CATALOG.find((p) => p.barcode === codeB) || OFFLINE_CATALOG[1];
@@ -1330,10 +1398,27 @@ async function runComparison() {
         .map(([label, unit, va, vb, lower]) => {
             const diff = Number((va - vb).toFixed(1));
             const sign = diff > 0 ? `+${diff}` : `${diff}`;
-            const fav = lower ? (va < vb ? prodA.product_name : prodB.product_name) : va > vb ? prodA.product_name : prodB.product_name;
-            return `<tr><td><strong>${label}</strong></td><td>${va} ${unit}</td><td>${vb} ${unit}</td><td><code>${sign} ${unit}</code></td><td><span class="text-emerald">${fav}</span></td></tr>`;
+            const fav = Math.abs(diff) < 0.01 ? "Empate técnico" : lower ? (va < vb ? prodA.product_name : prodB.product_name) : va > vb ? prodA.product_name : prodB.product_name;
+            return `<tr><td><strong>${escapeHtml(label)}</strong></td><td>${va} ${escapeHtml(unit)}</td><td>${vb} ${escapeHtml(unit)}</td><td><code>${sign} ${escapeHtml(unit)}</code></td><td><span class="text-emerald">${escapeHtml(fav)}</span></td></tr>`;
         })
         .join("");
+
+    const offlineNotes = [];
+    if (prodA.barcode === prodB.barcode) {
+        offlineNotes.push(`Comparação do mesmo alimento (${prodA.product_name}): valores nutricionais idênticos.`);
+    } else {
+        if (prodA.anvisa.warnings_count !== prodB.anvisa.warnings_count) {
+            const lessWarn = prodA.anvisa.warnings_count < prodB.anvisa.warnings_count ? prodA : prodB;
+            const moreWarn = lessWarn === prodA ? prodB : prodA;
+            offlineNotes.push(`${lessWarn.product_name} tem ${lessWarn.anvisa.warnings_count} alerta(s) frontal(is) ANVISA, enquanto ${moreWarn.product_name} apresenta ${moreWarn.anvisa.warnings_count}.`);
+        } else {
+            offlineNotes.push(`Ambos os produtos possuem ${prodA.anvisa.warnings_count} alerta(s) frontal(is) pela regra da ANVISA.`);
+        }
+    }
+    const notesEl = document.getElementById("compare-notes");
+    if (notesEl) {
+        notesEl.innerHTML = offlineNotes.map((n) => `<div>• ${escapeHtml(n)}</div>`).join("");
+    }
 }
 
 function setupCameraBarcodeScanner() {
@@ -1394,11 +1479,10 @@ function setupCameraBarcodeScanner() {
     }
 }
 
-if (typeof document !== "undefined") {
-    document.addEventListener("DOMContentLoaded", async () => {
-        if (typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof window !== "undefined" && window.location && window.location.protocol.startsWith("http")) {
-            navigator.serviceWorker.register("/sw.js").catch(() => {});
-        }
+async function initNutriScanApp() {
+    if (typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof window !== "undefined" && window.location && window.location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
 
     document.querySelectorAll(".tab-btn, .mob-nav-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -1649,8 +1733,9 @@ if (typeof document !== "undefined") {
 
     // Gerenciamento do Modal de Perfil & Onboarding (#modal-profile-onboarding)
     setupProfileOnboardingModal();
-    });
 }
+
+
 
 function setupProfileOnboardingModal() {
     const modal = document.getElementById("modal-profile-onboarding");
@@ -1676,9 +1761,13 @@ function setupProfileOnboardingModal() {
     function updatePreview() {
         if (!previewKcal || !previewWater) return;
         const gender = inputGender?.value || "masculino";
-        const weight = parseFloat(inputWeight?.value) || 75;
-        const height = parseFloat(inputHeight?.value) || 175;
-        const age = parseInt(inputAge?.value, 10) || 28;
+        const rawWeight = parseFloat(inputWeight?.value);
+        const rawHeight = parseFloat(inputHeight?.value);
+        const rawAge = parseInt(inputAge?.value, 10);
+
+        const weight = !isNaN(rawWeight) && rawWeight > 0 ? Math.min(300, Math.max(30, rawWeight)) : 75;
+        const height = !isNaN(rawHeight) && rawHeight > 0 ? Math.min(250, Math.max(100, rawHeight)) : 175;
+        const age = !isNaN(rawAge) && rawAge > 0 ? Math.min(110, Math.max(12, rawAge)) : 28;
         const activity = inputActivity?.value || "moderado";
         const goal = inputGoal?.value || "cutting";
 
@@ -1739,6 +1828,19 @@ function setupProfileOnboardingModal() {
         });
     }
 
+    // Backdrop click and Escape key dismissal
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    window.addEventListener("keydown", (e) => {
+        if (!modal.hidden && e.key === "Escape") {
+            closeModal();
+        }
+    });
+
     // Attach input listeners for live preview
     [inputGender, inputAge, inputWeight, inputHeight, inputActivity, inputGoal].forEach((el) => {
         if (el) {
@@ -1781,6 +1883,14 @@ function setupProfileOnboardingModal() {
     const existingProfile = getUserProfile();
     if (!existingProfile) {
         setTimeout(openModal, 350);
+    }
+}
+
+if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initNutriScanApp);
+    } else {
+        initNutriScanApp();
     }
 }
 

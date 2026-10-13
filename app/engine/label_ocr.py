@@ -335,8 +335,14 @@ def parse_nutrition_table_text(
         "sodium_pct": _pct(consumed_macros["sodium_mg"], limits.get("sodium_limit_mg", 2000.0)),
     }
 
-    anvisa = evaluate_anvisa_rdc429(per_100g, is_beverage=False)
-    nutriscore = normalize_nutriscore("", per_100g, is_beverage=False)
+    is_beverage = bool(
+        re.search(r"Por[çc][ãa]o(?:\s+de)?\s*[:\-]?\s*\d+[.,]?\d*\s*ml\b", text, flags=re.IGNORECASE)
+        or re.search(r"\b100\s*ml\b", text, flags=re.IGNORECASE)
+        or any(k in (product_name or "").lower() for k in ("suco", "refrigerante", "bebida", "néctar", "chá", "nectar"))
+    )
+
+    anvisa = evaluate_anvisa_rdc429(per_100g, is_beverage=is_beverage)
+    nutriscore = normalize_nutriscore("", per_100g, is_beverage=is_beverage)
 
     return LabelParseResult(
         product_name=product_name,

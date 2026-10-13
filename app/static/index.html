@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="static/css/style.css?v=1.3.0" />
+    <link rel="stylesheet" href="css/style.css?v=1.3.0" />
 </head>
 <body>
     <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -915,11 +915,24 @@
         </div>
     </div>
 
-    <script src="static/js/share_export.js"></script>
-    <script src="static/js/barcode_cam.js"></script>
-    <script src="static/js/label_parser.js"></script>
-    <script src="static/js/plate_scanner.js"></script>
-    <script src="static/js/app_tour.js"></script>
-    <script src="static/js/app.js"></script>
+    <script>
+        (function() {
+            const prefix = window.location.protocol === "file:" ? "js/" : "static/js/";
+            const scripts = [
+                "share_export.js",
+                "barcode_cam.js",
+                "label_parser.js",
+                "plate_scanner.js",
+                "app_tour.js",
+                "app.js"
+            ];
+            scripts.forEach(s => {
+                const scr = document.createElement("script");
+                scr.src = prefix + s;
+                scr.async = false;
+                document.body.appendChild(scr);
+            });
+        })();
+    </script>
 </body>
 </html>

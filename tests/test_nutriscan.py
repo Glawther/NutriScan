@@ -119,6 +119,12 @@ def test_compare_products_deltas():
     assert protein_delta.diff == -8.0
     assert protein_delta.favorable_barcode == "7891000053508"
 
+    # Test compare same product A vs A
+    comp_same = compare_products(prod_a, prod_a)
+    assert all(d.diff == 0.0 for d in comp_same.deltas)
+    assert all(d.favorable_barcode is None for d in comp_same.deltas)
+    assert any("valores nutricionais idênticos" in note for note in comp_same.summary_notes)
+
 
 def test_sqlite_storage_lifecycle():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -472,6 +478,16 @@ def test_generate_whatsapp_and_plain_text_summary():
     empty_wa = generate_whatsapp_summary(empty_diary)
     assert "(14/10/2026)" in empty_wa
     assert "Nenhuma refeição registrada" in empty_wa
+
+    # 4. Test over-goal summary (bulking or binge day: 2600 kcal vs 2000 kcal goal)
+    over_diary = {
+        "date_str": "2026-10-14",
+        "consumed": {"kcal": 2600, "proteins_g": 180, "carbohydrates_g": 300, "fat_g": 80, "sodium_mg": 2200},
+        "goals": {"daily_kcal_limit": 2000},
+        "entries": [],
+    }
+    over_wa = generate_whatsapp_summary(over_diary)
+    assert "2600 / 2000 kcal (600 kcal acima da meta)" in over_wa
 
 
 def test_fastapi_diet_export_endpoint():
@@ -926,3 +942,98 @@ def test_fastapi_diet_micronutrients_endpoint():
 
         # Cleanup created entry
         client.delete(f"/api/v1/diet/diary/{created_entry['id']}")
+
+
+def test_mifflin_st_jeor_backend_parity_and_safety_floors():
+    from app.database import calculate_mifflin_goals
+
+    # 1. Homem padrão (80kg, 180cm, 30 anos, sedentário, manutenção)
+    # TMB = 10*80 + 6.25*180 - 5*30 + 5 = 800 + 1125 - 150 + 5 = 1780 kcal
+    # TDEE = 1780 * 1.2 = 2136 kcal
+    # Proteína: 1.6 g/kg * 80 = 128g; Gordura: 0.8 g/kg * 80 = 64g
+    # Carbs: (2136 - 128*4 - 64*9) / 4 = (2136 - 512 - 576) / 4 = 1048 / 4 = 262g
+    # Água: 80 * 35 = 2800 ml
+    res_m = calculate_mifflin_goals(80.0, 180.0, 30, "sedentario", "manutencao", gender="masculino")
+    assert res_m["tmb"] == 1780.0
+    assert res_m["tdee"] == 2136.0
+    assert res_m["daily_kcal_limit"] == 2136.0
+    assert res_m["proteins_limit_g"] == 128.0
+    assert res_m["fat_limit_g"] == 64.0
+    assert res_m["carbs_limit_g"] == 262.0
+    assert res_m["water_goal_ml"] == 2800.0
+
+    # 2. Mulher padrão (60kg, 165cm, 25 anos, sedentário, manutenção)
+    # TMB = 10*60 + 6.25*165 - 5*25 - 161 = 600 + 1031.25 - 125 - 161 = 1345.25 -> 1345 kcal
+    # TDEE = 1345.25 * 1.2 = 1614.3 -> 1614 kcal
+    res_f = calculate_mifflin_goals(60.0, 165.0, 25, "sedentario", "manutencao", gender="feminino")
+    assert res_f["tmb"] == 1345.0
+    assert res_f["tdee"] == 1614.0
+    assert res_f["daily_kcal_limit"] == 1614.0
+    assert res_f["water_goal_ml"] == 2100.0
+
+    # 3. Piso de segurança nutricional para pessoas de baixo peso em cutting agressivo:
+    # Mulher: 42kg, 150cm, 50 anos, sedentária, cutting (-400 kcal)
+    # TMB = 946.5 kcal; TDEE = 1135.8 kcal. Sem piso daria ~736 kcal!
+    # Piso obrigatório: 1200 kcal
+    safe_f = calculate_mifflin_goals(42.0, 150.0, 50, "sedentario", "cutting", gender="feminino")
+    assert safe_f["daily_kcal_limit"] == 1200.0
+    assert safe_f["carbs_limit_g"] > 0.0
+
+    # Homem: 48kg, 160cm, 50 anos, sedentário, cutting (-400 kcal)
+    # TMB = 1235 kcal; TDEE = 1482 kcal. Sem piso daria ~1082 kcal!
+    # Piso obrigatório: 1500 kcal
+    safe_m = calculate_mifflin_goals(48.0, 160.0, 50, "sedentario", "cutting", gender="masculino")
+    assert safe_m["daily_kcal_limit"] == 1500.0
+    assert safe_m["carbs_limit_g"] > 0.0
+
+
+def test_label_ocr_beverage_rdc429_detection():
+    from app.engine.label_ocr import parse_nutrition_table_text
+
+    raw_juice_label = (
+        "INFORMAÇÃO NUTRICIONAL\n"
+        "Produto: Néctar de Fruta Uva\n"
+        "Porção de 200 ml (1 copo)\n"
+        "Valor energético: 90 kcal\n"
+        "Carboidratos: 22,0 g\n"
+        "Açúcares totais: 20,0 g\n"
+        "Proteínas: 0,0 g\n"
+        "Gorduras totais: 0,0 g\n"
+        "Gorduras saturadas: 0,0 g\n"
+        "Fibra alimentar: 0,0 g\n"
+        "Sódio: 15 mg"
+    )
+    res = parse_nutrition_table_text(raw_juice_label, portion_consumed_g=200.0)
+    # 20g por 200ml equivale a 10g / 100ml.
+    # Como é bebida, o limiar é 7.5g/100ml -> DEVE gerar ALTO EM AÇÚCAR
+    assert res.anvisa.is_beverage is True
+    assert res.anvisa.high_sugar is True
+    assert "ALTO EM AÇÚCAR" in res.anvisa.warnings_list
+
+
+def test_robustness_malformed_payloads_and_xss():
+    with TestClient(app) as client:
+        # 1. Invalid date in trends endpoint safely falls back to today's date (returns 200, no 500 crash)
+        res_trends = client.get("/api/v1/diet/trends?end_date=invalid-date-format")
+        assert res_trends.status_code == 200
+        assert "days" in res_trends.json()
+        assert len(res_trends.json()["days"]) == 7
+
+        # 2. Water log with negative or excessive amounts via /api/v1/diet/water
+        res_neg_water = client.post("/api/v1/diet/water", json={"date_str": "2026-10-13", "amount_ml": -500})
+        assert res_neg_water.status_code == 200
+        assert res_neg_water.json()["amount_ml"] >= 0
+
+        # 3. Label photo endpoint with bad base64 safely handles error without 500
+        res_bad_b64 = client.post("/api/v1/scan-label-photo", json={"image_base64": "!!!not-valid-base64!!!"})
+        assert res_bad_b64.status_code == 200
+
+        # 4. Plate photo endpoint with bad base64 safely handles error without 500
+        res_bad_plate_b64 = client.post("/api/v1/scan-plate-photo", json={"image_base64": "invalid_base64"})
+        assert res_bad_plate_b64.status_code == 200
+
+        # 5. Search with potential XSS / script payload
+        res_xss_search = client.get("/api/v1/search?q=<script>alert(1)</script>")
+        assert res_xss_search.status_code == 200
+        # Returns empty or safe list without unhandled 500 error
+        assert isinstance(res_xss_search.json(), list)

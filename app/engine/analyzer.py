@@ -214,26 +214,37 @@ def detect_is_beverage(raw_product: dict) -> bool:
     return False
 
 
+def _safe_float(val, default: float = 0.0) -> float:
+    try:
+        if val is None or val == "":
+            return default
+        return float(val)
+    except (ValueError, TypeError):
+        return default
+
+
 def analyze_raw_product(raw_product: dict, source: str = "openfoodfacts") -> ProductAnalysis:
     nutriments = raw_product.get("nutriments", {}) or {}
 
-    energy_kcal = float(
-        nutriments.get("energy-kcal_100g")
-        or nutriments.get("energy-kcal")
-        or (float(nutriments.get("energy_100g", 0.0) or 0.0) / 4.184)
-    )
-    carbohydrates_g = float(nutriments.get("carbohydrates_100g", 0.0) or 0.0)
-    sugars_g = float(nutriments.get("sugars_100g", 0.0) or 0.0)
-    fat_g = float(nutriments.get("fat_100g", 0.0) or 0.0)
-    saturated_fat_g = float(nutriments.get("saturated-fat_100g", 0.0) or 0.0)
-    proteins_g = float(nutriments.get("proteins_100g", 0.0) or 0.0)
-    fiber_g = float(nutriments.get("fiber_100g", 0.0) or 0.0)
+    raw_energy = nutriments.get("energy-kcal_100g") or nutriments.get("energy-kcal")
+    if raw_energy is not None:
+        energy_kcal = _safe_float(raw_energy, 0.0)
+    else:
+        energy_kj = _safe_float(nutriments.get("energy_100g"), 0.0)
+        energy_kcal = energy_kj / 4.184
+
+    carbohydrates_g = _safe_float(nutriments.get("carbohydrates_100g"), 0.0)
+    sugars_g = _safe_float(nutriments.get("sugars_100g"), 0.0)
+    fat_g = _safe_float(nutriments.get("fat_100g"), 0.0)
+    saturated_fat_g = _safe_float(nutriments.get("saturated-fat_100g"), 0.0)
+    proteins_g = _safe_float(nutriments.get("proteins_100g"), 0.0)
+    fiber_g = _safe_float(nutriments.get("fiber_100g"), 0.0)
 
     # Open Food Facts armazena sodium_100g em gramas; convertemos para mg se < 20
     raw_sodium = nutriments.get("sodium_100g")
-    raw_salt = float(nutriments.get("salt_100g", 0.0) or 0.0)
+    raw_salt = _safe_float(nutriments.get("salt_100g"), 0.0)
     if raw_sodium is not None:
-        val_sod = float(raw_sodium or 0.0)
+        val_sod = _safe_float(raw_sodium, 0.0)
         sodium_mg = val_sod * 1000.0 if val_sod < 15.0 else val_sod
     elif raw_salt > 0:
         sodium_mg = (raw_salt / 2.5) * 1000.0
@@ -348,30 +359,33 @@ def compare_products(prod_a: ProductAnalysis, prod_b: ProductAnalysis) -> Compar
         )
 
     notes: List[str] = []
-    if prod_a.anvisa.warnings_count != prod_b.anvisa.warnings_count:
-        less_warn = prod_a if prod_a.anvisa.warnings_count < prod_b.anvisa.warnings_count else prod_b
-        more_warn = prod_b if less_warn == prod_a else prod_a
-        notes.append(
-            f"{less_warn.product_name} tem {less_warn.anvisa.warnings_count} alerta(s) frontal(is) ANVISA, "
-            f"enquanto {more_warn.product_name} apresenta {more_warn.anvisa.warnings_count}."
-        )
+    if prod_a.barcode == prod_b.barcode:
+        notes.append(f"Comparação do mesmo alimento ({prod_a.product_name}): valores nutricionais idênticos.")
     else:
-        notes.append(
-            f"Ambos os produtos possuem {prod_a.anvisa.warnings_count} alerta(s) frontal(is) pela regra da ANVISA."
-        )
+        if prod_a.anvisa.warnings_count != prod_b.anvisa.warnings_count:
+            less_warn = prod_a if prod_a.anvisa.warnings_count < prod_b.anvisa.warnings_count else prod_b
+            more_warn = prod_b if less_warn == prod_a else prod_a
+            notes.append(
+                f"{less_warn.product_name} tem {less_warn.anvisa.warnings_count} alerta(s) frontal(is) ANVISA, "
+                f"enquanto {more_warn.product_name} apresenta {more_warn.anvisa.warnings_count}."
+            )
+        else:
+            notes.append(
+                f"Ambos os produtos possuem {prod_a.anvisa.warnings_count} alerta(s) frontal(is) pela regra da ANVISA."
+            )
 
-    sugar_diff = abs(round(prod_a.nutrition.sugars_g - prod_b.nutrition.sugars_g, 1))
-    if sugar_diff > 0:
-        higher_sugar = prod_a if prod_a.nutrition.sugars_g > prod_b.nutrition.sugars_g else prod_b
-        notes.append(f"{higher_sugar.product_name} contém +{sugar_diff}g de açúcares por 100g/ml na comparação direta.")
+        sugar_diff = abs(round(prod_a.nutrition.sugars_g - prod_b.nutrition.sugars_g, 1))
+        if sugar_diff > 0:
+            higher_sugar = prod_a if prod_a.nutrition.sugars_g > prod_b.nutrition.sugars_g else prod_b
+            notes.append(f"{higher_sugar.product_name} contém +{sugar_diff}g de açúcares por 100g/ml na comparação direta.")
 
-    if len(prod_a.additives) != len(prod_b.additives):
-        more_add = prod_a if len(prod_a.additives) > len(prod_b.additives) else prod_b
-        less_add = prod_b if more_add == prod_a else prod_a
-        notes.append(
-            f"{more_add.product_name} lista {len(more_add.additives)} aditivo(s) químico(s) contra "
-            f"{len(less_add.additives)} em {less_add.product_name}."
-        )
+        if len(prod_a.additives) != len(prod_b.additives):
+            more_add = prod_a if len(prod_a.additives) > len(prod_b.additives) else prod_b
+            less_add = prod_b if more_add == prod_a else prod_a
+            notes.append(
+                f"{more_add.product_name} lista {len(more_add.additives)} aditivo(s) químico(s) contra "
+                f"{len(less_add.additives)} em {less_add.product_name}."
+            )
 
     return ComparisonResponse(
         product_a=prod_a,

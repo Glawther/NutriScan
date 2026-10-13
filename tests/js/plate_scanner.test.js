@@ -79,3 +79,26 @@ test("Plate presets contain predefined items and valid bounding boxes", () => {
         assert.ok(typeof item.box.left === "number");
     }
 });
+
+test("updateItemGrams safely clamps extreme inputs (negative, zero, >2000g, NaN)", () => {
+    plateScanner.loadPreset("prato_feito");
+    // Test negative delta clamping to 0
+    plateScanner.updateItemGrams(0, -9999, true);
+    let state = plateScanner.getState();
+    assert.strictEqual(state.items[0].grams, 0);
+
+    // Test extreme value > 2000g clamping to 2000
+    plateScanner.updateItemGrams(0, 9999, false);
+    state = plateScanner.getState();
+    assert.strictEqual(state.items[0].grams, 2000);
+
+    // Test invalid NaN string clamping to 0
+    plateScanner.updateItemGrams(0, "invalid_text", false);
+    state = plateScanner.getState();
+    assert.strictEqual(state.items[0].grams, 0);
+
+    // Test normal addition
+    plateScanner.updateItemGrams(0, 150, false);
+    state = plateScanner.getState();
+    assert.strictEqual(state.items[0].grams, 150);
+});

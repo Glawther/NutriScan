@@ -69,6 +69,7 @@ class ComparisonResponse(BaseModel):
 
 class DietGoals(BaseModel):
     id: int = 1
+    gender: str = Field("masculino", description="masculino | feminino")
     goal_type: str = Field("cutting", description="cutting | manutencao | bulking | personalizado")
     weight_kg: float = Field(78.0, ge=30.0, le=300.0)
     height_cm: float = Field(176.0, ge=100.0, le=250.0)
@@ -82,6 +83,7 @@ class DietGoals(BaseModel):
 
 
 class DietGoalsUpdateRequest(BaseModel):
+    gender: Optional[str] = "masculino"
     goal_type: str = "cutting"
     weight_kg: float = 78.0
     height_cm: float = 176.0

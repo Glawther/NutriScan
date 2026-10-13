@@ -96,7 +96,11 @@ class MainActivity : AppCompatActivity() {
         configureWebView()
         setupOnBackPressed()
 
-        webView.loadUrl("file:///android_asset/index.html")
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState)
+        } else {
+            webView.loadUrl("file:///android_asset/index.html")
+        }
     }
 
     /**
@@ -180,18 +184,24 @@ class MainActivity : AppCompatActivity() {
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
+                val uri = request?.url ?: return false
+                val url = uri.toString()
+                val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: ""
+
                 if (url.startsWith("file://") || url.startsWith("http://10.0.2.2") || url.startsWith("http://localhost")) {
                     return false
                 }
-                // External links open in device default browser
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    // Ignore invalid external scheme
+                if (scheme == "about" || scheme == "javascript" || scheme == "data" || scheme == "blob") {
+                    return false
                 }
-                return true
+                // External links open in device default browser / handler
+                return try {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    startActivity(intent)
+                    true
+                } catch (e: Exception) {
+                    false
+                }
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -302,8 +312,18 @@ class MainActivity : AppCompatActivity() {
     @Throws(IOException::class)
     private fun createImageFile(): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: filesDir
         return File.createTempFile("NUTRISCAN_${timeStamp}_", ".jpg", storageDir)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        webView.saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        webView.restoreState(savedInstanceState)
     }
 
     override fun onResume() {
@@ -338,13 +358,14 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun vibrate(durationMs: Long) {
             try {
+                val clampedMs = durationMs.coerceIn(10L, 1000L)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vibrator?.vibrate(
-                        VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE)
+                        VibrationEffect.createOneShot(clampedMs, VibrationEffect.DEFAULT_AMPLITUDE)
                     )
                 } else {
                     @Suppress("DEPRECATION")
-                    vibrator?.vibrate(durationMs)
+                    vibrator?.vibrate(clampedMs)
                 }
             } catch (e: Exception) {
                 // Ignore vibration failure on devices without vibrator or missing permission

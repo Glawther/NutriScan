@@ -1,4 +1,4 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -44,6 +44,12 @@ app.add_middleware(
 
 app.include_router(api_router)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+if (STATIC_DIR / "css").is_dir():
+    app.mount("/css", StaticFiles(directory=str(STATIC_DIR / "css")), name="css")
+if (STATIC_DIR / "js").is_dir():
+    app.mount("/js", StaticFiles(directory=str(STATIC_DIR / "js")), name="js")
+if (STATIC_DIR / "samples").is_dir():
+    app.mount("/samples", StaticFiles(directory=str(STATIC_DIR / "samples")), name="samples")
 
 
 @app.get("/", include_in_schema=False)

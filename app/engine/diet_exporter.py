@@ -76,8 +76,12 @@ def _extract_summary_parts(
     c_int = int(round(float(consumed_kcal)))
     g_int = int(round(float(goal_kcal)))
     diff_int = int(round(float(diff_kcal)))
+    if diff_int >= 0:
+        diff_str = f"{diff_int} kcal restantes"
+    else:
+        diff_str = f"{abs(diff_int)} kcal acima da meta"
 
-    totals_line = f"🔥 Calorias: {c_int} / {g_int} kcal ({diff_int} kcal restantes)"
+    totals_line = f"🔥 Calorias: {c_int} / {g_int} kcal ({diff_str})"
 
     # Macros
     prot = consumed_dict.get("proteins_g")
