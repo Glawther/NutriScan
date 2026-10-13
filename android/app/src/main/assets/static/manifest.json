@@ -1,0 +1,18 @@
+{
+  "name": "NutriScan Dieta e Leitor de Ficha Técnica",
+  "short_name": "NutriScan",
+  "description": "Controle de limite diário de calorias e macros, leitor de foto de tabela nutricional ANVISA e consulta de produtos.",
+  "start_url": "/?tab=dieta",
+  "display": "standalone",
+  "background_color": "#0b0f17",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/static/samples/rotulo_whey.png",
+      "sizes": "620x480",
+      "type": "image/png"
+    }
+  ]
+}

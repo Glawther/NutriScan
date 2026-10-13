@@ -16,7 +16,7 @@
         calcio_mg: 1000,
         ferro_mg: 14,
         potassio_mg: 3500,
-        magnesio_mg: 420,
+        magnesio_mg: 260,
         vitamina_c_mg: 100,
         sodio_mg: 2000,
     };

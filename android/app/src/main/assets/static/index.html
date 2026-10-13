@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#090d16" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NutriScan - Dieta Diária, Leitor de Foto da Ficha Técnica e Rótulos ANVISA</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="static/css/style.css?v=1.3.0" />
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand-block">
+                <div class="brand-logo" aria-hidden="true">NS</div>
+                <div class="brand-info-wrap">
+                    <div class="brand-greeting-row">
+                        <span id="user-greeting-text" class="user-greeting">Olá! Seja bem-vindo</span>
+                    </div>
+                    <h1 class="brand-title">NutriScan</h1>
+                    <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
+                </div>
+                <div class="brand-actions-row">
+                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">👤 Perfil</button>
+                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour interativo pelo app" aria-label="Tour do App">🎓 Tour do App</button>
+                </div>
+            </div>
+            <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
+                <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-dieta" data-tab="dieta" id="tab-btn-dieta">1. Minha Dieta (Hoje)</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" id="tab-btn-prato">5. Foto do Prato (IA)</button>
+                <button type="button" class="btn-tour-nav" id="btn-start-tour" title="Iniciar tour interativo pelo app" aria-label="Iniciar tour interativo" style="display: none;">✨ Tour do App</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content" id="main-content">
+        <!-- FAIXA DE PROGRESSO DIÁRIO DA DIETA (BENTO KPI STRIP) -->
+        <section class="diet-kpi-strip" id="diet-kpi-strip" aria-label="Resumo do consumo diário">
+            <div class="kpi-card kpi-card-highlight">
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Calorias hoje vs limite diário</span>
+                    <span class="status-pill" id="top-kcal-badge">0 kcal</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-kcal-consumed">0</strong>
+                    <span class="kpi-divider">/ <span id="top-kcal-limit">2000</span> kcal</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-emerald" id="top-bar-kcal" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Proteínas</span>
+                    <span class="kpi-pct text-emerald" id="top-prot-pct">0%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-prot-consumed">0g</strong>
+                    <span class="kpi-divider">meta <span id="top-prot-limit">150</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-blue" id="top-bar-prot" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Carboidratos</span>
+                    <span class="kpi-pct text-amber" id="top-carb-pct">0%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-carb-consumed">0g</strong>
+                    <span class="kpi-divider">meta <span id="top-carb-limit">200</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-amber" id="top-bar-carb" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Gorduras totais</span>
+                    <span class="kpi-pct text-rose" id="top-fat-pct">0%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-fat-consumed">0g</strong>
+                    <span class="kpi-divider">meta <span id="top-fat-limit">65</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-rose" id="top-bar-fat" style="width: 0%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 1: MINHA DIETA (HOJE) -->
+        <section class="tab-panel active" role="tabpanel" id="panel-dieta" aria-labelledby="tab-btn-dieta">
+            <!-- Navegador de Datas da Dieta -->
+            <div class="diet-date-bar">
+                <button type="button" class="btn-date-nav" id="btn-date-prev" aria-label="Dia anterior">◀ Ontem</button>
+                <div class="diet-current-date-wrap">
+                    <span class="diet-date-badge" id="diet-date-badge">HOJE</span>
+                    <strong class="diet-date-text" id="diet-date-text">Hoje</strong>
+                </div>
+                <button type="button" class="btn-date-nav" id="btn-date-next" aria-label="Próximo dia">Amanhã ▶</button>
+            </div>
+
+            <div class="diet-grid">
+                <div class="card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>Refeições registradas hoje</h2>
+                            <p class="section-desc" id="diet-status-subtitle">Acompanhe cada refeição e o saldo restante do seu limite diário.</p>
+                        </div>
+                        <div class="btn-group-inline share-btn-group">
+                            <button class="btn-secondary" id="btn-share-whatsapp" title="Compartilhar resumo da dieta no WhatsApp">📲 WhatsApp</button>
+                            <button class="btn-secondary" id="btn-copy-diet" title="Copiar resumo para a área de transferência">📋 Copiar</button>
+                            <button class="btn-secondary" id="btn-print-diet" title="Imprimir ou salvar relatório em PDF">🖨️ Imprimir PDF</button>
+                            <button class="btn-emerald" id="btn-go-photo-scan">+ Ler foto de ficha técnica</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="diary-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Refeição</th>
+                                    <th scope="col">Alimento / Produto</th>
+                                    <th scope="col">Porção</th>
+                                    <th scope="col">Calorias</th>
+                                    <th scope="col">Carb</th>
+                                    <th scope="col">Prot</th>
+                                    <th scope="col">Gord</th>
+                                    <th scope="col">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diary-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="quick-manual-box">
+                        <h3>Adicionar alimento avulso à dieta</h3>
+                        <div class="manual-form-grid">
+                            <div>
+                                <label class="field-label" for="manual-meal">Refeição</label>
+                                <select id="manual-meal" name="manual_meal" class="select-input">
+                                    <option value="Café da manhã">Café da manhã</option>
+                                    <option value="Almoço">Almoço</option>
+                                    <option value="Lanche" selected>Lanche</option>
+                                    <option value="Jantar">Jantar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-name">Alimento</label>
+                                <input type="text" id="manual-name" name="manual_name" class="text-input" placeholder="Ex: Banana prata + Aveia…" autocomplete="off" spellcheck="false" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-portion">Porção (g)</label>
+                                <input type="number" id="manual-portion" name="manual_portion" class="text-input" value="100" min="1" inputmode="decimal" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-kcal">Kcal</label>
+                                <input type="number" id="manual-kcal" name="manual_kcal" class="text-input" value="130" min="0" inputmode="numeric" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-carb">Carb (g)</label>
+                                <input type="number" id="manual-carb" name="manual_carb" class="text-input" value="27" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-prot">Prot (g)</label>
+                                <input type="number" id="manual-prot" name="manual_prot" class="text-input" value="3.5" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-fat">Gord (g)</label>
+                                <input type="number" id="manual-fat" name="manual_fat" class="text-input" value="1.2" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
+                            </div>
+                            <div class="manual-btn-col">
+                                <button class="btn-primary" id="btn-add-manual">Lançar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>Definir limite diário da dieta</h2>
+                            <p class="section-desc">Ajuste sua meta manual ou calcule pelo peso, altura e objetivo.</p>
+                        </div>
+                    </div>
+
+                    <div class="goals-form">
+                        <div class="form-row-2">
+                            <div>
+                                <label class="field-label" for="goal-type">Objetivo da dieta</label>
+                                <select id="goal-type" name="goal_type" class="select-input">
+                                    <option value="cutting">Emagrecer (déficit calórico)</option>
+                                    <option value="manutencao">Manter peso atual</option>
+                                    <option value="bulking">Ganhar massa muscular (superávit)</option>
+                                    <option value="personalizado">Limite manual personalizado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-activity">Ritmo de treino / atividade</label>
+                                <select id="goal-activity" name="goal_activity" class="select-input">
+                                    <option value="sedentario">Sedentário</option>
+                                    <option value="leve">Leve (1 a 3x / semana)</option>
+                                    <option value="moderado" selected>Moderado (3 a 5x / semana)</option>
+                                    <option value="intenso">Intenso (6x / semana)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div>
+                                <label class="field-label" for="goal-weight">Peso (kg)</label>
+                                <input type="number" id="goal-weight" name="goal_weight" class="text-input" value="78" min="35" max="250" step="0.5" inputmode="decimal" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-height">Altura (cm)</label>
+                                <input type="number" id="goal-height" name="goal_height" class="text-input" value="176" min="120" max="230" inputmode="numeric" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-age">Idade</label>
+                                <input type="number" id="goal-age" name="goal_age" class="text-input" value="29" min="14" max="100" inputmode="numeric" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <button class="btn-secondary-full" id="btn-calc-mifflin">Calcular meta sugerida pelo meu corpo</button>
+
+                        <div class="limits-divider">Limites diários configurados</div>
+
+                        <div class="form-row-2">
+                            <div>
+                                <label class="field-label" for="limit-kcal">Limite de calorias (kcal/dia)</label>
+                                <input type="number" id="limit-kcal" name="limit_kcal" class="text-input" value="2000" min="800" max="6000" step="10" inputmode="numeric" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-prot">Meta de proteínas (g/dia)</label>
+                                <input type="number" id="limit-prot" name="limit_prot" class="text-input" value="150" min="20" max="400" inputmode="numeric" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div>
+                                <label class="field-label" for="limit-carb">Carboidratos (g)</label>
+                                <input type="number" id="limit-carb" name="limit_carb" class="text-input" value="200" min="10" max="800" inputmode="numeric" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-fat">Gorduras (g)</label>
+                                <input type="number" id="limit-fat" name="limit_fat" class="text-input" value="65" min="10" max="300" inputmode="numeric" autocomplete="off" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-sodium">Sódio máx (mg)</label>
+                                <input type="number" id="limit-sodium" name="limit_sodium" class="text-input" value="2000" min="500" max="5000" step="50" inputmode="numeric" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <button class="btn-primary-full" id="btn-save-goals">Salvar limite diário</button>
+                    </div>
+                </div>
+
+                <!-- Card de Hidratação Diária -->
+                <div class="card water-card" id="water-widget-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>💧 Hidratação Diária</h3>
+                            <p class="section-desc">Meta diária: 35ml por kg de peso corporal</p>
+                        </div>
+                        <span class="unit-pill" id="water-pct-badge">0%</span>
+                    </div>
+                    <div class="water-kpi-main">
+                        <strong class="water-val" id="water-consumed-val">0 ml</strong>
+                        <span class="water-goal-sub">meta: <span id="water-goal-val">2.730 ml</span></span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-blue" id="water-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="water-actions-row">
+                        <button type="button" class="btn-water-add" data-amount="200">+200 ml</button>
+                        <button type="button" class="btn-water-add" data-amount="300">+300 ml</button>
+                        <button type="button" class="btn-water-add" data-amount="500">+500 ml</button>
+                        <button type="button" class="btn-water-reset" id="btn-water-reset" title="Zerar água do dia" aria-label="Zerar água do dia">✕</button>
+                    </div>
+                </div>
+
+                <!-- Card de Tendência dos Últimos 7 Dias -->
+                <div class="card trends-card" id="trends-widget-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>📊 Tendência dos Últimos 7 Dias</h3>
+                            <p class="section-desc">Consumo calórico vs meta diária</p>
+                        </div>
+                        <span class="kpi-pct text-emerald" id="trends-compliance-badge">100% no alvo</span>
+                    </div>
+                    <div class="trends-bars-grid" id="trends-bars-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: FOTO DA FICHA TÉCNICA (TABELA NUTRICIONAL) -->
+        <section class="tab-panel" role="tabpanel" id="panel-foto" aria-labelledby="tab-btn-foto" hidden>
+            <div class="card">
+                <div class="photo-controls-grid">
+                    <div>
+                        <span class="field-label">1. Tirar foto da tabela nutricional ou escolher amostra</span>
+                        <div class="upload-btn-row">
+                            <label for="label-photo-input" class="btn-camera">
+                                Tirar foto / Enviar imagem da ficha técnica
+                            </label>
+                            <input
+                                type="file"
+                                id="label-photo-input"
+                                name="label_photo"
+                                accept="image/*"
+                                capture="environment"
+                                style="display: none;"
+                            />
+                            <span class="upload-file-label" id="upload-filename">Amostra: Whey Protein Concentrado 80%</span>
+                        </div>
+                        <div class="quick-chips">
+                            <span class="chips-label">Fotos de fichas técnicas prontas:</span>
+                            <button class="sample-chip active" data-sample="rotulo_whey" data-portion="30">Whey Protein 80% (30g)</button>
+                            <button class="sample-chip" data-sample="rotulo_pasta_amendoim" data-portion="30">Pasta de Amendoim (30g)</button>
+                            <button class="sample-chip" data-sample="rotulo_pao_integral" data-portion="50">Pão Integral (50g)</button>
+                            <button class="sample-chip" data-sample="rotulo_iogurte_proteico" data-portion="160">Iogurte Proteico (160g)</button>
+                        </div>
+                    </div>
+
+                    <div class="portion-control-box">
+                        <div>
+                            <label class="field-label" for="photo-portion-input">2. Quantidade que vai comer (g/ml)</label>
+                            <input type="number" id="photo-portion-input" name="photo_portion" class="text-input" value="45" min="1" max="2000" inputmode="decimal" autocomplete="off" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="photo-meal-select">Refeição de destino</label>
+                            <select id="photo-meal-select" name="photo_meal" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Lanche" selected>Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn-primary" id="btn-recalc-photo">Calcular porção</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scanner-grid">
+                <div class="card">
+                    <div class="section-header-inline">
+                        <h3>Imagem da tabela nutricional (Ficha Técnica)</h3>
+                        <span class="unit-pill" id="ocr-engine-badge">Leitor ANVISA RDC 429</span>
+                    </div>
+                    <div class="label-image-frame">
+                        <img id="label-preview-img" src="static/samples/rotulo_whey.png" alt="Foto da tabela nutricional do produto" width="480" height="280" loading="lazy" />
+                    </div>
+                    <div class="ocr-text-wrap">
+                        <label class="field-label" for="ocr-raw-textarea">Texto identificado na ficha técnica (você pode editar ou colar os dados do rótulo):</label>
+                        <textarea id="ocr-raw-textarea" name="ocr_raw_text" class="ocr-textarea" rows="5" spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="product-header">
+                        <div>
+                            <span class="ean-badge" id="ocr-portion-summary">Tabela base: 30g | Seu consumo: 45g (1.5x)</span>
+                            <h2 class="product-title" id="ocr-prod-name">Whey Protein Concentrado 80%</h2>
+                            <p class="product-subtitle">Cálculo proporcional imediato para a quantidade que você vai consumir</p>
+                        </div>
+                        <span class="ns-step ns-a active" id="ocr-nutriscore-badge" style="padding: 6px 12px; flex: 0;">Nutri-Score A</span>
+                    </div>
+
+                    <div class="macro-result-cards">
+                        <div class="macro-box macro-box-kcal">
+                            <span class="macro-box-label">Calorias na sua porção</span>
+                            <strong class="macro-box-val" id="ocr-res-kcal">180 kcal</strong>
+                            <span class="macro-box-pct" id="ocr-pct-kcal">+9.0% do limite diário</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Proteínas</span>
+                            <strong class="macro-box-val text-emerald" id="ocr-res-prot">36.0 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-prot">+24.0% da meta</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Carboidratos</span>
+                            <strong class="macro-box-val text-amber" id="ocr-res-carb">4.8 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-carb">+2.4% da meta</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Gorduras totais</span>
+                            <strong class="macro-box-val text-rose" id="ocr-res-fat">2.7 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-fat">+4.2% da meta</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table compact-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nutriente extraído</th>
+                                    <th scope="col" id="th-label-base">No rótulo (30g)</th>
+                                    <th scope="col" id="th-consumed-base">Sua porção (45g)</th>
+                                    <th scope="col">Impacto na meta diária</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ocr-breakdown-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="anvisa-box" style="margin-top: 12px; margin-bottom: 12px;">
+                        <div class="section-header-inline">
+                            <h3>Avaliação frontal ANVISA (por 100g)</h3>
+                        </div>
+                        <div class="anvisa-Seals-row" id="ocr-anvisa-seals"></div>
+                    </div>
+
+                    <button class="btn-emerald-full" id="btn-add-ocr-to-diet">
+                        Adicionar esta porção à minha dieta de hoje
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: CÓDIGO DE BARRAS (OPEN FOOD FACTS) -->
+        <section class="tab-panel" role="tabpanel" id="panel-scanner" aria-labelledby="tab-btn-scanner" hidden>
+            <div class="card search-card">
+                <div class="search-row">
+                    <div class="search-input-wrap">
+                        <label for="barcode-input" class="field-label">Código de barras EAN-13 ou nome do produto industrializado</label>
+                        <div class="input-action-group">
+                            <input
+                                type="text"
+                                id="barcode-input"
+                                name="barcode_search"
+                                class="text-input"
+                                placeholder="Ex: 3017620422003, 7894900011517 ou digite o nome do alimento…"
+                                value="3017620422003"
+                                autocomplete="off"
+                                spellcheck="false"
+                            />
+                            <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
+                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner" style="display: inline-flex; align-items: center; gap: 6px;">📷 Câmera ao vivo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-chips">
+                    <span class="chips-label">Produtos do catálogo:</span>
+                    <button class="chip-btn active" data-barcode="3017620422003">Nutella (3017620422003)</button>
+                    <button class="chip-btn" data-barcode="7894900011517">Coca-Cola Original (7894900011517)</button>
+                    <button class="chip-btn" data-barcode="7622210691071">Bis Ao Leite (7622210691071)</button>
+                    <button class="chip-btn" data-barcode="7892840222949">Doritos Nacho (7892840222949)</button>
+                    <button class="chip-btn" data-barcode="7891000053508">Aveia Quaker (7891000053508)</button>
+                    <button class="chip-btn" data-barcode="7891025101604">Iogurte Natural (7891025101604)</button>
+                </div>
+            </div>
+
+            <div class="scanner-grid" id="product-result-container">
+                <div class="card product-main-card">
+                    <div class="product-header">
+                        <div>
+                            <span class="ean-badge" id="prod-ean">EAN 3017620422003</span>
+                            <h2 class="product-title" id="prod-name">Carregando…</h2>
+                            <p class="product-subtitle" id="prod-meta">Marca e categoria</p>
+                        </div>
+                        <span class="unit-pill" id="prod-unit">Base: 100g</span>
+                    </div>
+
+                    <div class="anvisa-box">
+                        <div class="section-header-inline">
+                            <h3>Rotulagem nutricional frontal (ANVISA RDC 429/2020)</h3>
+                            <span class="threshold-note" id="anvisa-threshold-note">Cortes para sólidos (100g)</span>
+                        </div>
+                        <div class="anvisa-Seals-row" id="anvisa-seals"></div>
+                    </div>
+
+                    <div class="scores-row">
+                        <div class="score-box">
+                            <span class="score-box-title">Nutri-Score (A a E)</span>
+                            <div class="nutriscore-bar" id="nutriscore-bar">
+                                <span class="ns-step ns-a" data-grade="A">A</span>
+                                <span class="ns-step ns-b" data-grade="B">B</span>
+                                <span class="ns-step ns-c" data-grade="C">C</span>
+                                <span class="ns-step ns-d" data-grade="D">D</span>
+                                <span class="ns-step ns-e" data-grade="E">E</span>
+                            </div>
+                        </div>
+                        <div class="score-box">
+                            <span class="score-box-title">Grau de processamento (NOVA / USP)</span>
+                            <div class="nova-display">
+                                <span class="nova-badge" id="nova-badge">NOVA 4</span>
+                                <span class="nova-label" id="nova-label">Ultraprocessado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ingredients-block">
+                        <h3>Lista de ingredientes e alergênicos</h3>
+                        <p class="ingredients-text" id="prod-ingredients"></p>
+                        <div class="allergens-row" id="prod-allergens"></div>
+                    </div>
+
+                    <div class="add-barcode-to-diet-bar">
+                        <div>
+                            <label class="field-label" for="barcode-portion-g">Porção consumida (g/ml)</label>
+                            <input type="number" id="barcode-portion-g" name="barcode_portion" class="text-input" value="30" min="1" max="1000" inputmode="decimal" autocomplete="off" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="barcode-meal-type">Refeição</label>
+                            <select id="barcode-meal-type" name="barcode_meal" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Lanche" selected>Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <button class="btn-emerald" id="btn-add-barcode-diet">Adicionar à dieta de hoje</button>
+                    </div>
+                </div>
+
+                <div class="card nutrition-side-card">
+                    <h3>Tabela nutricional (por 100g / 100ml)</h3>
+                    <div class="table-responsive">
+                        <table class="data-table compact-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nutriente</th>
+                                    <th scope="col">Quantidade</th>
+                                    <th scope="col">Referência ANVISA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nutrition-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="additives-section">
+                        <div class="section-header-inline">
+                            <h3>Aditivos identificados no rótulo</h3>
+                            <span class="count-pill" id="additives-count-pill">0 aditivos</span>
+                        </div>
+                        <div id="additives-list" class="additives-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: COMPARAR ALIMENTOS -->
+        <section class="tab-panel" role="tabpanel" id="panel-comparar" aria-labelledby="tab-btn-comparar" hidden>
+            <div class="card compare-controls-card">
+                <div class="compare-selectors-grid">
+                    <div>
+                        <label for="compare-select-a" class="field-label">Produto A</label>
+                        <select id="compare-select-a" name="compare_a" class="select-input"></select>
+                    </div>
+                    <div>
+                        <label for="compare-select-b" class="field-label">Produto B</label>
+                        <select id="compare-select-b" name="compare_b" class="select-input"></select>
+                    </div>
+                    <div class="compare-btn-wrap">
+                        <button class="btn-primary" id="btn-run-compare">Comparar composição</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compare-summary-grid" id="compare-cards-row">
+                <div class="card compare-prod-card" id="comp-card-a"></div>
+                <div class="card compare-prod-card" id="comp-card-b"></div>
+            </div>
+
+            <div class="card">
+                <div class="section-header-inline">
+                    <h3>Diferença nutricional por 100g / 100ml</h3>
+                    <span class="threshold-note">Comparativo direto entre os dois produtos selecionados</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Indicador</th>
+                                <th scope="col" id="th-prod-a">Produto A</th>
+                                <th scope="col" id="th-prod-b">Produto B</th>
+                                <th scope="col">Diferença (A vs B)</th>
+                                <th scope="col">Melhor perfil no indicador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compare-deltas-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="compare-notes-box" id="compare-notes"></div>
+            </div>
+        </section>
+        <!-- ABA 5: FOTO DO PRATO (IA) & MICRONUTRIENTES -->
+        <section class="tab-panel" role="tabpanel" id="panel-prato" aria-labelledby="tab-btn-prato" hidden>
+            <div class="plate-bento-grid">
+                <!-- CARD 1: Upload / Câmera + Pratos Prontos Bento Tile -->
+                <div class="card plate-input-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>1. Foto do Prato & IA de Visão</h2>
+                            <p class="section-desc">Tire uma foto do seu prato de comida ou escolha uma das refeições prontas abaixo.</p>
+                        </div>
+                        <span class="count-pill" id="plate-scan-status">Pronto para escanear</span>
+                    </div>
+
+                    <div class="plate-capture-box">
+                        <label class="plate-camera-dropzone" for="plate-photo-input">
+                            <span class="dropzone-icon" aria-hidden="true">📸</span>
+                            <strong class="dropzone-title">Tirar foto com a câmera ou anexar imagem</strong>
+                            <span class="dropzone-hint">Aceita fotos de smartphones Android, iOS ou arquivos (.jpg, .png)</span>
+                            <input type="file" id="plate-photo-input" name="plate_photo" accept="image/*" capture="environment" class="sr-only" />
+                        </label>
+                    </div>
+
+                    <div class="plate-presets-section">
+                        <span class="field-label">Pratos rápidos de referência:</span>
+                        <div class="plate-chips-row" role="group" aria-label="Pratos prontos de exemplo">
+                            <button type="button" class="chip-btn plate-preset-chip active" data-preset="prato_feito">
+                                🍛 Prato Feito
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="omelete_fitness">
+                                🍳 Omelete Fitness
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="salmao_legumes">
+                                🐟 Salmão com Legumes
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="acai_completo">
+                                🫐 Açaí Completo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Visão do Prato com Etiquetas Bounding Chips -->
+                <div class="card plate-vision-card">
+                    <div class="section-header-inline">
+                        <h3>2. Identificação Visual dos Alimentos</h3>
+                        <span class="status-pill" id="plate-detected-pill">IA Visão Ativa</span>
+                    </div>
+                    <div class="plate-preview-viewport">
+                        <img id="plate-preview-img" class="plate-viewport-image" src="" alt="Prato visualizado" width="480" height="360" />
+                        <div class="plate-bounding-overlay" id="plate-bounding-overlay"></div>
+                    </div>
+                    <div class="plate-quick-kpi-bar">
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Calorias</span>
+                            <strong class="kpi-mini-val text-emerald" id="plate-total-kcal">0 kcal</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Carboidratos</span>
+                            <strong class="kpi-mini-val text-amber" id="plate-total-carbs">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Proteínas</span>
+                            <strong class="kpi-mini-val text-blue" id="plate-total-prot">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Gorduras</span>
+                            <strong class="kpi-mini-val text-rose" id="plate-total-fat">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Fibras</span>
+                            <strong class="kpi-mini-val text-violet" id="plate-total-fiber">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Peso Total</span>
+                            <strong class="kpi-mini-val" id="plate-total-weight">0g</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Alimentos Detectados com Gramatura Editável e Adição TACO -->
+                <div class="card plate-items-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>3. Alimentos no Prato & Gramaturas</h3>
+                            <p class="section-desc">Ajuste os gramas de cada porção em tempo real. Calorias e micronutrientes são recalculados instantaneamente.</p>
+                        </div>
+                    </div>
+
+                    <div class="plate-items-list" id="plate-items-list"></div>
+
+                    <!-- Autocomplete TACO para adicionar alimento extra -->
+                    <div class="plate-taco-add-box">
+                        <label for="plate-taco-search" class="field-label">+ Adicionar alimento extra da Tabela TACO:</label>
+                        <div class="taco-search-input-wrap">
+                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar no banco TACO (ex: mandioca, frango, azeite, aveia)…" autocomplete="off" />
+                            <div class="taco-suggestions-dropdown" id="plate-taco-suggestions" hidden></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: Bento Micronutrientes (% IDR ANVISA) -->
+                <div class="card plate-micros-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>4. Micronutrientes do Prato (% IDR ANVISA)</h3>
+                            <p class="section-desc">Metas baseadas na IN 75/2020 e RDC 429/2020 para adultos.</p>
+                        </div>
+                        <span class="status-pill" id="plate-micros-badge">Balanço Nutricional</span>
+                    </div>
+
+                    <div class="plate-micros-grid" id="plate-micros-grid"></div>
+                </div>
+
+                <!-- CARD 5: Ação de Lançamento na Dieta -->
+                <div class="card plate-action-card">
+                    <div class="plate-action-bar">
+                        <div class="meal-select-wrap">
+                            <label for="plate-meal-select" class="field-label">Lançar no diário como:</label>
+                            <select id="plate-meal-select" name="plate_meal" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço" selected>Almoço</option>
+                                <option value="Lanche">Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-emerald btn-lg" id="btn-add-plate-diet">
+                            Adicionar prato completo à refeição
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ANDROID -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
+        <button class="mob-nav-btn active" data-tab="dieta" aria-label="Minha Dieta">
+            <span class="mob-nav-icon" aria-hidden="true">◉</span>
+            <span>Minha Dieta</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="foto" aria-label="Foto da Ficha Técnica">
+            <span class="mob-nav-icon" aria-hidden="true">▣</span>
+            <span>Foto Ficha</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="scanner" aria-label="Código de Barras EAN">
+            <span class="mob-nav-icon" aria-hidden="true">|||</span>
+            <span>Rótulo EAN</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="comparar" aria-label="Comparar Alimentos">
+            <span class="mob-nav-icon" aria-hidden="true">⇄</span>
+            <span>Comparar</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato com IA">
+            <span class="mob-nav-icon" aria-hidden="true">🍽️</span>
+            <span>Prato IA</span>
+        </button>
+    </nav>
+
+    <!-- Modal do Scanner de Código de Barras por Câmera -->
+    <div class="cam-modal-backdrop" id="cam-scanner-modal" role="dialog" aria-modal="true" aria-labelledby="cam-modal-title" hidden>
+        <div class="cam-bento-card">
+            <header class="cam-modal-header">
+                <div>
+                    <span class="cam-badge">EAN-13 / EAN-8 / UPC</span>
+                    <h2 id="cam-modal-title" class="cam-title">Escanear código de barras</h2>
+                </div>
+                <button type="button" class="cam-btn-icon" id="btn-cam-close" aria-label="Fechar scanner">✕</button>
+            </header>
+
+            <div class="cam-viewfinder-frame">
+                <video id="cam-scanner-video" class="cam-video-feed" playsinline muted autoplay></video>
+                <div class="cam-reticle">
+                    <div class="cam-corner top-left"></div>
+                    <div class="cam-corner top-right"></div>
+                    <div class="cam-corner bottom-left"></div>
+                    <div class="cam-corner bottom-right"></div>
+                    <div class="cam-laser-line" aria-hidden="true"></div>
+                </div>
+                <div class="cam-status-pill" id="cam-scanner-status">Aponte para o código de barras</div>
+            </div>
+
+            <footer class="cam-modal-footer">
+                <button type="button" class="cam-btn-action" id="btn-cam-torch" aria-label="Alternar lanterna">
+                    <span aria-hidden="true">⚡</span> Lanterna
+                </button>
+                <button type="button" class="cam-btn-secondary" id="btn-cam-cancel">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal do Tour Interativo pelo App (#modal-app-tour) -->
+    <div class="tour-modal-backdrop" id="modal-app-tour" role="dialog" aria-modal="true" aria-labelledby="tour-step-title" aria-describedby="tour-step-desc" hidden>
+        <div class="tour-backdrop-overlay" id="tour-backdrop-overlay" aria-hidden="true"></div>
+        <div class="tour-spotlight-cutout" id="tour-spotlight-cutout" aria-hidden="true"></div>
+
+        <div class="tour-bento-card" role="document">
+            <!-- Dynamic Progress Bar -->
+            <div class="tour-progress-track" role="progressbar" id="tour-progress-bar" aria-label="Progresso do Tour" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                <div class="tour-progress-fill" id="tour-progress-fill" style="width: 20%;"></div>
+            </div>
+
+            <header class="tour-card-header">
+                <div class="tour-header-left">
+                    <span class="tour-step-badge" id="tour-step-badge">Passo 1 de 5</span>
+                </div>
+                <button type="button" class="tour-btn-close" id="btn-close-tour-modal" aria-label="Fechar tour interativo">✕</button>
+            </header>
+
+            <div class="tour-card-body">
+                <div class="tour-icon-wrap" id="tour-step-icon" aria-hidden="true">🥗</div>
+                <div class="tour-text-wrap">
+                    <h2 class="tour-title" id="tour-step-title">1. Seu Painel Diário da Dieta</h2>
+                    <p class="tour-description" id="tour-step-desc">Acompanhe seu consumo de calorias e macros calculado especialmente para o seu peso e objetivo. Registre água e veja o saldo restante de cada refeição.</p>
+                </div>
+            </div>
+
+            <!-- Dots Indicator -->
+            <div class="tour-dots-row" id="tour-dots-container" aria-hidden="true"></div>
+
+            <footer class="tour-card-footer">
+                <button type="button" class="tour-btn-skip" id="btn-skip-tour">Pular tour</button>
+                <div class="tour-btn-group-nav">
+                    <button type="button" class="tour-btn-prev" id="btn-prev-tour" style="display: none;">◀ Anterior</button>
+                    <button type="button" class="tour-btn-next" id="btn-next-tour">Próximo ▶</button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil & Onboarding do Usuário (#modal-profile-onboarding) -->
+    <div class="profile-modal-backdrop" id="modal-profile-onboarding" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" hidden>
+        <div class="profile-bento-card" role="document">
+            <header class="profile-modal-header">
+                <div class="profile-header-info">
+                    <span class="profile-badge">PERFIL & DIETA</span>
+                    <h2 id="profile-modal-title" class="profile-title">Configurar Perfil Nutricional</h2>
+                </div>
+                <button type="button" class="btn-profile-close" id="btn-profile-close" aria-label="Fechar modal de perfil">✕</button>
+            </header>
+
+            <form id="profile-onboarding-form" class="profile-form">
+                <div class="profile-form-body">
+                    <div class="profile-field-group">
+                        <label class="field-label" for="profile-name">Nome <span class="text-subtle">(opcional)</span></label>
+                        <input type="text" id="profile-name" class="text-input" placeholder="Ex: Lucas, Camila..." autocomplete="name" />
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-gender">Sexo</label>
+                            <select id="profile-gender" class="select-input">
+                                <option value="masculino" selected>Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-age">Idade (anos)</label>
+                            <input type="number" id="profile-age" class="text-input" value="28" min="14" max="110" inputmode="numeric" required />
+                        </div>
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-weight">Peso (kg)</label>
+                            <input type="number" id="profile-weight" class="text-input" value="75" min="30" max="250" step="0.5" inputmode="decimal" required />
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-height">Altura (cm)</label>
+                            <input type="number" id="profile-height" class="text-input" value="175" min="100" max="240" inputmode="numeric" required />
+                        </div>
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-activity">Nível de atividade</label>
+                            <select id="profile-activity" class="select-input">
+                                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                                <option value="leve">Leve (exercício 1 a 3x/sem)</option>
+                                <option value="moderado" selected>Moderado (exercício 3 a 5x/sem)</option>
+                                <option value="intenso">Intenso (exercício 6 a 7x/sem)</option>
+                            </select>
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-goal">Objetivo</label>
+                            <select id="profile-goal" class="select-input">
+                                <option value="cutting" selected>Emagrecer (déficit -400 kcal)</option>
+                                <option value="manutencao">Manter peso (manutenção)</option>
+                                <option value="bulking">Ganhar Massa (superávit +350 kcal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Bar -->
+                    <div class="profile-preview-strip" id="profile-preview-strip" aria-live="polite">
+                        <div class="preview-item">
+                            <span class="preview-label">Calorias sugeridas:</span>
+                            <strong class="preview-value text-emerald" id="profile-preview-kcal">~2000 kcal</strong>
+                        </div>
+                        <span class="preview-divider" aria-hidden="true">|</span>
+                        <div class="preview-item">
+                            <span class="preview-label">Meta de Água:</span>
+                            <strong class="preview-value text-blue" id="profile-preview-water">~2625 ml</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="profile-modal-footer">
+                    <button type="submit" class="btn-emerald-full" id="btn-save-profile">Criar perfil e começar</button>
+                    <button type="button" class="btn-profile-skip" id="btn-profile-skip">Configurar mais tarde (padrão)</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <script src="static/js/share_export.js"></script>
+    <script src="static/js/barcode_cam.js"></script>
+    <script src="static/js/label_parser.js"></script>
+    <script src="static/js/plate_scanner.js"></script>
+    <script src="static/js/app_tour.js"></script>
+    <script src="static/js/app.js"></script>
+</body>
+</html>

@@ -31,6 +31,12 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      - name: Sync Static Assets to Android Assets
+        run: |
+          mkdir -p android/app/src/main/assets/static/js android/app/src/main/assets/static/css android/app/src/main/assets/static/samples/pratos
+          cp -r app/static/* android/app/src/main/assets/
+          cp -r app/static/* android/app/src/main/assets/static/
+
       - name: Generate Gradle Wrapper & Build APKs
         working-directory: android
         run: |

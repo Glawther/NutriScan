@@ -284,7 +284,9 @@ function calculateMifflinStJeor(gender, weightKg, heightCm, age, activityLevel, 
         goalAdjustment = 0;
     }
 
-    const dailyKcalLimit = Math.max(1000, Math.round(tdee + goalAdjustment));
+    // Piso de segurança nutricional: mínimo de 1200 kcal para mulheres e 1500 kcal para homens
+    const safetyFloor = isMale ? 1500 : 1200;
+    const dailyKcalLimit = Math.max(safetyFloor, Math.round(tdee + goalAdjustment));
 
     // Macros:
     // Proteína: 2.0 g/kg para cutting/bulking, 1.6 g/kg para manutenção
@@ -563,7 +565,14 @@ function renderDietToday(summary) {
     tbody.innerHTML = rowsHtml + totalRow;
 }
 
-let currentDietDate = new Date().toISOString().slice(0, 10);
+function getLocalDateString(d = new Date()) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+let currentDietDate = getLocalDateString();
 
 async function loadDietToday(dateStr = currentDietDate) {
     currentDietDate = dateStr;
@@ -585,7 +594,7 @@ async function loadDietToday(dateStr = currentDietDate) {
 }
 
 function updateDateDisplay(dateStr) {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getLocalDateString();
     const badge = document.getElementById("diet-date-badge");
     const text = document.getElementById("diet-date-text");
     if (!badge || !text) return;
@@ -1424,6 +1433,11 @@ if (typeof document !== "undefined") {
             sodium_mg: 0,
         });
         document.getElementById("manual-name").value = "";
+        document.getElementById("manual-portion").value = "100";
+        document.getElementById("manual-kcal").value = "";
+        document.getElementById("manual-carb").value = "";
+        document.getElementById("manual-prot").value = "";
+        document.getElementById("manual-fat").value = "";
     });
 
     document.getElementById("btn-calc-mifflin").addEventListener("click", () => saveDietGoals(true));
@@ -1573,14 +1587,14 @@ if (typeof document !== "undefined") {
         btnDatePrev.addEventListener("click", () => {
             const d = new Date(currentDietDate + "T12:00:00");
             d.setDate(d.getDate() - 1);
-            loadDietToday(d.toISOString().slice(0, 10));
+            loadDietToday(getLocalDateString(d));
         });
     }
     if (btnDateNext) {
         btnDateNext.addEventListener("click", () => {
             const d = new Date(currentDietDate + "T12:00:00");
             d.setDate(d.getDate() + 1);
-            loadDietToday(d.toISOString().slice(0, 10));
+            loadDietToday(getLocalDateString(d));
         });
     }
 
@@ -1736,12 +1750,20 @@ function setupProfileOnboardingModal() {
     if (form) {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
+            const rawWeight = parseFloat(inputWeight?.value);
+            const rawHeight = parseFloat(inputHeight?.value);
+            const rawAge = parseInt(inputAge?.value, 10);
+
+            const weight_kg = !isNaN(rawWeight) && rawWeight > 0 ? Math.min(300, Math.max(30, rawWeight)) : 75;
+            const height_cm = !isNaN(rawHeight) && rawHeight > 0 ? Math.min(250, Math.max(100, rawHeight)) : 175;
+            const age = !isNaN(rawAge) && rawAge > 0 ? Math.min(110, Math.max(12, rawAge)) : 28;
+
             const profileData = {
-                name: (inputName?.value || "").trim(),
+                name: (inputName?.value || "").trim().slice(0, 50),
                 gender: inputGender?.value || "masculino",
-                age: parseInt(inputAge?.value, 10) || 28,
-                weight_kg: parseFloat(inputWeight?.value) || 75,
-                height_cm: parseFloat(inputHeight?.value) || 175,
+                age,
+                weight_kg,
+                height_cm,
                 activity_level: inputActivity?.value || "moderado",
                 goal_type: inputGoal?.value || "cutting",
                 updated_at: new Date().toISOString(),

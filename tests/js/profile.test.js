@@ -178,3 +178,20 @@ test("resetAllUserData clears today meals and water", async () => {
     const resetState = getLocalDietData();
     assert.strictEqual(resetState.entries.length, 0, "entries deve ser resetado para []");
 });
+
+test("Nutritional safety floor: women minimum 1200 kcal, men minimum 1500 kcal", () => {
+    // Mulher muito leve em corte: 42kg, 150cm, 50 anos, sedentária
+    // TMB: 10*42 + 6.25*150 - 5*50 - 161 = 420 + 937.5 - 250 - 161 = 946.5
+    // TDEE: 946.5 * 1.2 = 1135.8 -> Cutting (-400) daria 736 kcal! Piso deve segurar em 1200 kcal.
+    const resMulher = calculateMifflinStJeor("feminino", 42, 150, 50, "sedentario", "cutting");
+    assert.strictEqual(resMulher.daily_kcal_limit, 1200, "mulher deve respeitar piso de 1200 kcal");
+    assert.ok(resMulher.carbs_limit_g > 0, "carboidrato deve ser positivo");
+
+    // Homem muito leve em corte: 48kg, 160cm, 50 anos, sedentário
+    // TMB: 10*48 + 6.25*160 - 5*50 + 5 = 480 + 1000 - 250 + 5 = 1235
+    // TDEE: 1235 * 1.2 = 1482 -> Cutting (-400) daria 1082 kcal! Piso deve segurar em 1500 kcal.
+    const resHomem = calculateMifflinStJeor("masculino", 48, 160, 50, "sedentario", "cutting");
+    assert.strictEqual(resHomem.daily_kcal_limit, 1500, "homem deve respeitar piso de 1500 kcal");
+    assert.ok(resHomem.carbs_limit_g > 0, "carboidrato deve ser positivo");
+});
+

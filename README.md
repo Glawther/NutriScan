@@ -80,7 +80,7 @@ Interface responsiva em formato Bento com barra inferior de navegação e suport
 O fluxo do GitHub Actions (`.github/workflows/android-apk.yml`) compila os APKs automaticamente em cada release e push.
 
 1. Acesse a aba **Releases** no repositório [Glawther/NutriScan](https://github.com/Glawther/NutriScan/releases).
-2. Baixe o arquivo `app-debug.apk` ou `NutriScan-v1.6.1.apk`.
+2. Baixe o arquivo `app-debug.apk` ou `NutriScan-v1.6.2.apk`.
 3. Instale diretamente no celular Android (habilite a instalação de fontes confiáveis nas configurações do aparelho).
 
 ## Como executar localmente

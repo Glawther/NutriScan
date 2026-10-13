@@ -1,8 +1,13 @@
-const CACHE_NAME = "nutriscan-v1.3.0";
+const CACHE_NAME = "nutriscan-v1.6.2";
 const ASSETS = [
   "/",
   "/static/css/style.css",
   "/static/js/app.js",
+  "/static/js/app_tour.js",
+  "/static/js/plate_scanner.js",
+  "/static/js/barcode_cam.js",
+  "/static/js/label_parser.js",
+  "/static/js/share_export.js",
   "/manifest.json"
 ];
 

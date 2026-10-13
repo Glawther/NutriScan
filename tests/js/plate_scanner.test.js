@@ -17,7 +17,7 @@ test("NutriScanPlateScanner exports required methods, catalogs and IDR constants
     assert.strictEqual(plateScanner.ANVISA_IDR.calcio_mg, 1000);
     assert.strictEqual(plateScanner.ANVISA_IDR.ferro_mg, 14);
     assert.strictEqual(plateScanner.ANVISA_IDR.potassio_mg, 3500);
-    assert.strictEqual(plateScanner.ANVISA_IDR.magnesio_mg, 420);
+    assert.strictEqual(plateScanner.ANVISA_IDR.magnesio_mg, 260);
     assert.strictEqual(plateScanner.ANVISA_IDR.vitamina_c_mg, 100);
     assert.strictEqual(plateScanner.ANVISA_IDR.sodio_mg, 2000);
     assert.ok(Array.isArray(plateScanner.TACO_DATABASE));
