@@ -1,3 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NutriScan</string>
+    <string name="camera_permission_required">Permissão de câmera necessária para capturar rótulos e tabelas nutricionais.</string>
+    <string name="file_chooser_title">Capturar rótulo ou selecionar imagem</string>
+    <string name="file_chooser_error">Não foi possível abrir o seletor de arquivos.</string>
 </resources>

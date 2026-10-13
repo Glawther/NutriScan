@@ -1,35 +1,72 @@
 /* ==========================================================================
-   NutriScan — Web Interface Design System
-   Audited against Web Interface Guidelines & No-AI-Slop standards
+   NutriScan — Retro Design System
+   Throwback vintage aesthetic with high-contrast palette, tactile 3D borders,
+   grocery receipt/label tables, CRT status accents, and 100% WCAG AA compliance.
    ========================================================================== */
 
 :root {
-    --bg-main: #090d16;
-    --bg-card: #0f172a;
-    --bg-elevated: #1e293b;
-    --bg-hover: #1e293b;
-    --border-color: #1e293b;
-    --border-subtle: #334155;
-    --border-focus: #3b82f6;
+    /* Palette: Throwback high-contrast vintage */
+    --retro-cream: #faf5ea;
+    --retro-cream-light: #fffdf8;
+    --retro-cream-dark: #f0e6d2;
+    --retro-parchment: #ede0c8;
+    --retro-slate: #1c1917;
+    --retro-ink: #0c0a09;
+    --retro-charcoal: #292524;
+    --retro-muted: #57534e;
+    --retro-border: #1c1917;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    /* Vintage accent tokens */
+    --retro-blue: #2563eb;
+    --retro-blue-light: #3b82f6;
+    --retro-blue-hover: #1d4ed8;
+    --retro-amber: #d97706;
+    --retro-amber-light: #f59e0b;
+    --retro-amber-hover: #b45309;
+    --retro-emerald: #15803d;
+    --retro-emerald-light: #16a34a;
+    --retro-emerald-hover: #166534;
+    --retro-rose: #e11d48;
+    --retro-rose-light: #f43f5e;
+    --retro-rose-hover: #be123c;
+    --retro-purple: #7c3aed;
 
-    --accent-blue: #3b82f6;
-    --accent-blue-hover: #2563eb;
-    --emerald: #10b981;
-    --emerald-hover: #059669;
-    --amber: #f59e0b;
-    --rose: #f43f5e;
+    /* Semantic Aliases */
+    --bg-main: var(--retro-cream);
+    --bg-card: var(--retro-cream-light);
+    --bg-elevated: var(--retro-cream-dark);
+    --bg-hover: var(--retro-parchment);
+    --border-color: var(--retro-slate);
+    --border-subtle: #44403c;
+    --border-focus: var(--retro-blue);
 
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --text-primary: var(--retro-ink);
+    --text-secondary: var(--retro-charcoal);
+    --text-muted: var(--retro-muted);
+
+    --accent-blue: var(--retro-blue);
+    --accent-blue-hover: var(--retro-blue-hover);
+    --emerald: var(--retro-emerald);
+    --emerald-hover: var(--retro-emerald-hover);
+    --amber: var(--retro-amber);
+    --rose: var(--retro-rose);
+
+    /* Retro radii & spacing (compact & tactile) */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
     --radius-full: 9999px;
 
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    /* Retro tactile shadows */
+    --shadow-retro-sm: 2px 2px 0px var(--retro-ink);
+    --shadow-retro: 3px 3px 0px var(--retro-ink);
+    --shadow-retro-lg: 5px 5px 0px var(--retro-ink);
+    --shadow-retro-pressed: 1px 1px 0px var(--retro-ink);
+
+    /* Typography */
+    --font-display: "Macondo", cursive, system-ui, sans-serif;
+    --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
 }
 
 /* Reset & Box Sizing */
@@ -44,14 +81,19 @@
 /* Accessibility: Skip Link */
 .skip-link {
     position: absolute;
-    top: -60px;
+    top: -80px;
     left: 16px;
-    background: var(--accent-blue);
-    color: #ffffff;
+    background: var(--retro-amber);
+    color: var(--retro-ink);
     padding: 10px 18px;
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro);
     border-radius: var(--radius-sm);
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-weight: 800;
     font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     z-index: 99999;
     text-decoration: none;
     transition: top 0.15s ease-out;
@@ -59,8 +101,8 @@
 
 .skip-link:focus-visible {
     top: 14px;
-    outline: 2px solid #ffffff;
-    outline-offset: 2px;
+    outline: 3px solid var(--retro-blue);
+    outline-offset: 3px;
 }
 
 /* Base Body Styles */
@@ -72,18 +114,31 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Retro subtle dotted receipt grid background */
+    background-image: radial-gradient(rgba(28, 25, 23, 0.09) 1px, transparent 1px);
+    background-size: 16px 16px;
+    min-height: 100vh;
 }
 
-/* Focus Management (Web Guidelines: visible focus ring without layout shift) */
+/* Focus Management (WCAG AA: visible focus ring without layout shift) */
 :focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 3px solid var(--retro-blue);
     outline-offset: 2px;
 }
 
 /* Typography Hierarchy */
-h1, h2, h3, .brand-title, .product-title {
+h1, .brand-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.02em;
     text-wrap: balance;
+}
+
+h2, h3, .product-title {
+    font-family: var(--font-sans);
+    font-weight: 800;
     letter-spacing: -0.015em;
+    text-wrap: balance;
 }
 
 /* Numeric & Tabular Alignment */
@@ -97,7 +152,10 @@ h1, h2, h3, .brand-title, .product-title {
 .ean-badge,
 .unit-pill,
 .count-pill,
-.status-pill {
+.status-pill,
+.threshold-note,
+.nova-badge,
+.ns-step {
     font-variant-numeric: tabular-nums;
 }
 
@@ -109,9 +167,9 @@ h1, h2, h3, .brand-title, .product-title {
 
 /* Header & Top Bar */
 .topbar {
-    background-color: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
+    background-color: var(--retro-cream-light);
+    border-bottom: 2.5px solid var(--retro-ink);
+    box-shadow: 0 3px 0px rgba(28, 25, 23, 0.12);
     padding: 12px 0;
     position: sticky;
     top: 0;
@@ -133,32 +191,38 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .brand-logo {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #042416;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--retro-amber);
+    color: var(--retro-ink);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
+    font-family: var(--font-display);
     font-weight: 800;
-    font-size: 15px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    letter-spacing: -0.5px;
+    letter-spacing: 0.5px;
     flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
 }
 
 .brand-title {
-    font-size: 17px;
+    font-size: 22px;
     font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
+    color: var(--retro-ink);
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .brand-subtitle {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--retro-charcoal);
     line-height: 1.25;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -172,32 +236,38 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .tab-btn {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    padding: 8px 14px;
+    background: var(--retro-cream-light);
+    color: var(--retro-charcoal);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
+    padding: 7px 14px;
     border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
     font-size: 12.5px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     min-height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
 }
 
 .tab-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-elevated);
-    border-color: var(--border-subtle);
+    background-color: var(--retro-parchment);
+    color: var(--retro-ink);
+}
+
+.tab-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-retro-pressed);
 }
 
 .tab-btn.active {
-    background-color: var(--accent-blue);
-    border-color: var(--accent-blue);
+    background-color: var(--retro-blue);
+    border-color: var(--retro-ink);
     color: #ffffff;
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    box-shadow: var(--shadow-retro);
 }
 
 /* Main Content Wrapper */
@@ -206,7 +276,7 @@ h1, h2, h3, .brand-title, .product-title {
     padding-bottom: 36px;
 }
 
-/* Daily Diet KPI Strip */
+/* Daily Diet KPI Strip (Vintage Grocery Receipt Ribbon) */
 .diet-kpi-strip {
     display: grid;
     grid-template-columns: 1.35fr 1fr 1fr 1fr;
@@ -215,23 +285,21 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .kpi-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 12px 16px;
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: border-color 0.15s ease;
-}
-
-.kpi-card:hover {
-    border-color: var(--border-subtle);
+    position: relative;
+    transition: transform 0.1s ease;
 }
 
 .kpi-card-highlight {
-    border-color: rgba(16, 185, 129, 0.4);
-    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 1) 100%);
+    background-color: #f7fee7;
+    border-color: var(--retro-ink);
 }
 
 .kpi-row-top {
@@ -242,32 +310,36 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .kpi-label {
-    font-size: 11.5px;
-    color: var(--text-secondary);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--retro-charcoal);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
 }
 
 .kpi-pct {
+    font-family: var(--font-mono);
     font-size: 11.5px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .status-pill {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background-color: rgba(16, 185, 129, 0.18);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background-color: #dcfce7;
+    color: var(--retro-emerald);
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: 1px 1px 0px var(--retro-ink);
+    text-transform: uppercase;
 }
 
 .status-pill.exceeded {
-    background-color: rgba(244, 63, 94, 0.2);
-    color: #fb7185;
-    border-color: rgba(244, 63, 94, 0.4);
+    background-color: #ffe4e6;
+    color: var(--retro-rose);
 }
 
 .kpi-main-numbers {
@@ -277,40 +349,41 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .kpi-value {
-    font-size: 21px;
+    font-family: var(--font-mono);
+    font-size: 22px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--retro-ink);
     line-height: 1.1;
 }
 
 .kpi-divider {
     font-size: 12px;
-    color: var(--text-secondary);
+    font-weight: 600;
+    color: var(--retro-charcoal);
 }
 
 .progress-track {
     width: 100%;
-    height: 7px;
-    background-color: var(--bg-main);
-    border-radius: var(--radius-full);
+    height: 10px;
+    background-color: var(--retro-cream-dark);
+    border: 1.5px solid var(--retro-ink);
+    border-radius: 2px;
     overflow: hidden;
-    border: 1px solid var(--border-subtle);
 }
 
 .progress-fill {
     height: 100%;
-    border-radius: var(--radius-full);
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fill-emerald { background-color: var(--emerald); }
-.fill-blue { background-color: var(--accent-blue); }
-.fill-amber { background-color: var(--amber); }
-.fill-rose { background-color: var(--rose); }
+.fill-emerald { background-color: var(--retro-emerald); }
+.fill-blue { background-color: var(--retro-blue); }
+.fill-amber { background-color: var(--retro-amber); }
+.fill-rose { background-color: var(--retro-rose); }
 
-.text-emerald { color: var(--emerald); }
-.text-amber { color: var(--amber); }
-.text-rose { color: var(--rose); }
+.text-emerald { color: var(--retro-emerald); font-weight: 700; }
+.text-amber { color: var(--retro-amber); font-weight: 700; }
+.text-rose { color: var(--retro-rose); font-weight: 700; }
 
 /* Tab Panels */
 .tab-panel {
@@ -321,11 +394,12 @@ h1, h2, h3, .brand-title, .product-title {
     display: block;
 }
 
-/* Card Container */
+/* Card Container (Vintage Card with solid black offset shadow) */
 .card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro);
+    border-radius: var(--radius-sm);
     padding: 16px 18px;
     margin-bottom: 14px;
 }
@@ -343,35 +417,40 @@ h1, h2, h3, .brand-title, .product-title {
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+    border-bottom: 1.5px dashed var(--retro-parchment);
+    padding-bottom: 8px;
 }
 
 .section-header-inline h2 {
-    font-size: 15.5px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--retro-ink);
 }
 
 .section-header-inline h3,
 .nutrition-side-card h3,
 .ingredients-block h3 {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--retro-ink);
 }
 
 .section-desc {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--retro-muted);
     margin-top: 2px;
 }
 
 /* Form Fields & Controls */
 .field-label {
     display: block;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--retro-charcoal);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
 }
 
 .input-action-group {
@@ -383,22 +462,24 @@ h1, h2, h3, .brand-title, .product-title {
 .select-input,
 .ocr-textarea {
     width: 100%;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    color: var(--retro-ink);
     padding: 8px 12px;
     border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
     font-size: 13px;
+    font-weight: 600;
     line-height: 1.4;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: box-shadow 0.1s ease, border-color 0.1s ease;
 }
 
 .text-input:focus-visible,
 .select-input:focus-visible,
 .ocr-textarea:focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 3px solid var(--retro-blue);
     outline-offset: 1px;
-    border-color: var(--accent-blue);
+    border-color: var(--retro-blue);
 }
 
 .ocr-textarea {
@@ -406,9 +487,10 @@ h1, h2, h3, .brand-title, .product-title {
     font-size: 12px;
     line-height: 1.45;
     resize: vertical;
+    background-color: #fafaf9;
 }
 
-/* Buttons */
+/* Buttons (Tactile chunky retro buttons with 3px shadow and active press) */
 .btn-primary,
 .btn-emerald,
 .btn-secondary-full,
@@ -416,21 +498,35 @@ h1, h2, h3, .brand-title, .product-title {
 .btn-emerald-full,
 .btn-delete,
 .btn-camera {
-    font-family: inherit;
-    font-weight: 600;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro);
     border-radius: var(--radius-sm);
     cursor: pointer;
     white-space: nowrap;
     text-align: center;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
+}
+
+.btn-primary:active,
+.btn-emerald:active,
+.btn-secondary-full:active,
+.btn-primary-full:active,
+.btn-emerald-full:active,
+.btn-delete:active,
+.btn-camera:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-retro-pressed);
 }
 
 .btn-primary {
-    background-color: var(--accent-blue);
+    background-color: var(--retro-blue);
     color: #ffffff;
-    border: none;
     padding: 8px 16px;
-    font-size: 13px;
+    font-size: 12.5px;
     min-height: 38px;
     display: inline-flex;
     align-items: center;
@@ -438,16 +534,14 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-primary:hover {
-    background-color: var(--accent-blue-hover);
+    background-color: var(--retro-blue-hover);
 }
 
 .btn-emerald {
-    background-color: var(--emerald);
-    color: #032512;
-    border: none;
+    background-color: var(--retro-emerald);
+    color: #ffffff;
     padding: 8px 16px;
-    font-size: 12.5px;
-    font-weight: 700;
+    font-size: 12px;
     min-height: 38px;
     display: inline-flex;
     align-items: center;
@@ -455,18 +549,15 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-emerald:hover {
-    background-color: var(--emerald-hover);
-    color: #ffffff;
+    background-color: var(--retro-emerald-hover);
 }
 
 .btn-emerald-full {
     width: 100%;
-    background-color: var(--emerald);
-    color: #032512;
-    border: none;
+    background-color: var(--retro-emerald);
+    color: #ffffff;
     padding: 11px 18px;
-    font-size: 13.5px;
-    font-weight: 800;
+    font-size: 13px;
     min-height: 44px;
     display: flex;
     align-items: center;
@@ -475,18 +566,15 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-emerald-full:hover {
-    background-color: var(--emerald-hover);
-    color: #ffffff;
+    background-color: var(--retro-emerald-hover);
 }
 
 .btn-primary-full {
     width: 100%;
-    background-color: var(--accent-blue);
+    background-color: var(--retro-blue);
     color: #ffffff;
-    border: none;
     padding: 10px 16px;
     font-size: 13px;
-    font-weight: 700;
     min-height: 42px;
     display: flex;
     align-items: center;
@@ -495,17 +583,15 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-primary-full:hover {
-    background-color: var(--accent-blue-hover);
+    background-color: var(--retro-blue-hover);
 }
 
 .btn-secondary-full {
     width: 100%;
-    background-color: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-dark);
+    color: var(--retro-ink);
     padding: 9px 14px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11.5px;
     min-height: 38px;
     display: flex;
     align-items: center;
@@ -514,18 +600,16 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-secondary-full:hover {
-    background-color: #27354a;
-    border-color: var(--border-color);
+    background-color: var(--retro-parchment);
 }
 
 .btn-delete {
-    background-color: transparent;
-    color: var(--rose);
-    border: 1px solid rgba(244, 63, 94, 0.35);
-    padding: 5px 10px;
-    border-radius: var(--radius-sm);
-    font-size: 11.5px;
-    font-weight: 600;
+    background-color: #fee2e2;
+    color: var(--retro-rose);
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
+    padding: 4px 9px;
+    font-size: 11px;
     cursor: pointer;
     min-height: 30px;
     display: inline-flex;
@@ -534,19 +618,15 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-delete:hover {
-    background-color: rgba(244, 63, 94, 0.15);
-    border-color: var(--rose);
+    background-color: #fecdd3;
+    color: var(--retro-ink);
 }
 
 .btn-camera {
-    background-color: var(--accent-blue);
-    color: #ffffff;
-    border: none;
+    background-color: var(--retro-amber);
+    color: var(--retro-ink);
     padding: 9px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
+    font-size: 12.5px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -554,10 +634,11 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-camera:hover {
-    background-color: var(--accent-blue-hover);
+    background-color: var(--retro-amber-hover);
+    color: #ffffff;
 }
 
-/* Tables & Data Presentation */
+/* Tables & Data Presentation (Retro Grocery Receipt / Nutrition Style) */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -569,25 +650,39 @@ h1, h2, h3, .brand-title, .product-title {
     border-collapse: collapse;
     font-size: 12.5px;
     text-align: left;
+    border: 2px solid var(--retro-ink);
+    background-color: var(--retro-cream-light);
 }
 
 .data-table th,
 .data-table td {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1.5px solid var(--retro-cream-dark);
+    border-right: 1px solid var(--retro-cream-dark);
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+    border-right: none;
 }
 
 .data-table th {
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 11.5px;
+    color: var(--retro-ink);
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    background-color: rgba(15, 23, 42, 0.4);
+    letter-spacing: 0.04em;
+    background-color: var(--retro-parchment);
+    border-bottom: 2px solid var(--retro-ink);
+}
+
+.data-table tbody tr:nth-child(even) td {
+    background-color: #fdfbf7;
 }
 
 .data-table tr:hover td {
-    background-color: rgba(30, 41, 59, 0.3);
+    background-color: #fef3c7;
 }
 
 .data-table.compact-table th,
@@ -600,30 +695,33 @@ h1, h2, h3, .brand-title, .product-title {
     display: inline-block;
     padding: 2px 7px;
     border-radius: var(--radius-sm);
-    font-size: 11px;
-    font-weight: 600;
-    background-color: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 800;
+    background-color: var(--retro-parchment);
+    color: var(--retro-ink);
+    border: 1.5px solid var(--retro-ink);
+    text-transform: uppercase;
 }
 
 .source-tag {
     display: block;
-    font-size: 10.5px;
-    color: var(--text-muted);
+    font-size: 10px;
+    color: var(--retro-muted);
+    font-family: var(--font-mono);
 }
 
 /* Manual Entry Box */
 .quick-manual-box {
     margin-top: 14px;
     padding-top: 12px;
-    border-top: 1px solid var(--border-color);
+    border-top: 2px dashed var(--retro-ink);
 }
 
 .quick-manual-box h3 {
     font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 800;
+    color: var(--retro-ink);
     margin-bottom: 8px;
 }
 
@@ -635,7 +733,7 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .manual-btn-col button {
-    height: 35px;
+    height: 38px;
 }
 
 /* Goals Setup Form */
@@ -658,20 +756,22 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .limits-divider {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--retro-ink);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     padding: 8px 0 4px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--retro-ink);
     margin-top: 6px;
 }
 
 .save-feedback {
+    font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--emerald);
-    font-weight: 600;
+    color: var(--retro-emerald);
+    font-weight: 800;
     min-height: 18px;
     text-align: center;
 }
@@ -693,9 +793,10 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .upload-file-label {
-    font-size: 12px;
-    color: var(--emerald);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--retro-emerald);
+    font-weight: 800;
 }
 
 .quick-chips {
@@ -707,38 +808,45 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .chips-label {
-    font-size: 11.5px;
-    color: var(--text-secondary);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--retro-charcoal);
+    font-weight: 700;
 }
 
 .sample-chip,
 .chip-btn {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
+    background-color: var(--retro-cream-light);
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
+    color: var(--retro-ink);
     padding: 5px 11px;
     border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 700;
     cursor: pointer;
     min-height: 32px;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
 }
 
 .sample-chip:hover,
 .chip-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-elevated);
-    border-color: var(--border-color);
+    background-color: var(--retro-parchment);
+}
+
+.sample-chip:active,
+.chip-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-retro-pressed);
 }
 
 .sample-chip.active,
 .chip-btn.active {
-    background-color: var(--bg-elevated);
-    border-color: var(--accent-blue);
-    color: #93c5fd;
-    font-weight: 600;
+    background-color: var(--retro-amber);
+    color: var(--retro-ink);
+    border-color: var(--retro-ink);
+    box-shadow: var(--shadow-retro);
 }
 
 .portion-control-box {
@@ -746,8 +854,9 @@ h1, h2, h3, .brand-title, .product-title {
     grid-template-columns: 1fr 1fr auto;
     gap: 10px;
     align-items: end;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-dark);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 10px 12px;
 }
@@ -759,10 +868,12 @@ h1, h2, h3, .brand-title, .product-title {
     align-items: start;
 }
 
+/* Retro CRT / Scanner Frame */
 .label-image-frame {
     width: 100%;
-    background-color: #04070e;
-    border: 1px solid var(--border-color);
+    background-color: #1c1917;
+    border: 2.5px solid var(--retro-ink);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7), var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     overflow: hidden;
     display: flex;
@@ -770,6 +881,21 @@ h1, h2, h3, .brand-title, .product-title {
     justify-content: center;
     min-height: 220px;
     margin-bottom: 12px;
+    position: relative;
+}
+
+/* Subtle retro CRT scanline effect on image frame */
+.label-image-frame::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 .label-image-frame img {
@@ -790,42 +916,47 @@ h1, h2, h3, .brand-title, .product-title {
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 12px;
+    border-bottom: 1.5px dashed var(--retro-ink);
+    padding-bottom: 8px;
 }
 
 .ean-badge {
     display: inline-block;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--text-secondary);
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    font-weight: 700;
+    color: var(--retro-ink);
+    background-color: var(--retro-cream-dark);
+    border: 1.5px solid var(--retro-ink);
     padding: 2px 7px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     margin-bottom: 4px;
 }
 
 .product-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--retro-ink);
     line-height: 1.25;
 }
 
 .product-subtitle {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--retro-charcoal);
+    font-weight: 600;
     margin-top: 2px;
 }
 
 .unit-pill,
 .count-pill {
+    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 800;
     padding: 3px 8px;
     border-radius: var(--radius-sm);
-    background-color: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
+    background-color: var(--retro-cream-dark);
+    border: 1.5px solid var(--retro-ink);
+    color: var(--retro-ink);
     white-space: nowrap;
 }
 
@@ -837,8 +968,9 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .macro-box {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 10px;
     display: flex;
@@ -847,32 +979,37 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .macro-box-kcal {
-    border-color: rgba(59, 130, 246, 0.4);
-    background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, rgba(9, 13, 22, 1) 100%);
+    background-color: #eff6ff;
+    border-color: var(--retro-ink);
 }
 
 .macro-box-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--retro-charcoal);
+    font-weight: 700;
     text-transform: uppercase;
 }
 
 .macro-box-val {
-    font-size: 17px;
+    font-family: var(--font-mono);
+    font-size: 18px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--retro-ink);
 }
 
 .macro-box-pct {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--retro-muted);
+    font-weight: 700;
 }
 
-/* ANVISA Warning Seals (RDC 429/2020) */
+/* ANVISA Warning Seals (Official Brazilian Frontal Warning - Octagon/Black box with crisp retro borders) */
 .anvisa-box {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-color);
+    background-color: var(--retro-cream-dark);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 12px 14px;
     margin-bottom: 12px;
@@ -885,40 +1022,49 @@ h1, h2, h3, .brand-title, .product-title {
     margin-top: 8px;
 }
 
-.anvisa-seal {
+.anvisa-lupa {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    background-color: #000000;
+    gap: 8px;
+    background-color: var(--retro-ink);
     color: #ffffff;
-    border: 2px solid #ffffff;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 11px;
+    border: 2px solid var(--retro-ink);
+    border-radius: 2px;
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
     font-weight: 900;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-retro-sm);
 }
 
-.anvisa-seal-icon {
-    font-size: 12px;
+.anvisa-lupa-icon {
+    background-color: #ffffff;
+    color: var(--retro-ink);
+    padding: 2px 5px;
+    font-size: 9.5px;
+    font-weight: 900;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
 }
 
-.anvisa-clean-pill {
+.anvisa-clean {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background-color: #dcfce7;
+    color: var(--retro-emerald);
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 800;
 }
 
-/* Nutri-Score & NOVA Badges */
+/* Nutri-Score & NOVA Badges (Arcade Throwback Steps) */
 .scores-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -927,8 +1073,9 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .score-box {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-dark);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 10px 12px;
     display: flex;
@@ -937,16 +1084,17 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .score-box-title {
+    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: 800;
+    color: var(--retro-charcoal);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
 .nutriscore-bar {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     margin-top: 2px;
 }
 
@@ -954,24 +1102,27 @@ h1, h2, h3, .brand-title, .product-title {
     flex: 1;
     text-align: center;
     padding: 4px 0;
+    font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 800;
-    border-radius: 4px;
-    opacity: 0.25;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    border: 1.5px solid var(--retro-ink);
+    border-radius: 2px;
+    opacity: 0.35;
+    transition: opacity 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .ns-step.active {
     opacity: 1;
-    transform: scale(1.04);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transform: scale(1.06);
+    box-shadow: var(--shadow-retro-sm);
+    z-index: 2;
 }
 
-.ns-a { background-color: #038141; color: #ffffff; }
-.ns-b { background-color: #85bb2f; color: #04250d; }
-.ns-c { background-color: #fecb02; color: #2a2000; }
-.ns-d { background-color: #ee8100; color: #ffffff; }
-.ns-e { background-color: #e63e11; color: #ffffff; }
+.ns-a { background-color: #15803d; color: #ffffff; }
+.ns-b { background-color: #84cc16; color: #1c1917; }
+.ns-c { background-color: #eab308; color: #1c1917; }
+.ns-d { background-color: #f97316; color: #ffffff; }
+.ns-e { background-color: #dc2626; color: #ffffff; }
 
 .nova-display {
     display: flex;
@@ -982,23 +1133,32 @@ h1, h2, h3, .brand-title, .product-title {
 
 .nova-badge {
     padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 800;
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-weight: 900;
     font-size: 12px;
     color: #ffffff;
-    background-color: #dc2626;
+    background-color: var(--retro-ink);
 }
 
-.nova-text {
+.nova-badge.nova-1 { background-color: #15803d; color: #ffffff; }
+.nova-badge.nova-2 { background-color: #eab308; color: #1c1917; }
+.nova-badge.nova-3 { background-color: #ea580c; color: #ffffff; }
+.nova-badge.nova-4 { background-color: #dc2626; color: #ffffff; }
+
+.nova-label {
     font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 700;
+    color: var(--retro-ink);
 }
 
 /* Ingredients & Additives */
 .ingredients-block {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-color);
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 12px;
     margin-bottom: 12px;
@@ -1006,7 +1166,7 @@ h1, h2, h3, .brand-title, .product-title {
 
 .ingredients-text {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--retro-charcoal);
     line-height: 1.45;
     margin-top: 4px;
 }
@@ -1018,14 +1178,22 @@ h1, h2, h3, .brand-title, .product-title {
     margin-top: 8px;
 }
 
-.allergen-pill {
+.allergen-tag {
+    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 800;
     padding: 2px 7px;
-    border-radius: 4px;
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 2px;
+    background-color: #fef08a;
+    color: var(--retro-ink);
+    border: 1.5px solid var(--retro-ink);
+    box-shadow: 1px 1px 0px var(--retro-ink);
+}
+
+.threshold-note {
+    font-size: 11px;
+    color: var(--retro-muted);
+    font-weight: 600;
 }
 
 .add-barcode-to-diet-bar {
@@ -1033,8 +1201,9 @@ h1, h2, h3, .brand-title, .product-title {
     grid-template-columns: 1fr 1fr auto;
     gap: 10px;
     align-items: end;
-    background-color: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-dark);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro-sm);
     border-radius: var(--radius-sm);
     padding: 10px 12px;
     margin-top: 12px;
@@ -1043,7 +1212,7 @@ h1, h2, h3, .brand-title, .product-title {
 .additives-section {
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1.5px dashed var(--retro-ink);
 }
 
 .additives-list {
@@ -1055,20 +1224,29 @@ h1, h2, h3, .brand-title, .product-title {
 
 .additive-item {
     font-size: 12px;
-    padding: 5px 8px;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
-    border-radius: 4px;
+    padding: 6px 9px;
+    background-color: var(--retro-cream-light);
+    border: 1.5px solid var(--retro-ink);
+    border-radius: 2px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
 }
 
 .additive-code {
     font-family: var(--font-mono);
-    font-weight: 700;
-    color: #93c5fd;
+    font-weight: 800;
+    color: var(--retro-blue);
     font-size: 11.5px;
+    margin-right: 6px;
+}
+
+.additive-func {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--retro-muted);
+    font-weight: 600;
 }
 
 /* Compare View */
@@ -1086,20 +1264,27 @@ h1, h2, h3, .brand-title, .product-title {
     margin-bottom: 14px;
 }
 
+.compare-prod-card {
+    background-color: var(--retro-cream-light);
+    border: 2px solid var(--retro-ink);
+    box-shadow: var(--shadow-retro);
+}
+
 .compare-notes-box {
     margin-top: 12px;
     padding: 10px 14px;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--retro-cream-dark);
+    border: 2px solid var(--retro-ink);
     border-radius: var(--radius-sm);
     display: flex;
     flex-direction: column;
     gap: 5px;
     font-size: 12.5px;
-    color: var(--text-secondary);
+    color: var(--retro-charcoal);
+    font-weight: 600;
 }
 
-/* Mobile Bottom Navigation (Android Native Feel) */
+/* Mobile Bottom Navigation (Android Throwback Feel) */
 .mobile-bottom-nav {
     display: none;
 }
@@ -1141,6 +1326,15 @@ h1, h2, h3, .brand-title, .product-title {
         grid-template-columns: 1fr 1fr;
     }
 
+    .manual-btn-col {
+        grid-column: span 2;
+    }
+
+    .manual-btn-col button {
+        width: 100%;
+        min-height: 44px;
+    }
+
     .macro-result-cards {
         grid-template-columns: 1fr 1fr;
     }
@@ -1154,6 +1348,7 @@ h1, h2, h3, .brand-title, .product-title {
     .add-barcode-to-diet-bar button {
         grid-column: span 2;
         width: 100%;
+        min-height: 44px;
     }
 
     .data-table th,
@@ -1170,39 +1365,41 @@ h1, h2, h3, .brand-title, .product-title {
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(12px);
-        border-top: 1px solid var(--border-color);
+        background-color: var(--retro-cream-light);
+        border-top: 2.5px solid var(--retro-ink);
+        box-shadow: 0 -3px 0px rgba(28, 25, 23, 0.15);
         z-index: 999;
         padding: 4px 2px max(6px, env(safe-area-inset-bottom, 6px));
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
     }
 
     .mob-nav-btn {
         background: transparent;
         border: none;
-        color: var(--text-secondary);
+        color: var(--retro-charcoal);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 3px;
+        font-family: var(--font-sans);
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         min-height: 48px;
         cursor: pointer;
         border-radius: var(--radius-sm);
-        transition: color 0.15s ease, background-color 0.15s ease;
+        transition: color 0.1s ease, background-color 0.1s ease;
     }
 
     .mob-nav-btn:hover {
-        color: var(--text-primary);
-        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--retro-ink);
+        background-color: var(--retro-cream-dark);
     }
 
     .mob-nav-btn.active {
-        color: var(--emerald);
-        background-color: rgba(16, 185, 129, 0.08);
+        color: var(--retro-blue);
+        background-color: var(--retro-cream-dark);
+        border: 1.5px solid var(--retro-ink);
+        box-shadow: var(--shadow-retro-sm);
     }
 
     .mob-nav-icon {

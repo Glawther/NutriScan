@@ -1,0 +1,45 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- QR Code / Barcode Scanner Frame & Leaf / Heart Accent in Emerald Green -->
+    <!-- Top-left bracket -->
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 32,44 L 32,34 L 42,34" />
+    <!-- Top-right bracket -->
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 66,34 L 76,34 L 76,44" />
+    <!-- Bottom-left bracket -->
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 32,64 L 32,74 L 42,74" />
+    <!-- Bottom-right bracket -->
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 66,74 L 76,74 L 76,64" />
+    <!-- Stylized Leaf & Nutrient shield at the center -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M 54,42 C 45,42 42,50 44,59 C 45,63 49,66 54,66 C 59,66 63,63 64,59 C 66,50 63,42 54,42 Z" />
+    <!-- Leaf vein in white/tint -->
+    <path
+        android:strokeColor="#0B0F17"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M 54,45 L 54,63" />
+</vector>
