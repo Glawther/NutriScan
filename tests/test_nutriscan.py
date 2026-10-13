@@ -193,3 +193,89 @@ def test_nutriscore_fallback_and_allergens():
     assert "Trigo" in analyzed.allergens
     assert "Soja" in analyzed.allergens
 
+
+def test_label_ocr_parsing():
+    from app.engine.label_ocr import parse_nutrition_table_text
+
+    raw_label = (
+        "INFORMAÇÃO NUTRICIONAL\n"
+        "Produto: Whey Protein Isolado\n"
+        "Porção de 30g (2 dosadores)\n"
+        "Valor energético: 110 kcal\n"
+        "Carboidratos: 1,5 g\n"
+        "Açúcares totais: 0,5 g\n"
+        "Proteínas: 26,0 g\n"
+        "Gorduras totais: 0,5 g\n"
+        "Gorduras saturadas: 0,2 g\n"
+        "Fibra alimentar: 0,0 g\n"
+        "Sódio: 45 mg"
+    )
+    res = parse_nutrition_table_text(raw_label, portion_consumed_g=45.0)
+    assert res.product_name == "Whey Protein Isolado"
+    assert res.portion_label_g == 30.0
+    assert res.portion_consumed_g == 45.0
+    assert res.scale_factor == 1.5
+    assert res.consumed_macros["kcal"] == 165.0
+    assert res.consumed_macros["proteins_g"] == 39.0
+    assert res.consumed_macros["carbohydrates_g"] == 2.2
+    assert res.consumed_macros["sodium_mg"] == 67.5
+
+
+def test_diet_tracker_and_photo_endpoints():
+    with TestClient(app) as client:
+        # Test label photo endpoint
+        r_ocr = client.post(
+            "/api/v1/scan-label-photo",
+            json={"sample_id": "rotulo_whey", "portion_g": 60.0},
+        )
+        assert r_ocr.status_code == 200
+        ocr_data = r_ocr.json()
+        assert ocr_data["portion_consumed_g"] == 60.0
+        assert ocr_data["consumed_macros"]["kcal"] == 240.0
+        assert ocr_data["consumed_macros"]["proteins_g"] == 48.0
+
+        # Test diet goals
+        r_goals = client.put(
+            "/api/v1/diet/goals",
+            json={
+                "goal_type": "bulking",
+                "daily_kcal_limit": 2500,
+                "proteins_limit_g": 180,
+                "carbs_limit_g": 300,
+                "fat_limit_g": 70,
+                "sodium_limit_mg": 2200,
+            },
+        )
+        assert r_goals.status_code == 200
+        assert r_goals.json()["daily_kcal_limit"] == 2500
+
+        # Test diary entry creation and today summary
+        r_entry = client.post(
+            "/api/v1/diet/diary",
+            json={
+                "meal_type": "Lanche",
+                "product_name": "Whey Protein Teste",
+                "source_type": "foto_ficha",
+                "portion_g": 60,
+                "kcal": 240,
+                "carbohydrates_g": 6.4,
+                "proteins_g": 48.0,
+                "fat_g": 3.6,
+                "fiber_g": 0.0,
+                "sodium_mg": 110,
+            },
+        )
+        assert r_entry.status_code == 200
+        entry_id = r_entry.json()["id"]
+
+        r_today = client.get("/api/v1/diet/today")
+        assert r_today.status_code == 200
+        today_data = r_today.json()
+        assert today_data["consumed"]["kcal"] >= 240
+        assert any(e["id"] == entry_id for e in today_data["entries"])
+
+        # Delete entry
+        r_del = client.delete(f"/api/v1/diet/diary/{entry_id}")
+        assert r_del.status_code == 200
+
+

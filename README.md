@@ -1,72 +1,44 @@
 # NutriScan
 
-Aplicação web e API REST em Python para consulta nutricional de alimentos por código de barras (EAN-13) ou busca textual. O serviço consulta a base aberta [Open Food Facts](https://world.openfoodfacts.org/), verifica os limites de rotulagem nutricional frontal da **ANVISA (RDC 429/2020 e IN 75/2020)**, exibe o grau de processamento **NOVA (1 a 4)** e o **Nutri-Score (A a E)**, traduz códigos de aditivos (`E322`, `E150d`, `E338`, `E621`) e armazena os produtos consultados no SQLite.
+Aplicativo e API em Python para acompanhamento de dieta, leitura de foto de tabelas nutricionais (fichas técnicas), consulta por código de barras (EAN-13) e verificação dos limites de rotulagem frontal da ANVISA (RDC 429/2020 e IN 75/2020). Inclui projeto Android nativo em Kotlin com build automático de APK no GitHub Actions.
 
-## Painel web
+## Funcionalidades
 
-### 1. Consulta de produto e leitura de rótulo
-Exibe os alertas frontais no padrão de lupa da ANVISA (`ALTO EM AÇÚCAR`, `ALTO EM GORDURA SATURADA`, `ALTO EM SÓDIO`), a letra do Nutri-Score, o grupo NOVA segundo o guia alimentar da USP, a tabela por 100g/100ml e a lista de aditivos e alergênicos identificados.
+### 1. Minha Dieta (Controle de Limite Diário)
+Painel diário com barra de progresso para meta de calorias (kcal) e macronutrientes (carboidratos, proteínas, gorduras totais e sódio). Suporta cálculo automático pela fórmula de Mifflin-St Jeor a partir do peso, altura, idade e objetivo (emagrecimento, manutenção ou ganho de massa), além de diário de refeições com registro por café da manhã, almoço, lanche e jantar.
+
+![Painel de Dieta Diária no NutriScan](docs/screenshots/nutriscan_dieta.png)
+
+### 2. Leitor de Foto da Ficha Técnica (Tabela Nutricional)
+Permite tirar foto da tabela nutricional com a câmera do celular ou carregar imagem do rótulo. O extrator identifica porção-base, valor energético, carboidratos, proteínas, gorduras totais, gorduras saturadas, fibras e sódio, calculando os valores proporcionais exatos para a quantidade consumida (em gramas ou ml) e o impacto percentual na meta diária.
+
+![Leitor de Foto da Tabela Nutricional](docs/screenshots/nutriscan_foto_ficha.png)
+
+### 3. Código de Barras e Alertas ANVISA
+Consulta a base aberta [Open Food Facts](https://world.openfoodfacts.org/) para obter dados nutricionais por código EAN-13, classifica pelo grau de processamento NOVA (1 a 4) e Nutri-Score (A a E), e aplica as regras da ANVISA para os selos de advertência frontal:
+
+- **ALTO EM AÇÚCAR**: `>= 15 g` em sólidos ou `>= 7,5 g` em líquidos por 100g/100ml.
+- **ALTO EM GORDURA SATURADA**: `>= 6 g` em sólidos ou `>= 3 g` em líquidos por 100g/100ml.
+- **ALTO EM SÓDIO**: `>= 600 mg` em sólidos ou `>= 300 mg` em líquidos por 100g/100ml.
 
 ![Consulta de produto no NutriScan](docs/screenshots/nutriscan_produto.png)
 
-### 2. Comparador de alimentos
-Compara dois produtos lado a lado por 100g ou 100ml e calcula a diferença exata de calorias, açúcares totais, gorduras saturadas, sódio, proteínas, fibras alimentares e número de aditivos químicos.
+### 4. Versão Mobile e Aplicativo Android (.APK)
+Interface responsiva com barra inferior de navegação e suporte a PWA (Progressive Web App com `manifest.json` e `sw.js`). A pasta `android/` contém um projeto nativo em Kotlin/WebView com permissões de câmera integradas para tirar fotos de rótulos diretamente no celular.
 
-![Comparador de alimentos no NutriScan](docs/screenshots/nutriscan_comparador.png)
+<p align="center">
+  <img src="docs/screenshots/nutriscan_mobile_android.png" alt="NutriScan no Celular Android" width="340" />
+</p>
 
-### 3. Histórico salvo no SQLite
-Lista os produtos já analisados e gravados na tabela `products_history` (`nutriscan.db`), permitindo reabrir qualquer ficha nutricional sem nova chamada externa.
+## Como baixar o APK para Android
 
-![Histórico salvo no NutriScan](docs/screenshots/nutriscan_historico.png)
+O fluxo do GitHub Actions (`.github/workflows/android-apk.yml`) compila o APK debug automaticamente em cada push para a branch `main`.
 
-## Critérios de avaliação nutricional
+1. Acesse a aba **Actions** ou **Releases** no repositório [Glawther/NutriScan](https://github.com/Glawther/NutriScan).
+2. Baixe o artefato `NutriScan-Android-debug` (ou o arquivo `app-debug.apk`).
+3. Instale diretamente no celular Android (habilite a instalação de fontes confiáveis nas configurações do aparelho).
 
-### Rotulagem frontal ANVISA (RDC 429/2020 e IN 75/2020)
-
-| Nutriente | Limite para sólidos (por 100g) | Limite para líquidos (por 100ml) | Selo gerado |
-| :--- | :--- | :--- | :--- |
-| Açúcares adicionados / totais | `>= 15 g` | `>= 7,5 g` | `ALTO EM AÇÚCAR` |
-| Gorduras saturadas | `>= 6 g` | `>= 3 g` | `ALTO EM GORDURA SATURADA` |
-| Sódio | `>= 600 mg` | `>= 300 mg` | `ALTO EM SÓDIO` |
-
-### Classificação NOVA (NUPENS / USP)
-- **NOVA 1**: In natura ou minimamente processado (ex: aveia em flocos, arroz, iogurte natural sem aditivos).
-- **NOVA 2**: Ingrediente culinário processado (ex: óleos vegetais, manteiga, sal, açúcar).
-- **NOVA 3**: Alimento processado (ex: conservas, queijos, pães simples).
-- **NOVA 4**: Ultraprocessado (formulações industriais com corantes, emulsificantes, edulcorantes ou realçadores de sabor).
-
-## API pública utilizada
-
-O projeto consome a API aberta do [Open Food Facts](https://world.openfoodfacts.org/data), listada no diretório [public-apis](https://github.com/public-apis/public-apis), sem necessidade de chave de autenticação:
-
-| Operação | Endpoint externo | Uso no NutriScan |
-| :--- | :--- | :--- |
-| Busca por código EAN | `world.openfoodfacts.org/api/v2/product/{barcode}.json` | Obtém tabela nutricional por 100g/ml, lista de ingredientes, tags de alergênicos, aditivos (`additives_tags`), grupo NOVA e Nutri-Score. |
-| Busca textual | `br.openfoodfacts.org/cgi/search.pl` | Pesquisa alimentos comercializados no Brasil por nome ou marca. |
-
-## Arquitetura
-
-```mermaid
-flowchart LR
-    Client["Navegador / Cliente REST"] --> API["FastAPI (porta 8096)"]
-    API --> Cache[("SQLite (nutriscan.db)")]
-    API --> OFF["Open Food Facts API (HTTPX)"]
-    OFF --> Analyzer["Motor RDC 429/2020 + NOVA + Aditivos"]
-    Analyzer --> Cache
-```
-
-## Endpoints da API REST
-
-- `GET /api/v1/health`: estado do serviço e normas suportadas.
-- `GET /api/v1/metrics`: total de produtos no cache, contagem de ultraprocessados (NOVA 4), produtos com alerta ANVISA e distribuição por letra do Nutri-Score.
-- `GET /api/v1/product/{barcode}`: analisa um produto pelo código EAN-13 e salva no SQLite.
-- `GET /api/v1/search?q={termo}`: pesquisa produtos por nome, marca ou código de barras.
-- `GET /api/v1/compare?barcode_a={ean1}&barcode_b={ean2}`: compara dois produtos lado a lado.
-- `GET /api/v1/history`: retorna os produtos armazenados no banco local.
-
-## Como executar
-
-### Execução local
+## Como executar localmente
 
 ```bash
 git clone https://github.com/Glawther/NutriScan.git
@@ -82,18 +54,13 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Acesse `http://127.0.0.1:8096` no navegador. A documentação interativa OpenAPI fica em `http://127.0.0.1:8096/docs`.
-
-### Docker Compose
-
-```bash
-docker compose up --build -d
-```
+Acesse `http://127.0.0.1:8096` no navegador. A documentação da API OpenAPI fica em `http://127.0.0.1:8096/docs`.
 
 ## Testes
 
 ```bash
 pytest tests/ -v
+node --test tests/js/label_parser.test.js
 ```
 
 ## Licença

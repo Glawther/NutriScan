@@ -2,8 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NutriScan | Consulta nutricional e leitura de rótulos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0b0f17" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NutriScan | Dieta Diária, Leitor de Foto da Ficha Técnica e Rótulos ANVISA</title>
+    <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
@@ -13,47 +17,362 @@
                 <div class="brand-logo">NS</div>
                 <div>
                     <h1 class="brand-title">NutriScan</h1>
-                    <p class="brand-subtitle">Consulta nutricional e leitura de rótulos (Open Food Facts + ANVISA)</p>
+                    <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist">
-                <button class="tab-btn active" data-tab="scanner" id="tab-btn-scanner">1. Consultar produto</button>
-                <button class="tab-btn" data-tab="compare" id="tab-btn-compare">2. Comparar alimentos</button>
-                <button class="tab-btn" data-tab="history" id="tab-btn-history">3. Histórico salvo</button>
+                <button class="tab-btn active" data-tab="dieta" id="tab-btn-dieta">1. Minha Dieta (Hoje)</button>
+                <button class="tab-btn" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
+                <button class="tab-btn" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
+                <button class="tab-btn" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
             </nav>
         </div>
     </header>
 
     <main class="container main-content">
-        <section class="kpi-strip" id="kpi-strip">
-            <div class="kpi-card">
-                <span class="kpi-label">Produtos no banco local</span>
-                <strong class="kpi-value" id="kpi-total">0</strong>
-                <span class="kpi-meta"> Cache SQLite + Open Food Facts</span>
+        <!-- FAIXA DE PROGRESSO DIÁRIO DA DIETA (SEMPRE VISÍVEL NO TOPO) -->
+        <section class="diet-kpi-strip" id="diet-kpi-strip">
+            <div class="kpi-card kpi-card-highlight">
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Calorias hoje vs limite diário</span>
+                    <span class="status-pill" id="top-kcal-badge">Restam 660 kcal</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-kcal-consumed">1340</strong>
+                    <span class="kpi-divider">/ <span id="top-kcal-limit">2000</span> kcal</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-emerald" id="top-bar-kcal" style="width: 67%;"></div>
+                </div>
             </div>
+
             <div class="kpi-card">
-                <span class="kpi-label">Com alerta frontal ANVISA</span>
-                <strong class="kpi-value text-amber" id="kpi-anvisa">0</strong>
-                <span class="kpi-meta">Limites da RDC 429/2020</span>
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Proteínas</span>
+                    <span class="kpi-pct text-emerald" id="top-prot-pct">80%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-prot-consumed">119.9g</strong>
+                    <span class="kpi-divider">meta <span id="top-prot-limit">150</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-blue" id="top-bar-prot" style="width: 80%;"></div>
+                </div>
             </div>
+
             <div class="kpi-card">
-                <span class="kpi-label">Ultraprocessados (NOVA 4)</span>
-                <strong class="kpi-value text-rose" id="kpi-nova4">0</strong>
-                <span class="kpi-meta">Classificação guia alimentar USP</span>
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Carboidratos</span>
+                    <span class="kpi-pct text-amber" id="top-carb-pct">59%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-carb-consumed">118.1g</strong>
+                    <span class="kpi-divider">meta <span id="top-carb-limit">200</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-amber" id="top-bar-carb" style="width: 59%;"></div>
+                </div>
             </div>
+
             <div class="kpi-card">
-                <span class="kpi-label">In natura / mín. processados</span>
-                <strong class="kpi-value text-emerald" id="kpi-nova1">0</strong>
-                <span class="kpi-meta">Grupo NOVA 1 sem aditivos</span>
+                <div class="kpi-row-top">
+                    <span class="kpi-label">Gorduras totais</span>
+                    <span class="kpi-pct text-rose" id="top-fat-pct">60%</span>
+                </div>
+                <div class="kpi-main-numbers">
+                    <strong class="kpi-value" id="top-fat-consumed">39.0g</strong>
+                    <span class="kpi-divider">meta <span id="top-fat-limit">65</span>g</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-rose" id="top-bar-fat" style="width: 60%;"></div>
+                </div>
             </div>
         </section>
 
-        <!-- ABA 1: CONSULTAR PRODUTO -->
-        <section class="tab-panel active" id="panel-scanner">
+        <!-- ABA 1: MINHA DIETA (HOJE) -->
+        <section class="tab-panel active" id="panel-dieta">
+            <div class="diet-grid">
+                <div class="card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>Refeições registradas hoje</h2>
+                            <p class="section-desc" id="diet-status-subtitle">Acompanhe cada refeição e o saldo restante do seu limite diário.</p>
+                        </div>
+                        <div class="btn-group-inline">
+                            <button class="btn-emerald" id="btn-go-photo-scan">+ Ler foto de ficha técnica</button>
+                        </div>
+                    </div>
+
+                    <table class="data-table" id="diary-table">
+                        <thead>
+                            <tr>
+                                <th>Refeição</th>
+                                <th>Alimento / Produto</th>
+                                <th>Porção</th>
+                                <th>Calorias</th>
+                                <th>Carb</th>
+                                <th>Prot</th>
+                                <th>Gord</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diary-tbody"></tbody>
+                    </table>
+
+                    <div class="quick-manual-box">
+                        <h3>Adicionar alimento avulso à dieta</h3>
+                        <div class="manual-form-grid">
+                            <div>
+                                <label class="field-label" for="manual-meal">Refeição</label>
+                                <select id="manual-meal" class="select-input">
+                                    <option value="Café da manhã">Café da manhã</option>
+                                    <option value="Almoço">Almoço</option>
+                                    <option value="Lanche" selected>Lanche</option>
+                                    <option value="Jantar">Jantar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-name">Alimento</label>
+                                <input type="text" id="manual-name" class="text-input" placeholder="Ex: Banana prata + Aveia" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-portion">Porção (g)</label>
+                                <input type="number" id="manual-portion" class="text-input" value="100" min="1" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-kcal">Kcal</label>
+                                <input type="number" id="manual-kcal" class="text-input" value="130" min="0" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-carb">Carb (g)</label>
+                                <input type="number" id="manual-carb" class="text-input" value="27" min="0" step="0.1" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-prot">Prot (g)</label>
+                                <input type="number" id="manual-prot" class="text-input" value="3.5" min="0" step="0.1" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="manual-fat">Gord (g)</label>
+                                <input type="number" id="manual-fat" class="text-input" value="1.2" min="0" step="0.1" />
+                            </div>
+                            <div class="manual-btn-col">
+                                <button class="btn-primary" id="btn-add-manual">Lançar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>Definir limite diário da dieta</h2>
+                            <p class="section-desc">Ajuste sua meta manual ou calcule pelo peso, altura e objetivo.</p>
+                        </div>
+                    </div>
+
+                    <div class="goals-form">
+                        <div class="form-row-2">
+                            <div>
+                                <label class="field-label" for="goal-type">Objetivo da dieta</label>
+                                <select id="goal-type" class="select-input">
+                                    <option value="cutting">Emagrecer (déficit calórico)</option>
+                                    <option value="manutencao">Manter peso atual</option>
+                                    <option value="bulking">Ganhar massa muscular (superávit)</option>
+                                    <option value="personalizado">Limite manual personalizado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-activity">Ritmo de treino / atividade</label>
+                                <select id="goal-activity" class="select-input">
+                                    <option value="sedentario">Sedentário</option>
+                                    <option value="leve">Leve (1 a 3x / semana)</option>
+                                    <option value="moderado" selected>Moderado (3 a 5x / semana)</option>
+                                    <option value="intenso">Intenso (6x / semana)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div>
+                                <label class="field-label" for="goal-weight">Peso (kg)</label>
+                                <input type="number" id="goal-weight" class="text-input" value="78" min="35" max="250" step="0.5" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-height">Altura (cm)</label>
+                                <input type="number" id="goal-height" class="text-input" value="176" min="120" max="230" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="goal-age">Idade</label>
+                                <input type="number" id="goal-age" class="text-input" value="29" min="14" max="100" />
+                            </div>
+                        </div>
+
+                        <button class="btn-secondary-full" id="btn-calc-mifflin">Calcular meta sugerida pelo meu corpo</button>
+
+                        <div class="limits-divider">Limites diários configurados</div>
+
+                        <div class="form-row-2">
+                            <div>
+                                <label class="field-label" for="limit-kcal">Limite de calorias (kcal/dia)</label>
+                                <input type="number" id="limit-kcal" class="text-input" value="2000" min="800" max="6000" step="10" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-prot">Meta de proteínas (g/dia)</label>
+                                <input type="number" id="limit-prot" class="text-input" value="150" min="20" max="400" />
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div>
+                                <label class="field-label" for="limit-carb">Carboidratos (g)</label>
+                                <input type="number" id="limit-carb" class="text-input" value="200" min="10" max="800" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-fat">Gorduras (g)</label>
+                                <input type="number" id="limit-fat" class="text-input" value="65" min="10" max="300" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="limit-sodium">Sódio máx (mg)</label>
+                                <input type="number" id="limit-sodium" class="text-input" value="2000" min="500" max="5000" step="50" />
+                            </div>
+                        </div>
+
+                        <button class="btn-primary-full" id="btn-save-goals">Salvar limite diário</button>
+                        <div class="save-feedback" id="goals-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: FOTO DA FICHA TÉCNICA (TABELA NUTRICIONAL) -->
+        <section class="tab-panel" id="panel-foto">
+            <div class="card">
+                <div class="photo-controls-grid">
+                    <div>
+                        <label class="field-label">1. Tirar foto da tabela nutricional ou escolher amostra</label>
+                        <div class="upload-btn-row">
+                            <label for="label-photo-input" class="btn-camera">
+                                Tirar foto / Enviar imagem da ficha técnica
+                            </label>
+                            <input
+                                type="file"
+                                id="label-photo-input"
+                                accept="image/*"
+                                capture="environment"
+                                style="display: none;"
+                            />
+                            <span class="upload-file-label" id="upload-filename">Amostra: Whey Protein Concentrado 80%</span>
+                        </div>
+                        <div class="quick-chips">
+                            <span class="chips-label">Fotos de fichas técnicas prontas:</span>
+                            <button class="sample-chip active" data-sample="rotulo_whey" data-portion="30">Whey Protein 80% (30g)</button>
+                            <button class="sample-chip" data-sample="rotulo_pasta_amendoim" data-portion="30">Pasta de Amendoim (30g)</button>
+                            <button class="sample-chip" data-sample="rotulo_pao_integral" data-portion="50">Pão Integral (50g)</button>
+                            <button class="sample-chip" data-sample="rotulo_iogurte_proteico" data-portion="160">Iogurte Proteico (160g)</button>
+                        </div>
+                    </div>
+
+                    <div class="portion-control-box">
+                        <div>
+                            <label class="field-label" for="photo-portion-input">2. Quantidade que vai comer (g/ml)</label>
+                            <input type="number" id="photo-portion-input" class="text-input" value="45" min="1" max="2000" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="photo-meal-select">Refeição de destino</label>
+                            <select id="photo-meal-select" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Lanche" selected>Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn-primary" id="btn-recalc-photo">Calcular porção</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scanner-grid">
+                <div class="card">
+                    <div class="section-header-inline">
+                        <h3>Imagem da tabela nutricional (Ficha Técnica)</h3>
+                        <span class="unit-pill" id="ocr-engine-badge">Leitor ANVISA RDC 429</span>
+                    </div>
+                    <div class="label-image-frame">
+                        <img id="label-preview-img" src="/static/samples/rotulo_whey.png" alt="Foto da tabela nutricional" />
+                    </div>
+                    <div class="ocr-text-wrap">
+                        <label class="field-label" for="ocr-raw-textarea">Texto identificado na ficha técnica (você pode editar ou colar os dados do rótulo):</label>
+                        <textarea id="ocr-raw-textarea" class="ocr-textarea" rows="5"></textarea>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="product-header">
+                        <div>
+                            <span class="ean-badge" id="ocr-portion-summary">Tabela base: 30g | Seu consumo: 45g (1.5x)</span>
+                            <h2 class="product-title" id="ocr-prod-name">Whey Protein Concentrado 80%</h2>
+                            <p class="product-subtitle">Cálculo proporcional imediato para a quantidade que você vai consumir</p>
+                        </div>
+                        <span class="ns-step ns-a active" id="ocr-nutriscore-badge" style="padding: 6px 12px; flex: 0;">Nutri-Score A</span>
+                    </div>
+
+                    <div class="macro-result-cards">
+                        <div class="macro-box macro-box-kcal">
+                            <span class="macro-box-label">Calorias na sua porção</span>
+                            <strong class="macro-box-val" id="ocr-res-kcal">180 kcal</strong>
+                            <span class="macro-box-pct" id="ocr-pct-kcal">+9.0% do limite diário</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Proteínas</span>
+                            <strong class="macro-box-val text-emerald" id="ocr-res-prot">36.0 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-prot">+24.0% da meta</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Carboidratos</span>
+                            <strong class="macro-box-val text-amber" id="ocr-res-carb">4.8 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-carb">+2.4% da meta</span>
+                        </div>
+                        <div class="macro-box">
+                            <span class="macro-box-label">Gorduras totais</span>
+                            <strong class="macro-box-val text-rose" id="ocr-res-fat">2.7 g</strong>
+                            <span class="macro-box-pct" id="ocr-pct-fat">+4.2% da meta</span>
+                        </div>
+                    </div>
+
+                    <table class="data-table compact-table">
+                        <thead>
+                            <tr>
+                                <th>Nutriente extraído</th>
+                                <th id="th-label-base">No rótulo (30g)</th>
+                                <th id="th-consumed-base">Sua porção (45g)</th>
+                                <th>Impacto na meta diária</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ocr-breakdown-tbody"></tbody>
+                    </table>
+
+                    <div class="anvisa-box" style="margin-top: 12px; margin-bottom: 12px;">
+                        <div class="section-header-inline">
+                            <h3>Avaliação frontal ANVISA (por 100g)</h3>
+                        </div>
+                        <div class="anvisa-Seals-row" id="ocr-anvisa-seals"></div>
+                    </div>
+
+                    <button class="btn-emerald-full" id="btn-add-ocr-to-diet">
+                        Adicionar esta porção à minha dieta de hoje
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: CÓDIGO DE BARRAS (OPEN FOOD FACTS) -->
+        <section class="tab-panel" id="panel-scanner">
             <div class="card search-card">
                 <div class="search-row">
                     <div class="search-input-wrap">
-                        <label for="barcode-input" class="field-label">Código de barras EAN-13 ou nome do produto</label>
+                        <label for="barcode-input" class="field-label">Código de barras EAN-13 ou nome do produto industrializado</label>
                         <div class="input-action-group">
                             <input
                                 type="text"
@@ -67,7 +386,7 @@
                     </div>
                 </div>
                 <div class="quick-chips">
-                    <span class="chips-label">Amostras rápidas:</span>
+                    <span class="chips-label">Produtos do catálogo:</span>
                     <button class="chip-btn active" data-barcode="3017620422003">Nutella (3017620422003)</button>
                     <button class="chip-btn" data-barcode="7894900011517">Coca-Cola Original (7894900011517)</button>
                     <button class="chip-btn" data-barcode="7622210691071">Bis Ao Leite (7622210691071)</button>
@@ -121,6 +440,23 @@
                         <p class="ingredients-text" id="prod-ingredients"></p>
                         <div class="allergens-row" id="prod-allergens"></div>
                     </div>
+
+                    <div class="add-barcode-to-diet-bar">
+                        <div>
+                            <label class="field-label" for="barcode-portion-g">Porção consumida (g/ml)</label>
+                            <input type="number" id="barcode-portion-g" class="text-input" value="30" min="1" max="1000" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="barcode-meal-type">Refeição</label>
+                            <select id="barcode-meal-type" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Lanche" selected>Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <button class="btn-emerald" id="btn-add-barcode-diet">Adicionar à dieta de hoje</button>
+                    </div>
                 </div>
 
                 <div class="card nutrition-side-card">
@@ -147,8 +483,8 @@
             </div>
         </section>
 
-        <!-- ABA 2: COMPARAR ALIMENTOS -->
-        <section class="tab-panel" id="panel-compare">
+        <!-- ABA 4: COMPARAR ALIMENTOS -->
+        <section class="tab-panel" id="panel-comparar">
             <div class="card compare-controls-card">
                 <div class="compare-selectors-grid">
                     <div>
@@ -190,37 +526,29 @@
                 <div class="compare-notes-box" id="compare-notes"></div>
             </div>
         </section>
-
-        <!-- ABA 3: HISTÓRICO SALVO -->
-        <section class="tab-panel" id="panel-history">
-            <div class="card">
-                <div class="section-header-inline">
-                    <div>
-                        <h3>Produtos avaliados e salvos no SQLite</h3>
-                        <p class="section-desc">Registros armazenados localmente em <code>nutriscan.db</code> para consulta offline e comparação.</p>
-                    </div>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Código EAN</th>
-                            <th>Produto</th>
-                            <th>Marca</th>
-                            <th>Nutri-Score</th>
-                            <th>Grupo NOVA</th>
-                            <th>Alertas ANVISA</th>
-                            <th>Kcal / 100g</th>
-                            <th>Açúcares</th>
-                            <th>Sódio</th>
-                            <th>Ficha</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-tbody"></tbody>
-                </table>
-            </div>
-        </section>
     </main>
 
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ANDROID -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação mobile">
+        <button class="mob-nav-btn active" data-tab="dieta">
+            <span class="mob-nav-icon">◉</span>
+            <span>Minha Dieta</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="foto">
+            <span class="mob-nav-icon">▣</span>
+            <span>Foto Ficha</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="scanner">
+            <span class="mob-nav-icon">|||</span>
+            <span>Rótulo EAN</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="comparar">
+            <span class="mob-nav-icon">⇄</span>
+            <span>Comparar</span>
+        </button>
+    </nav>
+
+    <script src="/static/js/label_parser.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

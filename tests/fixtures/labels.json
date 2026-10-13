@@ -1,0 +1,74 @@
+[
+  {
+    "name": "rdc429_com_coluna_100g",
+    "text": "INFORMAÇÃO NUTRICIONAL\nPorções por embalagem: 30\nPorção: 30 g (2 dosadores)\n100 g 30 g %VD*\nValor energético (kcal) 400 120 6\nCarboidratos (g) 11 3,2 1\nAçúcares totais (g) 7,0 2,1\nAçúcares adicionados (g) 0 0 0\nProteínas (g) 80 24 48\nGorduras totais (g) 6,0 1,8 3\nGorduras saturadas (g) 3,3 1,0 5\nGorduras trans (g) 0 0\nFibra alimentar (g) 0 0 0\nSódio (mg) 183 55 3",
+    "expect": {
+      "portion_g": 30,
+      "unit": "g",
+      "has_100g_column": true,
+      "per_portion": { "kcal": 120, "carbohydrates_g": 3.2, "proteins_g": 24, "fat_g": 1.8, "saturated_fat_g": 1.0, "sodium_mg": 55 },
+      "per_100g": { "kcal": 400, "carbohydrates_g": 11, "proteins_g": 80, "fat_g": 6, "sodium_mg": 183 },
+      "warnings": []
+    }
+  },
+  {
+    "name": "modelo_antigo_por_porcao",
+    "text": "INFORMAÇÃO NUTRICIONAL\nPorção de 30 g (6 biscoitos)\nQuantidade por porção %VD(*)\nValor energético 142 kcal = 596 kJ 7%\nCarboidratos 20 g 7%\nProteínas 2,0 g 3%\nGorduras totais 6,0 g 11%\nGorduras saturadas 3,0 g 14%\nGorduras trans 0 g **\nFibra alimentar 0,7 g 3%\nSódio 105 mg 4%",
+    "expect": {
+      "portion_g": 30,
+      "unit": "g",
+      "has_100g_column": false,
+      "per_portion": { "kcal": 142, "carbohydrates_g": 20, "proteins_g": 2, "fat_g": 6, "saturated_fat_g": 3, "sodium_mg": 105 },
+      "per_100g": { "kcal": 473.3, "carbohydrates_g": 66.7, "saturated_fat_g": 10, "sodium_mg": 350 },
+      "warnings": ["ALTO EM GORDURA SATURADA"]
+    }
+  },
+  {
+    "name": "ocr_sem_acento_sem_cabecalho_100g",
+    "text": "INFORMACAO NUTRICIONAL\nPorcao 25 g (1 unidade)\nValor energetico (kcal) 520 130 7\nCarboidratos (g) 56 14 5\nAcucares totais (g) 32 8,0\nProteinas (g) 6,8 1,7 3\nGorduras totais (g) 30 7,5 12\nGorduras saturadas (g) 16 4,0 20\nSodio (mg) 120 30 2",
+    "expect": {
+      "portion_g": 25,
+      "unit": "g",
+      "has_100g_column": true,
+      "per_portion": { "kcal": 130, "carbohydrates_g": 14, "proteins_g": 1.7, "fat_g": 7.5, "saturated_fat_g": 4, "sodium_mg": 30 },
+      "per_100g": { "kcal": 520, "sugars_g": 32, "saturated_fat_g": 16 },
+      "warnings": ["ALTO EM AÇÚCAR (TOTAL)", "ALTO EM GORDURA SATURADA"]
+    }
+  },
+  {
+    "name": "bebida_em_ml",
+    "text": "INFORMAÇÃO NUTRICIONAL\nPorção de 200 ml (1 copo)\n100 ml 200 ml %VD*\nValor energético (kcal) 42 84 4\nCarboidratos (g) 10 21 7\nAçúcares totais (g) 10 21\nAçúcares adicionados (g) 10 21 42\nProteínas (g) 0 0 0\nGorduras totais (g) 0 0 0\nGorduras saturadas (g) 0 0 0\nSódio (mg) 10 20 1",
+    "expect": {
+      "portion_g": 200,
+      "unit": "ml",
+      "has_100g_column": true,
+      "per_portion": { "kcal": 84, "carbohydrates_g": 21, "sodium_mg": 20 },
+      "per_100g": { "kcal": 42, "added_sugars_g": 10 },
+      "warnings": ["ALTO EM AÇÚCAR ADICIONADO"]
+    }
+  },
+  {
+    "name": "texto_digitado_sem_porcao",
+    "text": "Valor energético: 250 kcal\nProteínas: 10 g\nCarboidratos: 30 g\nGorduras totais: 10 g",
+    "expect": {
+      "portion_g": 100,
+      "unit": "g",
+      "has_100g_column": false,
+      "per_portion": { "kcal": 250, "proteins_g": 10, "carbohydrates_g": 30, "fat_g": 10 },
+      "per_100g": { "kcal": 250, "proteins_g": 10 },
+      "warnings": []
+    }
+  },
+  {
+    "name": "sem_kcal_calcula_pelos_macros",
+    "text": "Porção de 50 g\nCarboidratos 10 g\nProteínas 5 g\nGorduras totais 2 g",
+    "expect": {
+      "portion_g": 50,
+      "unit": "g",
+      "has_100g_column": false,
+      "per_portion": { "kcal": 78, "carbohydrates_g": 10 },
+      "per_100g": { "kcal": 156 },
+      "warnings": []
+    }
+  }
+]

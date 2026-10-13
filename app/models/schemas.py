@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -65,3 +65,90 @@ class ComparisonResponse(BaseModel):
     product_b: ProductAnalysis
     deltas: List[NutrientDelta]
     summary_notes: List[str]
+
+
+class DietGoals(BaseModel):
+    id: int = 1
+    goal_type: str = Field("cutting", description="cutting | manutencao | bulking | personalizado")
+    weight_kg: float = Field(78.0, ge=30.0, le=300.0)
+    height_cm: float = Field(176.0, ge=100.0, le=250.0)
+    age: int = Field(29, ge=12, le=110)
+    activity_level: str = Field("moderado", description="sedentario | leve | moderado | intenso")
+    daily_kcal_limit: float = Field(2000.0, gt=0.0)
+    carbs_limit_g: float = Field(200.0, ge=0.0)
+    proteins_limit_g: float = Field(150.0, ge=0.0)
+    fat_limit_g: float = Field(65.0, ge=0.0)
+    sodium_limit_mg: float = Field(2000.0, ge=0.0)
+
+
+class DietGoalsUpdateRequest(BaseModel):
+    goal_type: str = "cutting"
+    weight_kg: float = 78.0
+    height_cm: float = 176.0
+    age: int = 29
+    activity_level: str = "moderado"
+    auto_calculate: bool = False
+    daily_kcal_limit: Optional[float] = None
+    carbs_limit_g: Optional[float] = None
+    proteins_limit_g: Optional[float] = None
+    fat_limit_g: Optional[float] = None
+    sodium_limit_mg: Optional[float] = None
+
+
+class DietDiaryEntry(BaseModel):
+    id: int
+    date_str: str
+    meal_type: str
+    product_name: str
+    source_type: str
+    portion_g: float
+    kcal: float
+    carbohydrates_g: float
+    proteins_g: float
+    fat_g: float
+    fiber_g: float
+    sodium_mg: float
+    created_at: str
+
+
+class DietDiaryCreateRequest(BaseModel):
+    date_str: Optional[str] = None
+    meal_type: str = Field("Lanche", description="Café da manhã | Almoço | Lanche | Jantar")
+    product_name: str
+    source_type: str = Field("foto_ficha", description="foto_ficha | codigo_barras | manual")
+    portion_g: float = Field(100.0, gt=0.0)
+    kcal: float = Field(0.0, ge=0.0)
+    carbohydrates_g: float = Field(0.0, ge=0.0)
+    proteins_g: float = Field(0.0, ge=0.0)
+    fat_g: float = Field(0.0, ge=0.0)
+    fiber_g: float = Field(0.0, ge=0.0)
+    sodium_mg: float = Field(0.0, ge=0.0)
+
+
+class DietTodaySummary(BaseModel):
+    date_str: str
+    goals: DietGoals
+    consumed: Dict[str, float]
+    remaining: Dict[str, float]
+    percentages: Dict[str, float]
+    status_label: str
+    within_kcal_limit: bool
+    entries: List[DietDiaryEntry]
+
+
+class LabelParseResult(BaseModel):
+    product_name: str
+    brand: str = "Ficha técnica escaneada"
+    sample_id: Optional[str] = None
+    image_url: Optional[str] = None
+    ocr_engine: str = "nutriscan_regex_br"
+    raw_ocr_text: str
+    portion_label_g: float
+    portion_consumed_g: float
+    scale_factor: float
+    per_label_portion: Dict[str, float]
+    per_100g: NutritionPer100g
+    consumed_macros: Dict[str, float]
+    daily_limit_impact_pct: Dict[str, float]
+    anvisa: AnvisaAlerts
+    nutriscore_grade: str
