@@ -1418,6 +1418,7 @@ h1, h2, h3, .brand-title, .product-title {
     font-weight: 800;
     color: var(--brand-blue);
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
 }
 
 .water-goal-sub {
@@ -1757,13 +1758,16 @@ h1, h2, h3, .brand-title, .product-title {
     border: 2px dashed var(--border-subtle);
     border-radius: var(--radius-tile);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
     text-align: center;
 }
 
-.plate-camera-dropzone:hover {
+.plate-camera-dropzone:hover,
+.plate-camera-dropzone:focus-within {
     border-color: var(--brand-emerald);
     background: var(--bg-tile-highlight);
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
 }
 
 .dropzone-icon {
@@ -1795,7 +1799,7 @@ h1, h2, h3, .brand-title, .product-title {
     border: 1px solid var(--border-card);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -2050,7 +2054,7 @@ h1, h2, h3, .brand-title, .product-title {
     color: var(--text-muted);
     font-size: 12px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .btn-remove-item:hover {

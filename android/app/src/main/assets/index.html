@@ -282,7 +282,7 @@
                         <button type="button" class="btn-water-add" data-amount="200">+200 ml</button>
                         <button type="button" class="btn-water-add" data-amount="300">+300 ml</button>
                         <button type="button" class="btn-water-add" data-amount="500">+500 ml</button>
-                        <button type="button" class="btn-water-reset" id="btn-water-reset" title="Zerar água do dia">✕</button>
+                        <button type="button" class="btn-water-reset" id="btn-water-reset" title="Zerar água do dia" aria-label="Zerar água do dia">✕</button>
                     </div>
                 </div>
 
@@ -305,7 +305,7 @@
             <div class="card">
                 <div class="photo-controls-grid">
                     <div>
-                        <label class="field-label">1. Tirar foto da tabela nutricional ou escolher amostra</label>
+                        <span class="field-label">1. Tirar foto da tabela nutricional ou escolher amostra</span>
                         <div class="upload-btn-row">
                             <label for="label-photo-input" class="btn-camera">
                                 Tirar foto / Enviar imagem da ficha técnica
@@ -641,7 +641,7 @@
                         <span class="status-pill" id="plate-detected-pill">IA Visão Ativa</span>
                     </div>
                     <div class="plate-preview-viewport">
-                        <img id="plate-preview-img" class="plate-viewport-image" src="" alt="Prato visualizado" />
+                        <img id="plate-preview-img" class="plate-viewport-image" src="" alt="Prato visualizado" width="480" height="360" />
                         <div class="plate-bounding-overlay" id="plate-bounding-overlay"></div>
                     </div>
                     <div class="plate-quick-kpi-bar">
@@ -677,7 +677,7 @@
                     <div class="section-header-inline">
                         <div>
                             <h3>3. Alimentos no Prato & Gramaturas</h3>
-                            <p class="section-desc">Ajuste as gramas de cada porção em tempo real. Calorias e micronutrientes se recalculam instantaneamente.</p>
+                            <p class="section-desc">Ajuste os gramas de cada porção em tempo real. Calorias e micronutrientes são recalculados instantaneamente.</p>
                         </div>
                     </div>
 
@@ -687,7 +687,7 @@
                     <div class="plate-taco-add-box">
                         <label for="plate-taco-search" class="field-label">+ Adicionar alimento extra da Tabela TACO:</label>
                         <div class="taco-search-input-wrap">
-                            <input type="text" id="plate-taco-search" class="text-input" placeholder="Buscar no banco TACO (ex: mandioca, frango, azeite, aveia)..." autocomplete="off" />
+                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar no banco TACO (ex: mandioca, frango, azeite, aveia)…" autocomplete="off" />
                             <div class="taco-suggestions-dropdown" id="plate-taco-suggestions" hidden></div>
                         </div>
                     </div>
