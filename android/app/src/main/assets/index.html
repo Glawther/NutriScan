@@ -96,6 +96,16 @@
 
         <!-- ABA 1: MINHA DIETA (HOJE) -->
         <section class="tab-panel active" role="tabpanel" id="panel-dieta" aria-labelledby="tab-btn-dieta">
+            <!-- Navegador de Datas da Dieta -->
+            <div class="diet-date-bar">
+                <button type="button" class="btn-date-nav" id="btn-date-prev" aria-label="Dia anterior">◀ Ontem</button>
+                <div class="diet-current-date-wrap">
+                    <span class="diet-date-badge" id="diet-date-badge">HOJE</span>
+                    <strong class="diet-date-text" id="diet-date-text">Hoje</strong>
+                </div>
+                <button type="button" class="btn-date-nav" id="btn-date-next" aria-label="Próximo dia">Amanhã ▶</button>
+            </div>
+
             <div class="diet-grid">
                 <div class="card">
                     <div class="section-header-inline">
@@ -103,7 +113,10 @@
                             <h2>Refeições registradas hoje</h2>
                             <p class="section-desc" id="diet-status-subtitle">Acompanhe cada refeição e o saldo restante do seu limite diário.</p>
                         </div>
-                        <div class="btn-group-inline">
+                        <div class="btn-group-inline share-btn-group">
+                            <button class="btn-secondary" id="btn-share-whatsapp" title="Compartilhar resumo da dieta no WhatsApp">📲 WhatsApp</button>
+                            <button class="btn-secondary" id="btn-copy-diet" title="Copiar resumo para a área de transferência">📋 Copiar</button>
+                            <button class="btn-secondary" id="btn-print-diet" title="Imprimir ou salvar relatório em PDF">🖨️ Imprimir PDF</button>
                             <button class="btn-emerald" id="btn-go-photo-scan">+ Ler foto de ficha técnica</button>
                         </div>
                     </div>
@@ -245,8 +258,43 @@
                         </div>
 
                         <button class="btn-primary-full" id="btn-save-goals">Salvar limite diário</button>
-                        <div class="save-feedback" id="goals-feedback" role="status" aria-live="polite"></div>
                     </div>
+                </div>
+
+                <!-- Card de Hidratação Diária -->
+                <div class="card water-card" id="water-widget-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>💧 Hidratação Diária</h3>
+                            <p class="section-desc">Meta diária: 35ml por kg de peso corporal</p>
+                        </div>
+                        <span class="unit-pill" id="water-pct-badge">0%</span>
+                    </div>
+                    <div class="water-kpi-main">
+                        <strong class="water-val" id="water-consumed-val">0 ml</strong>
+                        <span class="water-goal-sub">meta: <span id="water-goal-val">2.730 ml</span></span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-blue" id="water-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="water-actions-row">
+                        <button type="button" class="btn-water-add" data-amount="200">+200 ml</button>
+                        <button type="button" class="btn-water-add" data-amount="300">+300 ml</button>
+                        <button type="button" class="btn-water-add" data-amount="500">+500 ml</button>
+                        <button type="button" class="btn-water-reset" id="btn-water-reset" title="Zerar água do dia">✕</button>
+                    </div>
+                </div>
+
+                <!-- Card de Tendência dos Últimos 7 Dias -->
+                <div class="card trends-card" id="trends-widget-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>📊 Tendência dos Últimos 7 Dias</h3>
+                            <p class="section-desc">Consumo calórico vs meta diária</p>
+                        </div>
+                        <span class="kpi-pct text-emerald" id="trends-compliance-badge">100% no alvo</span>
+                    </div>
+                    <div class="trends-bars-grid" id="trends-bars-container"></div>
                 </div>
             </div>
         </section>
@@ -395,6 +443,7 @@
                                 spellcheck="false"
                             />
                             <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
+                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner" style="display: inline-flex; align-items: center; gap: 6px;">📷 Câmera ao vivo</button>
                         </div>
                     </div>
                 </div>
@@ -565,6 +614,40 @@
         </button>
     </nav>
 
+    <!-- Modal do Scanner de Código de Barras por Câmera -->
+    <div class="cam-modal-backdrop" id="cam-scanner-modal" role="dialog" aria-modal="true" aria-labelledby="cam-modal-title" hidden>
+        <div class="cam-bento-card">
+            <header class="cam-modal-header">
+                <div>
+                    <span class="cam-badge">EAN-13 / EAN-8 / UPC</span>
+                    <h2 id="cam-modal-title" class="cam-title">Escanear código de barras</h2>
+                </div>
+                <button type="button" class="cam-btn-icon" id="btn-cam-close" aria-label="Fechar scanner">✕</button>
+            </header>
+
+            <div class="cam-viewfinder-frame">
+                <video id="cam-scanner-video" class="cam-video-feed" playsinline muted autoplay></video>
+                <div class="cam-reticle">
+                    <div class="cam-corner top-left"></div>
+                    <div class="cam-corner top-right"></div>
+                    <div class="cam-corner bottom-left"></div>
+                    <div class="cam-corner bottom-right"></div>
+                    <div class="cam-laser-line" aria-hidden="true"></div>
+                </div>
+                <div class="cam-status-pill" id="cam-scanner-status">Aponte para o código de barras</div>
+            </div>
+
+            <footer class="cam-modal-footer">
+                <button type="button" class="cam-btn-action" id="btn-cam-torch" aria-label="Alternar lanterna">
+                    <span aria-hidden="true">⚡</span> Lanterna
+                </button>
+                <button type="button" class="cam-btn-secondary" id="btn-cam-cancel">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="static/js/share_export.js"></script>
+    <script src="static/js/barcode_cam.js"></script>
     <script src="static/js/label_parser.js"></script>
     <script src="static/js/app.js"></script>
 </body>

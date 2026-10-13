@@ -1,17 +1,21 @@
 import json
 import sqlite3
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from app.config import DATABASE_PATH
 from app.models.schemas import (
+    DailyTrendItem,
     DietDiaryCreateRequest,
     DietDiaryEntry,
     DietGoals,
     DietGoalsUpdateRequest,
     DietTodaySummary,
     ProductAnalysis,
+    WaterLogCreate,
+    WaterLogResponse,
+    WeeklyTrendsResponse,
 )
 from app.services.openfoodfacts import get_fallback_catalog
 
@@ -83,6 +87,16 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                     fiber_g REAL NOT NULL,
                     sodium_mg REAL NOT NULL,
                     created_at TEXT NOT NULL
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS diet_water (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    date_str TEXT,
+                    amount_ml INTEGER,
+                    created_at TEXT
                 )
                 """
             )
@@ -434,6 +448,175 @@ def get_diet_today_summary(date_str: Optional[str] = None, db_path: str = DATABA
     )
 
 
+def get_water_for_date(date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
+    init_db(db_path)
+    d_str = date_str or today_str()
+    goals = get_diet_goals(db_path=db_path)
+    if goals.weight_kg and goals.weight_kg > 0:
+        goal_ml = round(goals.weight_kg * 35)
+    else:
+        goal_ml = 2500
+
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            row = conn.execute(
+                "SELECT COALESCE(SUM(amount_ml), 0) AS total, MAX(id) AS last_id FROM diet_water WHERE date_str = ?",
+                (d_str,),
+            ).fetchone()
+            total_ml = int(row["total"] or 0)
+            last_id = int(row["last_id"] or 0)
+        finally:
+            conn.close()
+
+    remaining_ml = max(0, goal_ml - total_ml)
+    pct = round((total_ml / goal_ml) * 100.0, 1) if goal_ml > 0 else 0.0
+
+    return {
+        "id": last_id,
+        "date_str": d_str,
+        "amount_ml": total_ml,
+        "goal_ml": goal_ml,
+        "remaining_ml": remaining_ml,
+        "pct": pct,
+    }
+
+
+def log_water(amount_ml: int, date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
+    init_db(db_path)
+    d_str = date_str or today_str()
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            conn.execute(
+                """
+                INSERT INTO diet_water (date_str, amount_ml, created_at)
+                VALUES (?, ?, ?)
+                """,
+                (d_str, amount_ml, now_iso),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    return get_water_for_date(date_str=d_str, db_path=db_path)
+
+
+def reset_water_for_date(date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> bool:
+    init_db(db_path)
+    d_str = date_str or today_str()
+
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            cur = conn.execute("DELETE FROM diet_water WHERE date_str = ?", (d_str,))
+            conn.commit()
+            return cur.rowcount >= 0
+        finally:
+            conn.close()
+
+
+def get_7day_trends(end_date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
+    init_db(db_path)
+    if end_date_str:
+        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+    else:
+        end_dt = datetime.now()
+
+    goals = get_diet_goals(db_path=db_path)
+    kcal_limit = goals.daily_kcal_limit
+
+    # Last 7 days in chronological order: end_dt - 6 days up to end_dt
+    date_strs = [(end_dt - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+    weekday_map = {
+        0: "Seg",
+        1: "Ter",
+        2: "Qua",
+        3: "Qui",
+        4: "Sex",
+        5: "Sáb",
+        6: "Dom",
+    }
+
+    days_data: List[DailyTrendItem] = []
+    total_water_ml_sum = 0
+    total_kcal_sum = 0.0
+    met_goal_count = 0
+
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            for d in date_strs:
+                cur_dt = datetime.strptime(d, "%Y-%m-%d")
+                weekday_short = weekday_map.get(cur_dt.weekday(), "")
+
+                # Diary macros
+                row_diary = conn.execute(
+                    """
+                    SELECT
+                        COALESCE(SUM(kcal), 0) AS total_kcal,
+                        COALESCE(SUM(proteins_g), 0) AS total_prot,
+                        COALESCE(SUM(carbohydrates_g), 0) AS total_carbs,
+                        COALESCE(SUM(fat_g), 0) AS total_fat
+                    FROM diet_diary
+                    WHERE date_str = ?
+                    """,
+                    (d,),
+                ).fetchone()
+
+                day_kcal = round(float(row_diary["total_kcal"] or 0.0), 1)
+                day_prot = round(float(row_diary["total_prot"] or 0.0), 1)
+                day_carbs = round(float(row_diary["total_carbs"] or 0.0), 1)
+                day_fat = round(float(row_diary["total_fat"] or 0.0), 1)
+
+                # Water
+                row_water = conn.execute(
+                    "SELECT COALESCE(SUM(amount_ml), 0) AS total_water FROM diet_water WHERE date_str = ?",
+                    (d,),
+                ).fetchone()
+                day_water_ml = int(row_water["total_water"] or 0)
+
+                pct_kcal = round((day_kcal / kcal_limit) * 100.0, 1) if kcal_limit > 0 else 0.0
+                met_goal = (day_kcal <= kcal_limit) if day_kcal > 0 else True
+                if met_goal:
+                    met_goal_count += 1
+
+                total_water_ml_sum += day_water_ml
+                total_kcal_sum += day_kcal
+
+                days_data.append(
+                    DailyTrendItem(
+                        date_str=d,
+                        weekday_short=weekday_short,
+                        total_kcal=day_kcal,
+                        kcal_limit=kcal_limit,
+                        pct_kcal=pct_kcal,
+                        total_prot=day_prot,
+                        total_carbs=day_carbs,
+                        total_fat=day_fat,
+                        total_water_ml=day_water_ml,
+                        met_goal=met_goal,
+                    )
+                )
+        finally:
+            conn.close()
+
+    avg_kcal = round(total_kcal_sum / 7.0, 1)
+    compliance_rate = round((met_goal_count / 7.0) * 100.0, 1)
+    total_water_liters = round(total_water_ml_sum / 1000.0, 2)
+
+    return {
+        "days": [item.model_dump() for item in days_data],
+        "avg_kcal": avg_kcal,
+        "compliance_rate": compliance_rate,
+        "total_water_liters": total_water_liters,
+    }
+
+
+
 def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
     init_db(db_path)
     existing = list_history(limit=5, db_path=db_path)
@@ -442,6 +625,7 @@ def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
             save_product(prod, db_path=db_path)
 
     today = today_str()
+    today_dt = datetime.now()
     summary = get_diet_today_summary(date_str=today, db_path=db_path)
     if not summary.entries:
         demo_meals = [
@@ -500,3 +684,101 @@ def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
         ]
         for meal in demo_meals:
             add_diary_entry(meal, db_path=db_path)
+
+    # Seed past 6 days if empty
+    past_days_templates = [
+        # (days_ago, water_ml, [meals])
+        (
+            1,
+            2400,
+            [
+                ("Café da manhã", "Tapioca com Queijo Minas Frescal", 160.0, 310.0, 32.0, 16.0, 11.0, 1.2, 280.0),
+                ("Almoço", "Filé de Salmão com Purê de Batata e Brócolis", 400.0, 680.0, 45.0, 48.0, 24.0, 6.0, 490.0),
+                ("Lanche", "Barra de Proteína Crisp", 45.0, 185.0, 15.0, 14.0, 6.5, 3.0, 110.0),
+                ("Jantar", "Omelete de 3 Ovos com Espinafre e Tomate", 220.0, 340.0, 5.0, 24.0, 22.0, 2.5, 390.0),
+            ],
+        ),
+        (
+            2,
+            2750,
+            [
+                ("Café da manhã", "Overnight Oats com Frutas Vermelhas", 250.0, 340.0, 48.0, 18.0, 7.5, 6.5, 80.0),
+                ("Almoço", "Patinho Moído com Mandioca Cozida e Salada", 420.0, 650.0, 55.0, 50.0, 16.0, 8.0, 520.0),
+                ("Lanche", "Iogurte Grego com Granola Zero", 180.0, 220.0, 22.0, 16.0, 5.0, 3.5, 75.0),
+                ("Jantar", "Sopa de Frango com Legumes", 350.0, 320.0, 25.0, 32.0, 8.0, 4.0, 450.0),
+            ],
+        ),
+        (
+            3,
+            2100,
+            [
+                ("Café da manhã", "Panqueca de Banana com Aveia e Canela", 180.0, 290.0, 42.0, 15.0, 5.5, 5.0, 60.0),
+                ("Almoço", "Peito de Frango com Macarrão Integral e Molho", 400.0, 690.0, 68.0, 54.0, 12.0, 7.0, 510.0),
+                ("Lanche", "Mix de Castanhas e Uvas Passas", 50.0, 260.0, 18.0, 6.0, 17.0, 3.0, 10.0),
+                ("Jantar", "Salada Caesar com Tiras de Frango Grelhado", 280.0, 380.0, 12.0, 36.0, 18.0, 4.0, 480.0),
+            ],
+        ),
+        (
+            4,
+            2600,
+            [
+                ("Café da manhã", "Pão Francês na Chapa com Requeijão Light + Café", 120.0, 260.0, 30.0, 8.0, 9.0, 1.5, 340.0),
+                ("Almoço", "Feijoada Light com Arroz e Couve Refogada", 450.0, 720.0, 58.0, 46.0, 22.0, 11.0, 650.0),
+                ("Lanche", "Smoothie de Whey com Morango e Leite Desnatado", 300.0, 210.0, 16.0, 27.0, 2.0, 2.0, 90.0),
+                ("Jantar", "Sanduíche Natural de Atum com Cenoura", 200.0, 360.0, 34.0, 28.0, 9.0, 4.0, 420.0),
+            ],
+        ),
+        (
+            5,
+            2800,
+            [
+                ("Café da manhã", "Crepioca com Queijo Cottage e Orégano", 160.0, 270.0, 24.0, 20.0, 8.0, 1.0, 290.0),
+                ("Almoço", "Filé Mignon Suíno com Batata Doce Assada", 380.0, 630.0, 48.0, 49.0, 18.0, 6.0, 460.0),
+                ("Lanche", "Maçã com Pasta de Amendoim Integral", 150.0, 240.0, 22.0, 7.0, 12.0, 4.5, 20.0),
+                ("Jantar", "Tilápia Grelhada com Legumes ao Vapor", 300.0, 330.0, 10.0, 42.0, 7.0, 5.0, 380.0),
+            ],
+        ),
+        (
+            6,
+            2500,
+            [
+                ("Café da manhã", "Torradas Integrais com Ovos Poché e Abacate", 190.0, 350.0, 26.0, 17.0, 17.0, 5.0, 310.0),
+                ("Almoço", "Arroz Integral, Lentilha e Sobrecoxa Assada", 420.0, 670.0, 60.0, 47.0, 21.0, 9.0, 520.0),
+                ("Lanche", "Whey Protein Isolado com Água de Coco", 300.0, 170.0, 11.0, 26.0, 0.5, 0.5, 70.0),
+                ("Jantar", "Wrap Integral de Frango com Ricota", 210.0, 350.0, 28.0, 31.0, 9.0, 3.5, 410.0),
+            ],
+        ),
+    ]
+
+    for days_ago, water_ml, meals in past_days_templates:
+        p_date = (today_dt - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+        # Check if meals exist for p_date
+        past_summary = get_diet_today_summary(date_str=p_date, db_path=db_path)
+        if not past_summary.entries:
+            for m_type, p_name, portion, kcal, carbs, prot, fat, fiber, sod in meals:
+                add_diary_entry(
+                    DietDiaryCreateRequest(
+                        date_str=p_date,
+                        meal_type=m_type,
+                        product_name=p_name,
+                        source_type="manual",
+                        portion_g=portion,
+                        kcal=kcal,
+                        carbohydrates_g=carbs,
+                        proteins_g=prot,
+                        fat_g=fat,
+                        fiber_g=fiber,
+                        sodium_mg=sod,
+                    ),
+                    db_path=db_path,
+                )
+        # Check if water exists for p_date
+        water_stat = get_water_for_date(date_str=p_date, db_path=db_path)
+        if water_stat["amount_ml"] == 0:
+            log_water(amount_ml=water_ml, date_str=p_date, db_path=db_path)
+
+    # Check today's water as well
+    today_water = get_water_for_date(date_str=today, db_path=db_path)
+    if today_water["amount_ml"] == 0:
+        log_water(amount_ml=1250, date_str=today, db_path=db_path)
+

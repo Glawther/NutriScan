@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bento Dark Theme Colors -->
+    <color name="splash_background">#090d16</color>
+    <color name="bento_background">#090d16</color>
+    <color name="bento_card">#111827</color>
+    <color name="primary_emerald">#10B981</color>
+    <color name="primary_emerald_dark">#059669</color>
+</resources>

@@ -1,4 +1,5 @@
 import base64
+from urllib.parse import quote
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, Request
 
@@ -6,15 +7,23 @@ from app.config import APP_NAME, APP_VERSION
 from app.database import (
     add_diary_entry,
     delete_diary_entry,
+    get_7day_trends,
     get_cached_product,
     get_diet_goals,
     get_diet_today_summary,
     get_metrics,
+    get_water_for_date,
     list_history,
+    log_water,
+    reset_water_for_date,
     save_product,
     update_diet_goals,
 )
 from app.engine.analyzer import compare_products
+from app.engine.diet_exporter import (
+    generate_plain_text_summary,
+    generate_whatsapp_summary,
+)
 from app.engine.label_ocr import (
     SAMPLE_LABELS,
     extract_text_from_image_bytes,
@@ -29,6 +38,9 @@ from app.models.schemas import (
     DietTodaySummary,
     LabelParseResult,
     ProductAnalysis,
+    WaterLogCreate,
+    WaterLogResponse,
+    WeeklyTrendsResponse,
 )
 from app.services.openfoodfacts import fetch_product_by_barcode, search_openfoodfacts
 
@@ -107,8 +119,84 @@ async def compare_endpoint(
 
 
 @router.get("/diet/today", response_model=DietTodaySummary)
-async def get_diet_today_endpoint(date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD")):
-    return get_diet_today_summary(date_str=date_str)
+async def get_diet_today_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+):
+    target = date or date_str
+    return get_diet_today_summary(date_str=target)
+
+
+@router.get("/diet/day", response_model=DietTodaySummary)
+async def get_diet_day_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+):
+    target = date or date_str
+    return get_diet_today_summary(date_str=target)
+
+
+@router.get("/diet/export")
+async def export_diet_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    format: str = Query("whatsapp", description="Formato: 'whatsapp' ou 'text'"),
+):
+    target = date or date_str
+    diary_summary = get_diet_today_summary(date_str=target)
+    water_data = get_water_for_date(date_str=target)
+
+    fmt = (format or "whatsapp").lower().strip()
+    diary_dict = diary_summary.model_dump()
+
+    if fmt == "text":
+        summary_text = generate_plain_text_summary(diary_dict, water_data=water_data)
+    else:
+        fmt = "whatsapp"
+        summary_text = generate_whatsapp_summary(diary_dict, water_data=water_data)
+
+    encoded_text = quote(summary_text)
+    whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_text}"
+
+    return {
+        "date": diary_summary.date_str,
+        "format": fmt,
+        "text": summary_text,
+        "whatsapp_url": whatsapp_url,
+    }
+
+
+@router.get("/diet/water", response_model=WaterLogResponse)
+async def get_water_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+):
+    target = date or date_str
+    return get_water_for_date(date_str=target)
+
+
+@router.post("/diet/water", response_model=WaterLogResponse)
+async def log_water_endpoint(payload: WaterLogCreate):
+    return log_water(amount_ml=payload.amount_ml, date_str=payload.date_str)
+
+
+@router.delete("/diet/water")
+async def delete_water_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+):
+    target = date or date_str
+    reset_water_for_date(date_str=target)
+    return {"reset": True, "date_str": target or "today"}
+
+
+@router.get("/diet/trends", response_model=WeeklyTrendsResponse)
+async def get_diet_trends_endpoint(
+    end_date: Optional[str] = Query(None, description="Data final YYYY-MM-DD"),
+    end_date_str: Optional[str] = Query(None, description="Data final YYYY-MM-DD"),
+):
+    target = end_date or end_date_str
+    return get_7day_trends(end_date_str=target)
 
 
 @router.put("/diet/goals", response_model=DietGoals)

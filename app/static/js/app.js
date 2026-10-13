@@ -5,6 +5,33 @@ let currentScannedProduct = null;
 let currentSampleId = "rotulo_whey";
 let uploadedFileObj = null;
 
+// Native Android Bridge Helpers (Haptic feedback & Share via NutriScanNative)
+window.triggerHaptic = function (durationMs = 40) {
+    if (window.NutriScanNative && typeof window.NutriScanNative.vibrate === "function") {
+        try {
+            window.NutriScanNative.vibrate(durationMs);
+            return;
+        } catch (_) {}
+    }
+    if (navigator.vibrate) {
+        try {
+            navigator.vibrate(durationMs);
+        } catch (_) {}
+    }
+};
+
+window.shareNutriScanText = function (title, text) {
+    if (window.NutriScanNative && typeof window.NutriScanNative.shareText === "function") {
+        try {
+            window.NutriScanNative.shareText(title, text);
+            return;
+        } catch (_) {}
+    }
+    if (navigator.share) {
+        navigator.share({ title, text }).catch(() => {});
+    }
+};
+
 const IS_FILE_PROTOCOL = window.location.protocol === "file:";
 const ASSET_BASE = IS_FILE_PROTOCOL ? "samples" : "/static/samples";
 
@@ -99,6 +126,7 @@ const OFFLINE_CATALOG = [
 ];
 
 function switchTab(rawTabName) {
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic(25);
     const tabName = rawTabName === "compare" ? "comparar" : rawTabName;
     document.querySelectorAll(".tab-btn").forEach((btn) => {
         const isActive = btn.dataset.tab === tabName;
@@ -331,17 +359,124 @@ function renderDietToday(summary) {
     tbody.innerHTML = rowsHtml + totalRow;
 }
 
-async function loadDietToday() {
+let currentDietDate = new Date().toISOString().slice(0, 10);
+
+async function loadDietToday(dateStr = currentDietDate) {
+    currentDietDate = dateStr;
+    updateDateDisplay(currentDietDate);
     try {
-        const res = await fetch("/api/v1/diet/today");
+        const res = await fetch(`/api/v1/diet/today?date=${dateStr}`);
         if (res.ok) {
             const data = await res.json();
             renderDietToday(data);
+            await loadWaterData(dateStr);
+            await load7DayTrends();
             return;
         }
     } catch (_) {}
     const state = getLocalDietData();
     renderDietToday(buildOfflineSummary(state));
+    await loadWaterData(dateStr);
+    await load7DayTrends();
+}
+
+function updateDateDisplay(dateStr) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const badge = document.getElementById("diet-date-badge");
+    const text = document.getElementById("diet-date-text");
+    if (!badge || !text) return;
+    const parts = dateStr.split("-");
+    const brDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
+    if (dateStr === todayStr) {
+        badge.textContent = "HOJE";
+        text.textContent = `Hoje (${brDate})`;
+    } else {
+        badge.textContent = dateStr < todayStr ? "ANTERIOR" : "FUTURO";
+        text.textContent = brDate;
+    }
+}
+
+async function loadWaterData(dateStr = currentDietDate) {
+    try {
+        const res = await fetch(`/api/v1/diet/water?date=${dateStr}`);
+        if (res.ok) {
+            const data = await res.json();
+            renderWater(data);
+            return;
+        }
+    } catch (_) {}
+    renderWater({ amount_ml: 0, goal_ml: 2500, pct: 0 });
+}
+
+function renderWater(data) {
+    const consumed = data.amount_ml || 0;
+    const goal = data.goal_ml || 2500;
+    const pct = Math.min(100, Math.round((consumed / goal) * 100));
+    const elVal = document.getElementById("water-consumed-val");
+    const elGoal = document.getElementById("water-goal-val");
+    const elBadge = document.getElementById("water-pct-badge");
+    const elFill = document.getElementById("water-progress-fill");
+    if (elVal) elVal.textContent = `${consumed} ml`;
+    if (elGoal) elGoal.textContent = `${goal} ml`;
+    if (elBadge) elBadge.textContent = `${pct}%`;
+    if (elFill) elFill.style.width = `${pct}%`;
+}
+
+async function addWaterAmount(amountMl) {
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic(40);
+    try {
+        await fetch("/api/v1/diet/water", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount_ml: amountMl, date_str: currentDietDate }),
+        });
+    } catch (_) {}
+    await loadWaterData(currentDietDate);
+    await load7DayTrends();
+}
+
+async function resetWaterAmount() {
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic(60);
+    try {
+        await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
+    } catch (_) {}
+    await loadWaterData(currentDietDate);
+    await load7DayTrends();
+}
+
+async function load7DayTrends() {
+    try {
+        const res = await fetch("/api/v1/diet/trends");
+        if (res.ok) {
+            const data = await res.json();
+            renderTrends(data);
+        }
+    } catch (_) {}
+}
+
+function renderTrends(data) {
+    const container = document.getElementById("trends-bars-container");
+    if (!container || !data || !data.days) return;
+    const badge = document.getElementById("trends-compliance-badge");
+    if (badge) badge.textContent = `${Math.round(data.compliance_rate || 100)}% na meta`;
+
+    const maxKcal = Math.max(...data.days.map((d) => Math.max(d.total_kcal, d.kcal_limit)), 2200);
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    container.innerHTML = data.days
+        .map((d) => {
+            const heightPct = Math.min(100, Math.max(8, Math.round((d.total_kcal / maxKcal) * 100)));
+            const isToday = d.date_str === todayStr;
+            const overGoal = d.total_kcal > d.kcal_limit;
+            return `
+            <div class="trend-col ${isToday ? "is-today" : ""}" title="${d.weekday_short} (${d.date_str}): ${d.total_kcal} kcal / ${d.kcal_limit} kcal">
+                <div class="trend-bar-track">
+                    <div class="trend-bar-fill ${overGoal ? "over-goal" : ""}" style="height: ${heightPct}%;"></div>
+                </div>
+                <span class="trend-day-label">${d.weekday_short}</span>
+            </div>`;
+        })
+        .join("");
 }
 
 window.removeDiaryItem = async function (entryId) {
@@ -359,6 +494,7 @@ window.removeDiaryItem = async function (entryId) {
 };
 
 async function addDiaryEntryToDiet(payload) {
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic(50);
     try {
         const res = await fetch("/api/v1/diet/diary", {
             method: "POST",
@@ -888,6 +1024,60 @@ async function runComparison() {
         .join("");
 }
 
+function setupCameraBarcodeScanner() {
+    const modal = document.getElementById("cam-scanner-modal");
+    const video = document.getElementById("cam-scanner-video");
+    const btnOpen = document.getElementById("btn-open-cam-scanner");
+    const btnClose = document.getElementById("btn-cam-close");
+    const btnCancel = document.getElementById("btn-cam-cancel");
+    const btnTorch = document.getElementById("btn-cam-torch");
+    const statusPill = document.getElementById("cam-scanner-status");
+
+    if (!btnOpen || !modal) return;
+    let torchOn = false;
+
+    btnOpen.addEventListener("click", () => {
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic(50);
+        modal.hidden = false;
+        if (statusPill) statusPill.textContent = "Aponte para o código de barras";
+
+        if (window.NutriScanCameraScanner) {
+            window.NutriScanCameraScanner.startScanner(
+                video,
+                (barcode) => {
+                    modal.hidden = true;
+                    window.NutriScanCameraScanner.stopScanner();
+                    const input = document.getElementById("barcode-input");
+                    if (input) input.value = barcode;
+                    scanProduct(barcode);
+                },
+                (err) => {
+                    if (statusPill) statusPill.textContent = "Câmera indisponível ou permissão negada";
+                }
+            );
+        }
+    });
+
+    const closeModal = () => {
+        modal.hidden = true;
+        if (window.NutriScanCameraScanner) {
+            window.NutriScanCameraScanner.stopScanner();
+        }
+    };
+
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    if (btnCancel) btnCancel.addEventListener("click", closeModal);
+
+    if (btnTorch) {
+        btnTorch.addEventListener("click", async () => {
+            torchOn = !torchOn;
+            if (window.NutriScanCameraScanner) {
+                await window.NutriScanCameraScanner.toggleTorch(torchOn);
+            }
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
         navigator.serviceWorker.register("/sw.js").catch(() => {});
@@ -1029,12 +1219,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("btn-run-compare").addEventListener("click", runComparison);
 
+    // Navegador de data
+    const btnDatePrev = document.getElementById("btn-date-prev");
+    const btnDateNext = document.getElementById("btn-date-next");
+    if (btnDatePrev) {
+        btnDatePrev.addEventListener("click", () => {
+            const d = new Date(currentDietDate + "T12:00:00");
+            d.setDate(d.getDate() - 1);
+            loadDietToday(d.toISOString().slice(0, 10));
+        });
+    }
+    if (btnDateNext) {
+        btnDateNext.addEventListener("click", () => {
+            const d = new Date(currentDietDate + "T12:00:00");
+            d.setDate(d.getDate() + 1);
+            loadDietToday(d.toISOString().slice(0, 10));
+        });
+    }
+
+    // Ações de hidratação (água)
+    document.querySelectorAll(".btn-water-add").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            addWaterAmount(parseInt(btn.dataset.amount, 10) || 200);
+        });
+    });
+    const btnWaterReset = document.getElementById("btn-water-reset");
+    if (btnWaterReset) {
+        btnWaterReset.addEventListener("click", resetWaterAmount);
+    }
+
+    // Scanner por câmera ao vivo
+    setupCameraBarcodeScanner();
+
     const params = new URLSearchParams(window.location.search);
     const initialTab = params.get("tab");
     if (initialTab && ["dieta", "foto", "scanner", "comparar", "compare"].includes(initialTab)) {
         switchTab(initialTab);
     } else {
         switchTab("dieta");
+    }
+
+    if (params.get("tab") === "scanner" && params.get("cam") === "1") {
+        setTimeout(() => document.getElementById("btn-open-cam-scanner")?.click(), 300);
     }
 
     await loadDietToday();

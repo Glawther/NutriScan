@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -12,6 +13,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.MediaStore
 import android.view.View
 import android.webkit.*
@@ -168,8 +172,11 @@ class MainActivity : AppCompatActivity() {
         // Media autoplay without gesture
         settings.mediaPlaybackRequiresUserGesture = false
 
-        // Dark background to prevent white flashing during page transition
-        webView.setBackgroundColor(Color.parseColor("#0B0F17"))
+        // Dark background matching Bento canvas #090d16 to prevent white flashing
+        webView.setBackgroundColor(Color.parseColor("#090d16"))
+
+        // Register NativeBridge JavaScript Interface
+        webView.addJavascriptInterface(NativeBridge(this), "NutriScanNative")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -312,5 +319,61 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         webView.destroy()
         super.onDestroy()
+    }
+
+    /**
+     * Native JavaScript Interface Bridge
+     * Exposes native haptic feedback, social sharing, and app environment detection to WebView JavaScript
+     */
+    class NativeBridge(private val activity: Activity) {
+
+        private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = activity.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            vibratorManager?.defaultVibrator ?: (activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator)
+        } else {
+            @Suppress("DEPRECATION")
+            activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+
+        @JavascriptInterface
+        fun vibrate(durationMs: Long) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator?.vibrate(
+                        VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE)
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator?.vibrate(durationMs)
+                }
+            } catch (e: Exception) {
+                // Ignore vibration failure on devices without vibrator or missing permission
+            }
+        }
+
+        @JavascriptInterface
+        fun shareText(title: String, text: String) {
+            activity.runOnUiThread {
+                try {
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, text)
+                        if (title.isNotEmpty()) {
+                            putExtra(Intent.EXTRA_SUBJECT, title)
+                            putExtra(Intent.EXTRA_TITLE, title)
+                        }
+                    }
+                    val chooserIntent = Intent.createChooser(sendIntent, title.ifEmpty { null })
+                    activity.startActivity(chooserIntent)
+                } catch (e: Exception) {
+                    // Ignore share chooser errors
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun isNativeApp(): Boolean {
+            return true
+        }
     }
 }

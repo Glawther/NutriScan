@@ -1250,3 +1250,457 @@ h1, h2, h3, .brand-title, .product-title {
         scroll-behavior: auto !important;
     }
 }
+
+/* Toast Notification Feedback */
+.ns-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: #064e3b;
+    color: #ecfdf5;
+    border: 1px solid #10b981;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.ns-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+    .ns-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 74px;
+        text-align: center;
+    }
+}
+
+/* Printable PDF & Window.Print Layout */
+@media print {
+    body {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        font-size: 12pt !important;
+    }
+
+    .topbar,
+    .nav-tabs,
+    .mobile-bottom-nav,
+    .btn-emerald,
+    .btn-primary,
+    .btn-secondary,
+    .btn-secondary-full,
+    .btn-primary-full,
+    .quick-manual-box,
+    .goals-form,
+    .btn-camera,
+    .sample-chip,
+    .chips-label,
+    .ns-toast,
+    .skip-link,
+    #btn-share-whatsapp,
+    #btn-copy-diet,
+    #btn-print-diet,
+    .share-btn-group {
+        display: none !important;
+    }
+
+    .container,
+    .main-content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        box-shadow: none !important;
+        color: #111827 !important;
+        break-inside: avoid;
+        margin-bottom: 16px !important;
+    }
+
+    .data-table th,
+    .data-table td {
+        border-color: #e5e7eb !important;
+        color: #111827 !important;
+    }
+
+    .kpi-card {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        color: #111827 !important;
+    }
+}
+
+/* ==========================================================================
+   Date Navigator, Water Tracker, 7-Day Trends & Camera Barcode Scanner
+   ========================================================================== */
+
+/* Date Navigator Bar */
+.diet-date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    padding: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.diet-current-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.diet-date-badge {
+    background-color: var(--brand-emerald);
+    color: #090d16;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.04em;
+}
+
+.diet-date-text {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.btn-date-nav {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-date-nav:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Water Widget */
+.water-card {
+    margin-top: 14px;
+}
+
+.water-kpi-main {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 12px 0 8px;
+}
+
+.water-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--brand-blue);
+    font-family: var(--font-mono);
+}
+
+.water-goal-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.water-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.btn-water-add {
+    background-color: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--brand-blue);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-water-add:hover {
+    background-color: rgba(56, 189, 248, 0.2);
+}
+
+.btn-water-add:active {
+    transform: scale(0.97);
+}
+
+.btn-water-reset {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-water-reset:hover {
+    background: var(--bg-hover);
+    color: var(--brand-danger);
+}
+
+/* 7-Day Trends Widget */
+.trends-card {
+    margin-top: 14px;
+}
+
+.trends-bars-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 120px;
+    margin-top: 16px;
+    padding-bottom: 24px;
+    position: relative;
+}
+
+.trend-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.trend-bar-track {
+    width: 100%;
+    max-width: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.trend-bar-fill {
+    width: 100%;
+    border-radius: 4px;
+    background: var(--brand-emerald);
+    transition: height 0.4s ease;
+}
+
+.trend-bar-fill.over-goal {
+    background: var(--color-carb);
+}
+
+.trend-day-label {
+    position: absolute;
+    bottom: -22px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.trend-col.is-today .trend-day-label {
+    color: var(--brand-emerald);
+    font-weight: 800;
+}
+
+/* Bento Camera Barcode Scanner Modal */
+.cam-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(9, 13, 22, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.cam-modal-backdrop[hidden] {
+    display: none;
+}
+
+.cam-bento-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cam-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.cam-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--brand-emerald);
+}
+
+.cam-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 2px;
+}
+
+.cam-btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cam-btn-icon:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.cam-viewfinder-frame {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cam-video-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cam-reticle {
+    position: absolute;
+    width: 240px;
+    height: 150px;
+    pointer-events: none;
+}
+
+.cam-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--brand-emerald);
+}
+
+.cam-corner.top-left { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: 6px; }
+.cam-corner.top-right { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: 6px; }
+.cam-corner.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: 6px; }
+.cam-corner.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: 6px; }
+
+.cam-laser-line {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    height: 2px;
+    background: var(--brand-emerald);
+    box-shadow: 0 0 10px var(--brand-emerald);
+    animation: scanLaser 2s ease-in-out infinite alternate;
+}
+
+@keyframes scanLaser {
+    0% { top: 10%; opacity: 0.8; }
+    100% { top: 90%; opacity: 0.8; }
+}
+
+.cam-status-pill {
+    position: absolute;
+    bottom: 12px;
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.cam-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--bg-tile-elevated);
+}
+
+.cam-btn-action,
+.cam-btn-secondary {
+    flex: 1;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+
+.cam-btn-action {
+    background: var(--brand-emerald);
+    color: #090d16;
+    border: none;
+}
+
+.cam-btn-action:hover {
+    background: var(--brand-emerald-hover);
+}
+
+.cam-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+.cam-btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+

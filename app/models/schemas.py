@@ -152,3 +152,38 @@ class LabelParseResult(BaseModel):
     daily_limit_impact_pct: Dict[str, float]
     anvisa: AnvisaAlerts
     nutriscore_grade: str
+
+
+class WaterLogCreate(BaseModel):
+    amount_ml: int
+    date_str: Optional[str] = None
+
+
+class WaterLogResponse(BaseModel):
+    id: int
+    date_str: str
+    amount_ml: int
+    goal_ml: int
+    remaining_ml: int
+    pct: float
+
+
+class DailyTrendItem(BaseModel):
+    date_str: str
+    weekday_short: str
+    total_kcal: float
+    kcal_limit: float
+    pct_kcal: float
+    total_prot: float
+    total_carbs: float
+    total_fat: float
+    total_water_ml: int
+    met_goal: bool
+
+
+class WeeklyTrendsResponse(BaseModel):
+    days: List[DailyTrendItem]
+    avg_kcal: float
+    compliance_rate: float
+    total_water_liters: float
+

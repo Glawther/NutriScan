@@ -4,6 +4,10 @@
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
+-keep class com.glawther.nutriscan.MainActivity$NativeBridge { *; }
+-keepclassmembers class com.glawther.nutriscan.MainActivity$NativeBridge {
+    public *;
+}
 
 # Keep WebChromeClient and WebViewClient subclasses and their methods
 -keep public class * extends android.webkit.WebChromeClient {

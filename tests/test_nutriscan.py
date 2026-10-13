@@ -11,6 +11,10 @@ from app.engine.analyzer import (
     get_nova_label,
     parse_additives,
 )
+from app.engine.diet_exporter import (
+    generate_plain_text_summary,
+    generate_whatsapp_summary,
+)
 from app.models.schemas import NutritionPer100g
 from main import app
 
@@ -277,5 +281,251 @@ def test_diet_tracker_and_photo_endpoints():
         # Delete entry
         r_del = client.delete(f"/api/v1/diet/diary/{entry_id}")
         assert r_del.status_code == 200
+
+
+def test_water_tracking_and_trends():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        db_file = os.path.join(tmpdir, "test_water.db")
+        init_db(db_file)
+
+        from app.database import (
+            get_7day_trends,
+            get_water_for_date,
+            log_water,
+            reset_water_for_date,
+        )
+
+        test_date = "2026-10-10"
+
+        # Initial water check: default goal 78kg * 35 = 2730 ml
+        w0 = get_water_for_date(test_date, db_path=db_file)
+        assert w0["amount_ml"] == 0
+        assert w0["goal_ml"] == 2730
+        assert w0["remaining_ml"] == 2730
+        assert w0["pct"] == 0.0
+
+        # Log 500 ml
+        w1 = log_water(500, test_date, db_path=db_file)
+        assert w1["amount_ml"] == 500
+        assert w1["remaining_ml"] == 2230
+        assert w1["pct"] == round((500 / 2730) * 100.0, 1)
+
+        # Log another 250 ml
+        w2 = log_water(250, test_date, db_path=db_file)
+        assert w2["amount_ml"] == 750
+        assert w2["remaining_ml"] == 1980
+
+        # Reset water
+        res = reset_water_for_date(test_date, db_path=db_file)
+        assert res is True
+        w3 = get_water_for_date(test_date, db_path=db_file)
+        assert w3["amount_ml"] == 0
+        assert w3["remaining_ml"] == 2730
+
+        # Trends test
+        trends = get_7day_trends(end_date_str="2026-10-10", db_path=db_file)
+        assert len(trends["days"]) == 7
+        assert trends["days"][-1]["date_str"] == "2026-10-10"
+        assert "avg_kcal" in trends
+        assert "compliance_rate" in trends
+        assert "total_water_liters" in trends
+
+
+def test_fastapi_water_and_trends_endpoints():
+    with TestClient(app) as client:
+        # GET /api/v1/diet/water
+        r_get = client.get("/api/v1/diet/water")
+        assert r_get.status_code == 200
+        water_info = r_get.json()
+        assert "amount_ml" in water_info
+        assert "goal_ml" in water_info
+        assert "remaining_ml" in water_info
+        assert "pct" in water_info
+
+        # POST /api/v1/diet/water
+        r_post = client.post("/api/v1/diet/water", json={"amount_ml": 250})
+        assert r_post.status_code == 200
+        updated = r_post.json()
+        assert updated["amount_ml"] >= 250
+
+        # DELETE /api/v1/diet/water
+        r_del = client.delete("/api/v1/diet/water")
+        assert r_del.status_code == 200
+        assert r_del.json()["reset"] is True
+
+        # Check water after reset
+        r_after = client.get("/api/v1/diet/water")
+        assert r_after.status_code == 200
+        assert r_after.json()["amount_ml"] == 0
+
+        # GET /api/v1/diet/trends
+        r_trends = client.get("/api/v1/diet/trends")
+        assert r_trends.status_code == 200
+        t_data = r_trends.json()
+        assert len(t_data["days"]) == 7
+        assert "avg_kcal" in t_data
+        assert "compliance_rate" in t_data
+        assert "total_water_liters" in t_data
+        assert t_data["days"][0]["weekday_short"] != ""
+
+        # Test date navigation on /diet/today and /diet/day
+        past_date = "2026-10-01"
+        r_day = client.get(f"/api/v1/diet/today?date={past_date}")
+        assert r_day.status_code == 200
+        assert r_day.json()["date_str"] == past_date
+
+        r_day2 = client.get(f"/api/v1/diet/day?date={past_date}")
+        assert r_day2.status_code == 200
+        assert r_day2.json()["date_str"] == past_date
+
+
+def test_generate_whatsapp_and_plain_text_summary():
+    diary_data = {
+        "date_str": "2026-10-13",
+        "goals": {
+            "daily_kcal_limit": 2000.0,
+            "proteins_limit_g": 150.0,
+            "carbs_limit_g": 200.0,
+            "fat_limit_g": 65.0,
+            "sodium_limit_mg": 2000.0,
+        },
+        "consumed": {
+            "kcal": 1450.0,
+            "proteins_g": 120.0,
+            "carbohydrates_g": 150.0,
+            "fat_g": 42.0,
+            "sodium_mg": 1350.0,
+        },
+        "remaining": {
+            "kcal": 550.0,
+            "proteins_g": 30.0,
+            "carbohydrates_g": 50.0,
+            "fat_g": 23.0,
+            "sodium_mg": 650.0,
+        },
+        "entries": [
+            {
+                "meal_type": "Café da manhã",
+                "product_name": "Pão Integral",
+                "portion_g": 50.0,
+                "kcal": 120.0,
+            },
+            {
+                "meal_type": "Café da manhã",
+                "product_name": "Ovos Mexidos",
+                "portion_g": 100.0,
+                "kcal": 150.0,
+            },
+            {
+                "meal_type": "Almoço",
+                "product_name": "Frango Grelhado",
+                "portion_g": 150.0,
+                "kcal": 220.0,
+            },
+            {
+                "meal_type": "Lanche",
+                "product_name": "Whey Protein Concentrado",
+                "portion_g": 30.0,
+                "kcal": 120.0,
+            },
+        ],
+    }
+    water_data = {
+        "amount_ml": 1800,
+        "goal_ml": 2500,
+        "remaining_ml": 700,
+    }
+
+    # 1. WhatsApp Summary Formatting
+    wa_text = generate_whatsapp_summary(diary_data, water_data=water_data)
+
+    assert "🥗 *NutriScan - Resumo da Dieta (13/10/2026)*" in wa_text
+    assert "🔥 Calorias: 1450 / 2000 kcal (550 kcal restantes)" in wa_text
+    assert "💪 Proteína: 120g | 🌾 Carbs: 150g | 🥑 Gordura: 42g | 🧂 Sódio: 1350mg" in wa_text
+    assert "💧 Água: 1800 ml / 2500 ml" in wa_text
+    assert "*Café da manhã*" in wa_text
+    assert "• Pão Integral (50g) - 120 kcal" in wa_text
+    assert "• Ovos Mexidos (100g) - 150 kcal" in wa_text
+    assert "*Almoço*" in wa_text
+    assert "• Frango Grelhado (150g) - 220 kcal" in wa_text
+    assert "*Lanche*" in wa_text
+    assert "• Whey Protein Concentrado (30g) - 120 kcal" in wa_text
+
+    # 2. Plain Text Summary Formatting (No markdown asterisks)
+    plain_text = generate_plain_text_summary(diary_data, water_data=water_data)
+
+    assert "*" not in plain_text
+    assert "🥗 NutriScan - Resumo da Dieta (13/10/2026)" in plain_text
+    assert "🔥 Calorias: 1450 / 2000 kcal (550 kcal restantes)" in plain_text
+    assert "💪 Proteína: 120g | 🌾 Carbs: 150g | 🥑 Gordura: 42g | 🧂 Sódio: 1350mg" in plain_text
+    assert "💧 Água: 1800 ml / 2500 ml" in plain_text
+    assert "Café da manhã:" in plain_text
+    assert "• Pão Integral (50g) - 120 kcal" in plain_text
+
+    # 3. Test empty entries handling
+    empty_diary = {
+        "date_str": "2026-10-14",
+        "consumed": {"kcal": 0, "proteins_g": 0, "carbohydrates_g": 0, "fat_g": 0, "sodium_mg": 0},
+        "goals": {"daily_kcal_limit": 2000},
+        "entries": [],
+    }
+    empty_wa = generate_whatsapp_summary(empty_diary)
+    assert "(14/10/2026)" in empty_wa
+    assert "Nenhuma refeição registrada" in empty_wa
+
+
+def test_fastapi_diet_export_endpoint():
+    with TestClient(app) as client:
+        # Create a test diary entry first
+        r_entry = client.post(
+            "/api/v1/diet/diary",
+            json={
+                "date_str": "2026-10-15",
+                "meal_type": "Almoço",
+                "product_name": "Arroz Integral",
+                "source_type": "manual",
+                "portion_g": 100,
+                "kcal": 130,
+                "carbohydrates_g": 28,
+                "proteins_g": 3,
+                "fat_g": 1,
+                "fiber_g": 2,
+                "sodium_mg": 5,
+            },
+        )
+        assert r_entry.status_code == 200
+        created_id = r_entry.json()["id"]
+
+        try:
+            # 1. Export in WhatsApp format (default)
+            r_export_wa = client.get("/api/v1/diet/export?date_str=2026-10-15")
+            assert r_export_wa.status_code == 200
+            data_wa = r_export_wa.json()
+            assert data_wa["date"] == "2026-10-15"
+            assert data_wa["format"] == "whatsapp"
+            assert "🥗 *NutriScan - Resumo da Dieta (15/10/2026)*" in data_wa["text"]
+            assert "Arroz Integral (100g) - 130 kcal" in data_wa["text"]
+            assert data_wa["whatsapp_url"].startswith("https://api.whatsapp.com/send?text=")
+            assert "NutriScan" in data_wa["whatsapp_url"] or "%20" in data_wa["whatsapp_url"]
+
+            # 2. Export in Plain Text format
+            r_export_txt = client.get("/api/v1/diet/export?date_str=2026-10-15&format=text")
+            assert r_export_txt.status_code == 200
+            data_txt = r_export_txt.json()
+            assert data_txt["format"] == "text"
+            assert "*" not in data_txt["text"]
+            assert "🥗 NutriScan - Resumo da Dieta (15/10/2026)" in data_txt["text"]
+
+            # 3. Export with today's date omitted (should default to current date)
+            r_export_today = client.get("/api/v1/diet/export")
+            assert r_export_today.status_code == 200
+            data_today = r_export_today.json()
+            assert data_today["format"] == "whatsapp"
+            assert "NutriScan - Resumo da Dieta" in data_today["text"]
+            assert data_today["whatsapp_url"].startswith("https://api.whatsapp.com/send?text=")
+        finally:
+            client.delete(f"/api/v1/diet/diary/{created_id}")
+
+
 
 
