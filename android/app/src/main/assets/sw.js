@@ -1,4 +1,4 @@
-const CACHE_NAME = "nutriscan-v1.1.0";
+const CACHE_NAME = "nutriscan-v1.3.0";
 const ASSETS = [
   "/",
   "/static/css/style.css",
