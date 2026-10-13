@@ -1418,6 +1418,7 @@ h1, h2, h3, .brand-title, .product-title {
     font-weight: 800;
     color: var(--brand-blue);
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
 }
 
 .water-goal-sub {
@@ -1702,5 +1703,1181 @@ h1, h2, h3, .brand-title, .product-title {
 .cam-btn-secondary:hover {
     background: var(--bg-hover);
 }
+
+/* ==========================================================================
+   Bento Design System: Food Plate Scanner & Micronutrients Dashboard (#panel-prato)
+   ========================================================================== */
+
+.plate-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.plate-input-card {
+    grid-column: span 12;
+}
+
+.plate-vision-card {
+    grid-column: span 7;
+}
+
+.plate-items-card {
+    grid-column: span 5;
+}
+
+.plate-micros-card {
+    grid-column: span 12;
+}
+
+.plate-action-card {
+    grid-column: span 12;
+}
+
+@media (max-width: 992px) {
+    .plate-vision-card,
+    .plate-items-card {
+        grid-column: span 12;
+    }
+}
+
+/* Card 1: Camera Dropzone & Presets */
+.plate-capture-box {
+    margin: 14px 0;
+}
+
+.plate-camera-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 16px;
+    background: var(--bg-tile-elevated);
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius-tile);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    text-align: center;
+}
+
+.plate-camera-dropzone:hover,
+.plate-camera-dropzone:focus-within {
+    border-color: var(--brand-emerald);
+    background: var(--bg-tile-highlight);
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.dropzone-icon {
+    font-size: 28px;
+}
+
+.dropzone-title {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.dropzone-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.plate-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.plate-preset-chip {
+    padding: 7px 14px;
+    font-size: 12.5px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.plate-preset-chip:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.plate-preset-chip.active {
+    background: var(--bg-tile-highlight);
+    border-color: var(--brand-emerald);
+    color: var(--brand-emerald);
+    font-weight: 600;
+}
+
+/* Card 2: Plate Preview Viewport & Bounding Chips */
+.plate-preview-viewport {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+    max-height: 380px;
+    border-radius: var(--radius-md);
+    background: #020617;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 14px;
+}
+
+.plate-viewport-image {
+    width: 100%;
+    height: 100%;
+    max-height: 380px;
+    object-fit: cover;
+    display: block;
+}
+
+.plate-bounding-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.plate-bound-box {
+    position: absolute;
+    transform: translate(-10%, -10%);
+    pointer-events: auto;
+    transition: transform 0.15s ease;
+}
+
+.plate-bound-box:hover {
+    transform: translate(-10%, -10%) scale(1.05);
+    z-index: 10;
+}
+
+.plate-bound-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(9, 13, 22, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand-emerald);
+    box-shadow: 0 0 6px var(--brand-emerald);
+}
+
+.plate-quick-kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-tile-elevated);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+    .plate-quick-kpi-bar {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.kpi-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-mini-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.kpi-mini-val {
+    font-size: 13.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Card 3: Items List & Steppers */
+.plate-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.plate-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease;
+}
+
+.plate-item-row:hover {
+    border-color: var(--border-card);
+}
+
+.item-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    display: block;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.macro-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.macro-badge.kcal { background: rgba(16, 185, 129, 0.15); color: var(--color-kcal); }
+.macro-badge.carb { background: rgba(245, 158, 11, 0.15); color: var(--color-carb); }
+.macro-badge.prot { background: rgba(56, 189, 248, 0.15); color: var(--color-prot); }
+.macro-badge.fat { background: rgba(251, 113, 133, 0.15); color: var(--color-fat); }
+
+.item-stepper-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stepper-controls {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.btn-step {
+    width: 28px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-step:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.stepper-input-box {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.stepper-input {
+    width: 42px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-right: 2px;
+}
+
+.btn-remove-item {
+    width: 28px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-remove-item:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--brand-danger);
+    color: var(--brand-danger);
+}
+
+/* TACO Search & Dropdown */
+.plate-taco-add-box {
+    position: relative;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+}
+
+.taco-search-input-wrap {
+    position: relative;
+}
+
+.taco-suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--tile-shadow-hover);
+    z-index: 1000;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.taco-suggest-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.taco-suggest-item:last-child {
+    border-bottom: none;
+}
+
+.taco-suggest-item:hover {
+    background: var(--bg-hover);
+}
+
+.suggest-info strong {
+    display: block;
+    font-size: 12.5px;
+}
+
+.suggest-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.suggest-add-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-emerald);
+}
+
+.taco-no-result {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* Card 4: Bento Micronutrients Dashboard */
+.plate-micros-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+    .plate-micros-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .plate-micros-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.micro-card-tile {
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.micro-card-tile:hover {
+    border-color: var(--border-card);
+    transform: translateY(-2px);
+}
+
+.micro-tile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.micro-tile-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.status-pill.pill-optimal {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--brand-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pill.pill-adequate {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--brand-blue);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.status-pill.pill-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-carb);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-pill.pill-low {
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.status-pill.pill-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--brand-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.micro-tile-body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.micro-tile-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.micro-tile-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.micro-tile-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.micro-idr-ref {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Card 5: Action Card */
+.plate-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.meal-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   NutriScan — Interactive App Tour Modal & Spotlight (#modal-app-tour)
+   Bento Design System, WCAG AA Contrast, Focus Management & Reduced-Motion
+   ========================================================================== */
+
+/* Header Tour Trigger Button */
+.btn-tour-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: var(--brand-emerald);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.btn-tour-nav:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.btn-tour-nav:active {
+    transform: scale(0.98);
+}
+
+.btn-tour-nav:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Tour Modal Backdrop */
+.tour-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 24px 16px;
+    pointer-events: auto;
+    transition: opacity 0.25s ease-out;
+}
+
+.tour-modal-backdrop[hidden] {
+    display: none !important;
+}
+
+/* Translucent Dark Backdrop Overlay */
+.tour-backdrop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 13, 22, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000;
+}
+
+/* Spotlight Cutout & Glowing Ring */
+.tour-spotlight-cutout {
+    position: fixed;
+    z-index: 10001;
+    pointer-events: none;
+    border-radius: var(--radius-tile);
+    box-shadow: 0 0 0 9999px rgba(9, 13, 22, 0.75), 0 0 24px 4px rgba(16, 185, 129, 0.5);
+    border: 2px solid var(--brand-emerald);
+    transition: top 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                width 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                height 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Bento Tour Card */
+.tour-bento-card {
+    position: relative;
+    z-index: 10002;
+    width: 100%;
+    max-width: 520px;
+    background: var(--bg-tile);
+    border: 1px solid var(--border-card-highlight);
+    border-radius: var(--radius-tile);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: tourCardSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tourCardSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Progress Bar at Top of Tour Card */
+.tour-progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.tour-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-emerald), #38bdf8);
+    border-radius: var(--radius-pill);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card Header */
+.tour-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px 8px 20px;
+}
+
+.tour-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tour-step-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: var(--brand-emerald);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-pill);
+}
+
+.tour-btn-close {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tour-btn-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-card);
+}
+
+.tour-btn-close:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Card Body */
+.tour-card-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 20px 16px 20px;
+}
+
+.tour-icon-wrap {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.tour-text-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.tour-title {
+    font-size: 16.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 6px;
+}
+
+.tour-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+/* Dots Row */
+.tour-dots-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 20px 12px 20px;
+}
+
+.tour-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.15);
+    transition: background 0.2s ease, transform 0.2s ease, width 0.2s ease;
+}
+
+.tour-dot.completed {
+    background: rgba(16, 185, 129, 0.5);
+}
+
+.tour-dot.active {
+    width: 20px;
+    background: var(--brand-emerald);
+}
+
+/* Card Footer */
+.tour-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg-tile-elevated);
+    border-top: 1px solid var(--border-subtle);
+    gap: 12px;
+}
+
+.tour-btn-skip {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.tour-btn-skip:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.tour-btn-skip:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.tour-btn-group-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tour-btn-prev {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tour-btn-prev:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-card);
+}
+
+.tour-btn-prev:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.tour-btn-next {
+    background: var(--brand-emerald);
+    color: #090d16;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.tour-btn-next:hover {
+    background: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+.tour-btn-next:active {
+    transform: scale(0.98);
+}
+
+.tour-btn-next:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+    .tour-spotlight-cutout {
+        transition: none !important;
+    }
+    .tour-bento-card {
+        animation: none !important;
+    }
+    .tour-progress-fill {
+        transition: none !important;
+    }
+    .tour-dot {
+        transition: none !important;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+    .tour-modal-backdrop {
+        padding: 12px 10px;
+        align-items: flex-end;
+    }
+    .tour-bento-card {
+        max-width: 100%;
+    }
+    .tour-card-body {
+        padding: 10px 14px 14px 14px;
+        gap: 12px;
+    }
+    .tour-icon-wrap {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    .tour-title {
+        font-size: 15px;
+    }
+    .tour-description {
+        font-size: 12.5px;
+    }
+    .tour-card-footer {
+        padding: 10px 14px;
+    }
+    .btn-tour-nav {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+}
+
+/* ==========================================================================
+   User Greeting, Topbar Buttons & Profile Onboarding Modal Bento Styles
+   ========================================================================== */
+
+.brand-info-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.brand-greeting-row {
+    margin-bottom: 2px;
+}
+
+.user-greeting {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-emerald);
+    letter-spacing: 0.2px;
+    display: inline-block;
+}
+
+.brand-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.btn-topbar-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-card);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-topbar-profile:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--brand-emerald);
+}
+
+/* Profile Onboarding Bento Modal Backdrop */
+.profile-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9990;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(9, 13, 22, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 16px;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+.profile-modal-backdrop[hidden] {
+    display: none;
+}
+
+.profile-bento-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px 22px 14px 22px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+}
+
+.profile-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--brand-emerald);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.profile-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.btn-profile-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+}
+
+.btn-profile-close:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-form-body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.profile-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.profile-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.text-subtle {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Preview Strip */
+.profile-preview-strip {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.preview-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.preview-value {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.preview-divider {
+    color: var(--border-card);
+    font-weight: 300;
+}
+
+.profile-modal-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 22px 18px 22px;
+    background: var(--bg-tile-elevated);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.btn-profile-skip {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-profile-skip:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 600px) {
+    .profile-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .profile-form-body {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    .profile-modal-footer {
+        padding: 12px 16px 16px 16px;
+    }
+    .brand-actions-row {
+        margin-top: 6px;
+        margin-left: 0;
+    }
+}
+
 
 

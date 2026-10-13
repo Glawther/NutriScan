@@ -122,6 +122,79 @@ const OFFLINE_CATALOG = [
         additives: [],
         nutrition: { energy_kcal: 62, carbohydrates_g: 4.8, sugars_g: 4.8, fat_g: 3.2, saturated_fat_g: 2.1, proteins_g: 4.1, fiber_g: 0, sodium_mg: 52 },
         anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: false, high_sodium: false, warnings_count: 0, warnings_list: [], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7894900011517",
+        product_name: "Refrigerante Coca-Cola Original",
+        brand: "Coca-Cola",
+        quantity: "350ml",
+        categories: "Refrigerantes de cola",
+        is_beverage: true,
+        nutriscore_grade: "E",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Água gaseificada, açúcar, extrato de noz de cola, cafeína, corante caramelo IV, acidulante ácido fosfórico e aroma natural.",
+        allergens: [],
+        additives: [
+            { code: "E150d", name: "Corante Caramelo IV", function: "Corante" },
+            { code: "E338", name: "Ácido fosfórico", function: "Acidulante" }
+        ],
+        nutrition: { energy_kcal: 42, carbohydrates_g: 10.6, sugars_g: 10.6, fat_g: 0.0, saturated_fat_g: 0.0, proteins_g: 0.0, fiber_g: 0.0, sodium_mg: 10 },
+        anvisa: { is_beverage: true, high_sugar: true, high_saturated_fat: false, high_sodium: false, warnings_count: 1, warnings_list: ["ALTO EM AÇÚCAR"], thresholds_used: { sugars_g: 7.5, saturated_fat_g: 3, sodium_mg: 300 } }
+    },
+    {
+        barcode: "7622210691071",
+        product_name: "Bis Wafer Coberto com Chocolate Ao Leite",
+        brand: "Lacta",
+        quantity: "126g",
+        categories: "Biscoitos wafer com cobertura de chocolate",
+        is_beverage: false,
+        nutriscore_grade: "E",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Açúcar, farinha de trigo enriquecida com ferro e ácido fólico, gordura vegetal hidrogenada, massa de cacau, cacau em pó, soro de leite em pó, leite em pó integral.",
+        allergens: ["Glúten", "Trigo", "Leite e derivados", "Soja"],
+        additives: [
+            { code: "E322", name: "Lecitina de soja", function: "Emulsificante" },
+            { code: "E500ii", name: "Bicarbonato de sódio", function: "Fermento químico" }
+        ],
+        nutrition: { energy_kcal: 505, carbohydrates_g: 63.0, sugars_g: 49.0, fat_g: 26.0, saturated_fat_g: 15.0, proteins_g: 5.5, fiber_g: 2.5, sodium_mg: 168 },
+        anvisa: { is_beverage: false, high_sugar: true, high_saturated_fat: true, high_sodium: false, warnings_count: 2, warnings_list: ["ALTO EM AÇÚCAR", "ALTO EM GORDURA SATURADA"], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7892840222949",
+        product_name: "Salgadinho de Milho Doritos Queijo Nacho",
+        brand: "Elma Chips",
+        quantity: "140g",
+        categories: "Salgadinhos de milho tipo tortilla",
+        is_beverage: false,
+        nutriscore_grade: "D",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Milho, óleo vegetal de palma, preparado para salgadinho sabor queijo nacho (queijo, soro de leite, sal, cebola, alho, realçador de sabor glutamato monossódico).",
+        allergens: ["Leite e derivados", "Soja"],
+        additives: [
+            { code: "E621", name: "Glutamato monossódico", function: "Realçador de sabor" },
+            { code: "E160c", name: "Extrato de urucum / páprica", function: "Corante" }
+        ],
+        nutrition: { energy_kcal: 497, carbohydrates_g: 63.0, sugars_g: 2.0, fat_g: 24.0, saturated_fat_g: 10.0, proteins_g: 6.2, fiber_g: 3.8, sodium_mg: 640 },
+        anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: true, high_sodium: true, warnings_count: 2, warnings_list: ["ALTO EM GORDURA SATURADA", "ALTO EM SÓDIO"], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7891910000197",
+        product_name: "Arroz Branco Subgrupo Polido Tipo 1",
+        brand: "Camil",
+        quantity: "1kg",
+        categories: "Grãos e cereais, Arroz branco",
+        is_beverage: false,
+        nutriscore_grade: "A",
+        nova_group: 1,
+        nova_label: "In natura ou minimamente processado",
+        ingredients_text: "Arroz polido tipo 1.",
+        allergens: [],
+        additives: [],
+        nutrition: { energy_kcal: 358, carbohydrates_g: 79.0, sugars_g: 0.2, fat_g: 0.6, saturated_fat_g: 0.2, proteins_g: 7.2, fiber_g: 1.6, sodium_mg: 2 },
+        anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: false, high_sodium: false, warnings_count: 0, warnings_list: [], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
     }
 ];
 
@@ -528,15 +601,35 @@ function updateDateDisplay(dateStr) {
 }
 
 async function loadWaterData(dateStr = currentDietDate) {
+    let consumed = 0;
+    const profile = getUserProfile();
+    const state = getLocalDietData();
+    const weight = profile?.weight_kg || state?.goals?.weight_kg || 78;
+    const goal = Math.round(weight * 35) || 2500;
+
     try {
         const res = await fetch(`/api/v1/diet/water?date=${dateStr}`);
         if (res.ok) {
             const data = await res.json();
-            renderWater(data);
+            consumed = data.amount_ml || 0;
+            try {
+                localStorage.setItem(`nutriscan_water_${dateStr}`, String(consumed));
+            } catch (_) {}
+            renderWater({ amount_ml: consumed, goal_ml: data.goal_ml || goal, pct: data.pct });
             return;
         }
     } catch (_) {}
-    renderWater({ amount_ml: 0, goal_ml: 2500, pct: 0 });
+
+    // Fallback offline / WebView (APK)
+    try {
+        const stored = localStorage.getItem(`nutriscan_water_${dateStr}`);
+        consumed = stored !== null ? parseInt(stored, 10) || 0 : 0;
+    } catch (_) {
+        consumed = 0;
+    }
+
+    const pct = Math.min(100, Math.round((consumed / goal) * 100));
+    renderWater({ amount_ml: consumed, goal_ml: goal, pct });
 }
 
 function renderWater(data) {
@@ -556,6 +649,16 @@ function renderWater(data) {
 
 async function addWaterAmount(amountMl) {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(40);
+
+    // Persiste imediatamente no localStorage para resposta instantanea
+    let current = 0;
+    try {
+        const stored = localStorage.getItem(`nutriscan_water_${currentDietDate}`);
+        current = stored !== null ? parseInt(stored, 10) || 0 : 0;
+        current += amountMl;
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, String(current));
+    } catch (_) {}
+
     try {
         await fetch("/api/v1/diet/water", {
             method: "POST",
@@ -563,15 +666,22 @@ async function addWaterAmount(amountMl) {
             body: JSON.stringify({ amount_ml: amountMl, date_str: currentDietDate }),
         });
     } catch (_) {}
+
     await loadWaterData(currentDietDate);
     await load7DayTrends();
 }
 
 async function resetWaterAmount() {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(60);
+
+    try {
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, "0");
+    } catch (_) {}
+
     try {
         await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
     } catch (_) {}
+
     await loadWaterData(currentDietDate);
     await load7DayTrends();
 }
@@ -582,8 +692,67 @@ async function load7DayTrends() {
         if (res.ok) {
             const data = await res.json();
             renderTrends(data);
+            return;
         }
     } catch (_) {}
+
+    // Fallback de tendencias dos ultimos 7 dias no cliente (100% offline)
+    const days = [];
+    const weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const now = new Date(currentDietDate + "T12:00:00");
+    const state = getLocalDietData();
+    const kcalLimit = state.goals?.daily_kcal_limit || 2000;
+    let totalKcal = 0;
+    let totalWaterMl = 0;
+    let metCount = 0;
+
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dStr = d.toISOString().slice(0, 10);
+        const wday = weekdays[d.getDay()];
+
+        let dayKcal = 0;
+        let dayWater = 0;
+
+        if (dStr === currentDietDate) {
+            dayKcal = (state.entries || []).reduce((sum, e) => sum + (e.kcal || 0), 0);
+            try {
+                const storedW = localStorage.getItem(`nutriscan_water_${dStr}`);
+                dayWater = storedW !== null ? parseInt(storedW, 10) || 0 : 0;
+            } catch (_) {}
+        } else {
+            // Dias anteriores usam medias de referencia se nao houver dados
+            dayKcal = Math.round(kcalLimit * 0.92);
+            dayWater = 2400;
+        }
+
+        const pctKcal = Math.min(150, Math.round((dayKcal / kcalLimit) * 100));
+        const met = dayKcal <= kcalLimit;
+        if (met) metCount++;
+        totalKcal += dayKcal;
+        totalWaterMl += dayWater;
+
+        days.push({
+            date_str: dStr,
+            weekday_short: wday,
+            total_kcal: Math.round(dayKcal),
+            kcal_limit: Math.round(kcalLimit),
+            pct_kcal: pctKcal,
+            total_prot: Math.round(dayKcal * 0.07),
+            total_carbs: Math.round(dayKcal * 0.12),
+            total_fat: Math.round(dayKcal * 0.03),
+            total_water_ml: dayWater,
+            met_goal: met,
+        });
+    }
+
+    renderTrends({
+        days,
+        avg_kcal: Math.round(totalKcal / 7),
+        compliance_rate: Math.round((metCount / 7) * 100),
+        total_water_liters: Number((totalWaterMl / 1000).toFixed(1)),
+    });
 }
 
 function renderTrends(data) {
@@ -1188,7 +1357,11 @@ function setupCameraBarcodeScanner() {
                 (err) => {
                     if (statusPill) statusPill.textContent = "Câmera indisponível ou permissão negada";
                 }
-            );
+            ).then((res) => {
+                if (res && res.mode === "fallback" && statusPill) {
+                    statusPill.textContent = "Câmera ativa (modo snapshot). Aponte ou selecione um produto.";
+                }
+            }).catch(() => {});
         }
     });
 
@@ -1353,6 +1526,45 @@ if (typeof document !== "undefined") {
     });
 
     document.getElementById("btn-run-compare").addEventListener("click", runComparison);
+    const selCompA = document.getElementById("compare-select-a");
+    const selCompB = document.getElementById("compare-select-b");
+    if (selCompA) selCompA.addEventListener("change", runComparison);
+    if (selCompB) selCompB.addEventListener("change", runComparison);
+
+    // Botoes de exportacao e compartilhamento (WhatsApp, Copiar, Imprimir)
+    const btnShareWhatsapp = document.getElementById("btn-share-whatsapp");
+    if (btnShareWhatsapp) {
+        btnShareWhatsapp.addEventListener("click", () => {
+            const waterStored = parseInt(localStorage.getItem(`nutriscan_water_${currentDietDate}`) || "0", 10);
+            const waterData = { amount_ml: waterStored, goal_ml: Math.round((getUserProfile()?.weight_kg || 78) * 35) };
+            const text = window.NutriScanShare?.generateDailySummaryText(currentDietSummary, waterData, currentDietDate);
+            window.NutriScanShare?.shareToWhatsApp(text);
+        });
+    }
+
+    const btnCopyDiet = document.getElementById("btn-copy-diet");
+    if (btnCopyDiet) {
+        btnCopyDiet.addEventListener("click", () => {
+            const waterStored = parseInt(localStorage.getItem(`nutriscan_water_${currentDietDate}`) || "0", 10);
+            const waterData = { amount_ml: waterStored, goal_ml: Math.round((getUserProfile()?.weight_kg || 78) * 35) };
+            const text = window.NutriScanShare?.generateDailySummaryText(currentDietSummary, waterData, currentDietDate);
+            window.NutriScanShare?.copyToClipboard(text);
+        });
+    }
+
+    const btnPrintDiet = document.getElementById("btn-print-diet");
+    if (btnPrintDiet) {
+        btnPrintDiet.addEventListener("click", () => {
+            window.NutriScanShare?.printDailyReport();
+        });
+    }
+
+    const btnGoPhoto = document.getElementById("btn-go-photo-scan");
+    if (btnGoPhoto) {
+        btnGoPhoto.addEventListener("click", () => {
+            switchTab("foto");
+        });
+    }
 
     // Navegador de data
     const btnDatePrev = document.getElementById("btn-date-prev");

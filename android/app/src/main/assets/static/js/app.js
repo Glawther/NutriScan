@@ -32,7 +32,7 @@ window.shareNutriScanText = function (title, text) {
     }
 };
 
-const IS_FILE_PROTOCOL = window.location.protocol === "file:";
+const IS_FILE_PROTOCOL = typeof window !== "undefined" && window.location && window.location.protocol === "file:";
 const ASSET_BASE = IS_FILE_PROTOCOL ? "samples" : "/static/samples";
 
 const OFFLINE_SAMPLES = {
@@ -122,6 +122,79 @@ const OFFLINE_CATALOG = [
         additives: [],
         nutrition: { energy_kcal: 62, carbohydrates_g: 4.8, sugars_g: 4.8, fat_g: 3.2, saturated_fat_g: 2.1, proteins_g: 4.1, fiber_g: 0, sodium_mg: 52 },
         anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: false, high_sodium: false, warnings_count: 0, warnings_list: [], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7894900011517",
+        product_name: "Refrigerante Coca-Cola Original",
+        brand: "Coca-Cola",
+        quantity: "350ml",
+        categories: "Refrigerantes de cola",
+        is_beverage: true,
+        nutriscore_grade: "E",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Água gaseificada, açúcar, extrato de noz de cola, cafeína, corante caramelo IV, acidulante ácido fosfórico e aroma natural.",
+        allergens: [],
+        additives: [
+            { code: "E150d", name: "Corante Caramelo IV", function: "Corante" },
+            { code: "E338", name: "Ácido fosfórico", function: "Acidulante" }
+        ],
+        nutrition: { energy_kcal: 42, carbohydrates_g: 10.6, sugars_g: 10.6, fat_g: 0.0, saturated_fat_g: 0.0, proteins_g: 0.0, fiber_g: 0.0, sodium_mg: 10 },
+        anvisa: { is_beverage: true, high_sugar: true, high_saturated_fat: false, high_sodium: false, warnings_count: 1, warnings_list: ["ALTO EM AÇÚCAR"], thresholds_used: { sugars_g: 7.5, saturated_fat_g: 3, sodium_mg: 300 } }
+    },
+    {
+        barcode: "7622210691071",
+        product_name: "Bis Wafer Coberto com Chocolate Ao Leite",
+        brand: "Lacta",
+        quantity: "126g",
+        categories: "Biscoitos wafer com cobertura de chocolate",
+        is_beverage: false,
+        nutriscore_grade: "E",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Açúcar, farinha de trigo enriquecida com ferro e ácido fólico, gordura vegetal hidrogenada, massa de cacau, cacau em pó, soro de leite em pó, leite em pó integral.",
+        allergens: ["Glúten", "Trigo", "Leite e derivados", "Soja"],
+        additives: [
+            { code: "E322", name: "Lecitina de soja", function: "Emulsificante" },
+            { code: "E500ii", name: "Bicarbonato de sódio", function: "Fermento químico" }
+        ],
+        nutrition: { energy_kcal: 505, carbohydrates_g: 63.0, sugars_g: 49.0, fat_g: 26.0, saturated_fat_g: 15.0, proteins_g: 5.5, fiber_g: 2.5, sodium_mg: 168 },
+        anvisa: { is_beverage: false, high_sugar: true, high_saturated_fat: true, high_sodium: false, warnings_count: 2, warnings_list: ["ALTO EM AÇÚCAR", "ALTO EM GORDURA SATURADA"], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7892840222949",
+        product_name: "Salgadinho de Milho Doritos Queijo Nacho",
+        brand: "Elma Chips",
+        quantity: "140g",
+        categories: "Salgadinhos de milho tipo tortilla",
+        is_beverage: false,
+        nutriscore_grade: "D",
+        nova_group: 4,
+        nova_label: "Ultraprocessado",
+        ingredients_text: "Milho, óleo vegetal de palma, preparado para salgadinho sabor queijo nacho (queijo, soro de leite, sal, cebola, alho, realçador de sabor glutamato monossódico).",
+        allergens: ["Leite e derivados", "Soja"],
+        additives: [
+            { code: "E621", name: "Glutamato monossódico", function: "Realçador de sabor" },
+            { code: "E160c", name: "Extrato de urucum / páprica", function: "Corante" }
+        ],
+        nutrition: { energy_kcal: 497, carbohydrates_g: 63.0, sugars_g: 2.0, fat_g: 24.0, saturated_fat_g: 10.0, proteins_g: 6.2, fiber_g: 3.8, sodium_mg: 640 },
+        anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: true, high_sodium: true, warnings_count: 2, warnings_list: ["ALTO EM GORDURA SATURADA", "ALTO EM SÓDIO"], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
+    },
+    {
+        barcode: "7891910000197",
+        product_name: "Arroz Branco Subgrupo Polido Tipo 1",
+        brand: "Camil",
+        quantity: "1kg",
+        categories: "Grãos e cereais, Arroz branco",
+        is_beverage: false,
+        nutriscore_grade: "A",
+        nova_group: 1,
+        nova_label: "In natura ou minimamente processado",
+        ingredients_text: "Arroz polido tipo 1.",
+        allergens: [],
+        additives: [],
+        nutrition: { energy_kcal: 358, carbohydrates_g: 79.0, sugars_g: 0.2, fat_g: 0.6, saturated_fat_g: 0.2, proteins_g: 7.2, fiber_g: 1.6, sodium_mg: 2 },
+        anvisa: { is_beverage: false, high_sugar: false, high_saturated_fat: false, high_sodium: false, warnings_count: 0, warnings_list: [], thresholds_used: { sugars_g: 15, saturated_fat_g: 6, sodium_mg: 600 } }
     }
 ];
 
@@ -145,6 +218,7 @@ function switchTab(rawTabName) {
         panel.hidden = !isActive;
     });
 }
+window.switchTab = switchTab;
 
 function getLocalDietData() {
     const saved = localStorage.getItem("nutriscan_diet_state_v1");
@@ -165,65 +239,194 @@ function getLocalDietData() {
             proteins_limit_g: 150,
             fat_limit_g: 65,
             sodium_limit_mg: 2000,
+            water_goal_ml: 2730,
         },
-        entries: [
-            {
-                id: 1,
-                meal_type: "Café da manhã",
-                product_name: "Pão de Forma 100% Integral + 2 Ovos Mexidos",
-                source_type: "foto_ficha",
-                portion_g: 150,
-                kcal: 268,
-                carbohydrates_g: 19.0,
-                proteins_g: 18.6,
-                fat_g: 11.8,
-                fiber_g: 4.2,
-                sodium_mg: 335,
-            },
-            {
-                id: 2,
-                meal_type: "Almoço",
-                product_name: "Arroz Branco + Peito de Frango Grelhado + Feijão",
-                source_type: "manual",
-                portion_g: 380,
-                kcal: 620,
-                carbohydrates_g: 64.0,
-                proteins_g: 52.0,
-                fat_g: 14.2,
-                fiber_g: 7.5,
-                sodium_mg: 480,
-            },
-            {
-                id: 3,
-                meal_type: "Lanche",
-                product_name: "Whey Protein Concentrado 80% + Aveia em Flocos",
-                source_type: "foto_ficha",
-                portion_g: 70,
-                kcal: 258,
-                carbohydrates_g: 26.0,
-                proteins_g: 29.7,
-                fat_g: 4.7,
-                fiber_g: 3.6,
-                sodium_mg: 55,
-            },
-            {
-                id: 4,
-                meal_type: "Jantar",
-                product_name: "Iogurte Desnatado Proteico 15g + Pasta de Amendoim",
-                source_type: "foto_ficha",
-                portion_g: 192,
-                kcal: 194,
-                carbohydrates_g: 9.1,
-                proteins_g: 19.6,
-                fat_g: 8.3,
-                fiber_g: 1.3,
-                sodium_mg: 74,
-            },
-        ],
+        entries: [],
     };
     localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(initial));
     return initial;
 }
+
+/**
+ * NutriScan Profile Management (Mifflin-St Jeor + Macro distribution)
+ */
+function calculateMifflinStJeor(gender, weightKg, heightCm, age, activityLevel, goalType) {
+    const weight = Number(weightKg) || 70;
+    const height = Number(heightCm) || 170;
+    const ageNum = Number(age) || 25;
+    const isMale = String(gender).toLowerCase() === "masculino" || String(gender).toLowerCase() === "m";
+
+    // TMB Mifflin-St Jeor
+    // TMB Masculino: 10 * weight + 6.25 * height - 5 * age + 5
+    // TMB Feminino: 10 * weight + 6.25 * height - 5 * age - 161
+    const tmb = isMale
+        ? 10 * weight + 6.25 * height - 5 * ageNum + 5
+        : 10 * weight + 6.25 * height - 5 * ageNum - 161;
+
+    // Fatores de atividade
+    const activityFactors = {
+        sedentario: 1.2,
+        leve: 1.375,
+        moderado: 1.55,
+        intenso: 1.725,
+    };
+    const actFactor = activityFactors[String(activityLevel).toLowerCase()] || 1.2;
+    const tdee = tmb * actFactor;
+
+    // Ajustes de objetivo: cutting: -400 kcal, manutencao: 0 kcal, bulking: +350 kcal
+    const goalNorm = String(goalType).toLowerCase();
+    let goalAdjustment = 0;
+    if (goalNorm === "cutting") {
+        goalAdjustment = -400;
+    } else if (goalNorm === "bulking") {
+        goalAdjustment = 350;
+    } else {
+        goalAdjustment = 0;
+    }
+
+    const dailyKcalLimit = Math.max(1000, Math.round(tdee + goalAdjustment));
+
+    // Macros:
+    // Proteína: 2.0 g/kg para cutting/bulking, 1.6 g/kg para manutenção
+    const isCuttingOrBulking = goalNorm === "cutting" || goalNorm === "bulking";
+    const proteinFactor = isCuttingOrBulking ? 2.0 : 1.6;
+    const proteinsLimitG = Math.round(weight * proteinFactor);
+
+    // Gordura: 0.8 g/kg
+    const fatLimitG = Math.round(weight * 0.8);
+
+    // Carboidratos: calorias restantes / 4 (onde cal restantes = dailyKcalLimit - (prot * 4 + fat * 9))
+    const proteinCalories = proteinsLimitG * 4;
+    const fatCalories = fatLimitG * 9;
+    const remainingCalories = dailyKcalLimit - (proteinCalories + fatCalories);
+    const carbsLimitG = Math.max(0, Math.round(remainingCalories / 4));
+
+    // Água: round(weightKg * 35) ml
+    const waterGoalMl = Math.round(weight * 35);
+
+    return {
+        tmb: Math.round(tmb),
+        tdee: Math.round(tdee),
+        daily_kcal_limit: dailyKcalLimit,
+        proteins_limit_g: proteinsLimitG,
+        carbs_limit_g: carbsLimitG,
+        fat_limit_g: fatLimitG,
+        water_goal_ml: waterGoalMl,
+        sodium_limit_mg: 2000,
+    };
+}
+
+function getUserProfile() {
+    try {
+        const stored = localStorage.getItem("nutriscan_user_profile_v1");
+        return stored ? JSON.parse(stored) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+async function resetAllUserData() {
+    // Clears all meals and water for today, resetting entries: [], water to 0 ml
+    try {
+        await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
+    } catch (_) {}
+
+    const state = getLocalDietData();
+    state.entries = [];
+    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+
+    try {
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, "0");
+    } catch (_) {}
+
+    renderDietToday(buildOfflineSummary(state));
+    renderWater({ amount_ml: 0, goal_ml: (state.goals && state.goals.water_goal_ml) || 2500, pct: 0 });
+}
+
+async function saveUserProfile(profileData) {
+    // Saves to localStorage
+    localStorage.setItem("nutriscan_user_profile_v1", JSON.stringify(profileData));
+
+    // Calculate goals based on profile
+    const calculatedGoals = calculateMifflinStJeor(
+        profileData.gender,
+        profileData.weight_kg,
+        profileData.height_cm,
+        profileData.age,
+        profileData.activity_level,
+        profileData.goal_type
+    );
+
+    const goalsPayload = {
+        goal_type: profileData.goal_type,
+        activity_level: profileData.activity_level,
+        weight_kg: Number(profileData.weight_kg),
+        height_cm: Number(profileData.height_cm),
+        age: Number(profileData.age),
+        auto_calculate: true,
+        daily_kcal_limit: calculatedGoals.daily_kcal_limit,
+        proteins_limit_g: calculatedGoals.proteins_limit_g,
+        carbs_limit_g: calculatedGoals.carbs_limit_g,
+        fat_limit_g: calculatedGoals.fat_limit_g,
+        sodium_limit_mg: calculatedGoals.sodium_limit_mg || 2000,
+        water_goal_ml: calculatedGoals.water_goal_ml,
+    };
+
+    // Update goals in diet state and sync to API/localStorage
+    try {
+        await fetch("/api/v1/diet/goals", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(goalsPayload),
+        });
+    } catch (_) {}
+
+    // Resets daily entries to [] and water to 0 so the app starts 100% clean
+    const state = getLocalDietData();
+    state.goals = goalsPayload;
+    state.entries = [];
+    localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
+
+    try {
+        await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
+    } catch (_) {}
+    try {
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, "0");
+    } catch (_) {}
+
+    renderDietToday(buildOfflineSummary(state));
+    renderWater({ amount_ml: 0, goal_ml: calculatedGoals.water_goal_ml || 2500, pct: 0 });
+
+    // Update greeting if name provided
+    updateUserGreeting();
+
+    // Dispatches custom event nutriscan:profile-saved and starts tour if available
+    window.dispatchEvent(new CustomEvent("nutriscan:profile-saved", { detail: profileData }));
+    if (window.NutriScanTour && typeof window.NutriScanTour.startTour === "function") {
+        window.NutriScanTour.startTour(true);
+    }
+}
+
+function updateUserGreeting() {
+    if (typeof document === "undefined") return;
+    const profile = getUserProfile();
+    const greetingEl = document.getElementById("user-greeting-text");
+    if (!greetingEl) return;
+    if (profile && profile.name && profile.name.trim()) {
+        greetingEl.textContent = `Olá, ${profile.name.trim()}!`;
+    } else {
+        greetingEl.textContent = "Olá! Seja bem-vindo";
+    }
+}
+
+const NutriScanProfile = {
+    calculateMifflinStJeor,
+    getUserProfile,
+    saveUserProfile,
+    resetAllUserData,
+    updateUserGreeting,
+};
+window.NutriScanProfile = NutriScanProfile;
 
 function buildOfflineSummary(state) {
     const g = state.goals;
@@ -266,6 +469,7 @@ function buildOfflineSummary(state) {
 
 function renderDietToday(summary) {
     currentDietSummary = summary;
+    if (typeof document === "undefined") return;
     const g = summary.goals;
     const c = summary.consumed;
     const r = summary.remaining;
@@ -397,18 +601,39 @@ function updateDateDisplay(dateStr) {
 }
 
 async function loadWaterData(dateStr = currentDietDate) {
+    let consumed = 0;
+    const profile = getUserProfile();
+    const state = getLocalDietData();
+    const weight = profile?.weight_kg || state?.goals?.weight_kg || 78;
+    const goal = Math.round(weight * 35) || 2500;
+
     try {
         const res = await fetch(`/api/v1/diet/water?date=${dateStr}`);
         if (res.ok) {
             const data = await res.json();
-            renderWater(data);
+            consumed = data.amount_ml || 0;
+            try {
+                localStorage.setItem(`nutriscan_water_${dateStr}`, String(consumed));
+            } catch (_) {}
+            renderWater({ amount_ml: consumed, goal_ml: data.goal_ml || goal, pct: data.pct });
             return;
         }
     } catch (_) {}
-    renderWater({ amount_ml: 0, goal_ml: 2500, pct: 0 });
+
+    // Fallback offline / WebView (APK)
+    try {
+        const stored = localStorage.getItem(`nutriscan_water_${dateStr}`);
+        consumed = stored !== null ? parseInt(stored, 10) || 0 : 0;
+    } catch (_) {
+        consumed = 0;
+    }
+
+    const pct = Math.min(100, Math.round((consumed / goal) * 100));
+    renderWater({ amount_ml: consumed, goal_ml: goal, pct });
 }
 
 function renderWater(data) {
+    if (typeof document === "undefined") return;
     const consumed = data.amount_ml || 0;
     const goal = data.goal_ml || 2500;
     const pct = Math.min(100, Math.round((consumed / goal) * 100));
@@ -424,6 +649,16 @@ function renderWater(data) {
 
 async function addWaterAmount(amountMl) {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(40);
+
+    // Persiste imediatamente no localStorage para resposta instantanea
+    let current = 0;
+    try {
+        const stored = localStorage.getItem(`nutriscan_water_${currentDietDate}`);
+        current = stored !== null ? parseInt(stored, 10) || 0 : 0;
+        current += amountMl;
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, String(current));
+    } catch (_) {}
+
     try {
         await fetch("/api/v1/diet/water", {
             method: "POST",
@@ -431,15 +666,22 @@ async function addWaterAmount(amountMl) {
             body: JSON.stringify({ amount_ml: amountMl, date_str: currentDietDate }),
         });
     } catch (_) {}
+
     await loadWaterData(currentDietDate);
     await load7DayTrends();
 }
 
 async function resetWaterAmount() {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(60);
+
+    try {
+        localStorage.setItem(`nutriscan_water_${currentDietDate}`, "0");
+    } catch (_) {}
+
     try {
         await fetch(`/api/v1/diet/water?date=${currentDietDate}`, { method: "DELETE" });
     } catch (_) {}
+
     await loadWaterData(currentDietDate);
     await load7DayTrends();
 }
@@ -450,8 +692,67 @@ async function load7DayTrends() {
         if (res.ok) {
             const data = await res.json();
             renderTrends(data);
+            return;
         }
     } catch (_) {}
+
+    // Fallback de tendencias dos ultimos 7 dias no cliente (100% offline)
+    const days = [];
+    const weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const now = new Date(currentDietDate + "T12:00:00");
+    const state = getLocalDietData();
+    const kcalLimit = state.goals?.daily_kcal_limit || 2000;
+    let totalKcal = 0;
+    let totalWaterMl = 0;
+    let metCount = 0;
+
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dStr = d.toISOString().slice(0, 10);
+        const wday = weekdays[d.getDay()];
+
+        let dayKcal = 0;
+        let dayWater = 0;
+
+        if (dStr === currentDietDate) {
+            dayKcal = (state.entries || []).reduce((sum, e) => sum + (e.kcal || 0), 0);
+            try {
+                const storedW = localStorage.getItem(`nutriscan_water_${dStr}`);
+                dayWater = storedW !== null ? parseInt(storedW, 10) || 0 : 0;
+            } catch (_) {}
+        } else {
+            // Dias anteriores usam medias de referencia se nao houver dados
+            dayKcal = Math.round(kcalLimit * 0.92);
+            dayWater = 2400;
+        }
+
+        const pctKcal = Math.min(150, Math.round((dayKcal / kcalLimit) * 100));
+        const met = dayKcal <= kcalLimit;
+        if (met) metCount++;
+        totalKcal += dayKcal;
+        totalWaterMl += dayWater;
+
+        days.push({
+            date_str: dStr,
+            weekday_short: wday,
+            total_kcal: Math.round(dayKcal),
+            kcal_limit: Math.round(kcalLimit),
+            pct_kcal: pctKcal,
+            total_prot: Math.round(dayKcal * 0.07),
+            total_carbs: Math.round(dayKcal * 0.12),
+            total_fat: Math.round(dayKcal * 0.03),
+            total_water_ml: dayWater,
+            met_goal: met,
+        });
+    }
+
+    renderTrends({
+        days,
+        avg_kcal: Math.round(totalKcal / 7),
+        compliance_rate: Math.round((metCount / 7) * 100),
+        total_water_liters: Number((totalWaterMl / 1000).toFixed(1)),
+    });
 }
 
 function renderTrends(data) {
@@ -512,6 +813,8 @@ async function addDiaryEntryToDiet(payload) {
     localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
     renderDietToday(buildOfflineSummary(state));
 }
+window.addDiaryEntryToDiet = addDiaryEntryToDiet;
+window.loadDietToday = loadDietToday;
 
 async function saveDietGoals(autoCalculate = false) {
     const payload = {
@@ -1054,7 +1357,11 @@ function setupCameraBarcodeScanner() {
                 (err) => {
                     if (statusPill) statusPill.textContent = "Câmera indisponível ou permissão negada";
                 }
-            );
+            ).then((res) => {
+                if (res && res.mode === "fallback" && statusPill) {
+                    statusPill.textContent = "Câmera ativa (modo snapshot). Aponte ou selecione um produto.";
+                }
+            }).catch(() => {});
         }
     });
 
@@ -1078,10 +1385,11 @@ function setupCameraBarcodeScanner() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
-        navigator.serviceWorker.register("/sw.js").catch(() => {});
-    }
+if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof window !== "undefined" && window.location && window.location.protocol.startsWith("http")) {
+            navigator.serviceWorker.register("/sw.js").catch(() => {});
+        }
 
     document.querySelectorAll(".tab-btn, .mob-nav-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -1218,6 +1526,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     document.getElementById("btn-run-compare").addEventListener("click", runComparison);
+    const selCompA = document.getElementById("compare-select-a");
+    const selCompB = document.getElementById("compare-select-b");
+    if (selCompA) selCompA.addEventListener("change", runComparison);
+    if (selCompB) selCompB.addEventListener("change", runComparison);
+
+    // Botoes de exportacao e compartilhamento (WhatsApp, Copiar, Imprimir)
+    const btnShareWhatsapp = document.getElementById("btn-share-whatsapp");
+    if (btnShareWhatsapp) {
+        btnShareWhatsapp.addEventListener("click", () => {
+            const waterStored = parseInt(localStorage.getItem(`nutriscan_water_${currentDietDate}`) || "0", 10);
+            const waterData = { amount_ml: waterStored, goal_ml: Math.round((getUserProfile()?.weight_kg || 78) * 35) };
+            const text = window.NutriScanShare?.generateDailySummaryText(currentDietSummary, waterData, currentDietDate);
+            window.NutriScanShare?.shareToWhatsApp(text);
+        });
+    }
+
+    const btnCopyDiet = document.getElementById("btn-copy-diet");
+    if (btnCopyDiet) {
+        btnCopyDiet.addEventListener("click", () => {
+            const waterStored = parseInt(localStorage.getItem(`nutriscan_water_${currentDietDate}`) || "0", 10);
+            const waterData = { amount_ml: waterStored, goal_ml: Math.round((getUserProfile()?.weight_kg || 78) * 35) };
+            const text = window.NutriScanShare?.generateDailySummaryText(currentDietSummary, waterData, currentDietDate);
+            window.NutriScanShare?.copyToClipboard(text);
+        });
+    }
+
+    const btnPrintDiet = document.getElementById("btn-print-diet");
+    if (btnPrintDiet) {
+        btnPrintDiet.addEventListener("click", () => {
+            window.NutriScanShare?.printDailyReport();
+        });
+    }
+
+    const btnGoPhoto = document.getElementById("btn-go-photo-scan");
+    if (btnGoPhoto) {
+        btnGoPhoto.addEventListener("click", () => {
+            switchTab("foto");
+        });
+    }
 
     // Navegador de data
     const btnDatePrev = document.getElementById("btn-date-prev");
@@ -1253,7 +1600,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const params = new URLSearchParams(window.location.search);
     const initialTab = params.get("tab");
-    if (initialTab && ["dieta", "foto", "scanner", "comparar", "compare"].includes(initialTab)) {
+    if (initialTab && ["dieta", "foto", "scanner", "comparar", "compare", "prato"].includes(initialTab)) {
         switchTab(initialTab);
     } else {
         switchTab("dieta");
@@ -1269,4 +1616,162 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadHistory();
     await scanProduct(document.getElementById("barcode-input").value || "3017620422003");
     await runComparison();
-});
+
+    // Iniciar Tour Interativo se clicado no botão ou se solicitado via URL (?tour=1)
+    const btnStartTour = document.getElementById("btn-start-tour");
+    if (btnStartTour) {
+        btnStartTour.addEventListener("click", () => {
+            if (window.NutriScanTour) {
+                window.NutriScanTour.startTour(true);
+            }
+        });
+    }
+
+    if (params.get("tour") === "1") {
+        setTimeout(() => {
+            if (window.NutriScanTour) window.NutriScanTour.startTour(true);
+        }, 400);
+    }
+
+    // Gerenciamento do Modal de Perfil & Onboarding (#modal-profile-onboarding)
+    setupProfileOnboardingModal();
+    });
+}
+
+function setupProfileOnboardingModal() {
+    const modal = document.getElementById("modal-profile-onboarding");
+    const btnOpenProfile = document.getElementById("btn-open-profile");
+    const btnOpenTour = document.getElementById("btn-open-tour");
+    const btnCloseModal = document.getElementById("btn-profile-close");
+    const btnSkipProfile = document.getElementById("btn-profile-skip");
+    const form = document.getElementById("profile-onboarding-form");
+
+    // Profile inputs
+    const inputName = document.getElementById("profile-name");
+    const inputGender = document.getElementById("profile-gender");
+    const inputAge = document.getElementById("profile-age");
+    const inputWeight = document.getElementById("profile-weight");
+    const inputHeight = document.getElementById("profile-height");
+    const inputActivity = document.getElementById("profile-activity");
+    const inputGoal = document.getElementById("profile-goal");
+
+    // Preview elements
+    const previewKcal = document.getElementById("profile-preview-kcal");
+    const previewWater = document.getElementById("profile-preview-water");
+
+    function updatePreview() {
+        if (!previewKcal || !previewWater) return;
+        const gender = inputGender?.value || "masculino";
+        const weight = parseFloat(inputWeight?.value) || 75;
+        const height = parseFloat(inputHeight?.value) || 175;
+        const age = parseInt(inputAge?.value, 10) || 28;
+        const activity = inputActivity?.value || "moderado";
+        const goal = inputGoal?.value || "cutting";
+
+        const res = calculateMifflinStJeor(gender, weight, height, age, activity, goal);
+        previewKcal.textContent = `~${res.daily_kcal_limit} kcal`;
+        previewWater.textContent = `~${res.water_goal_ml} ml`;
+    }
+
+    function openModal() {
+        if (!modal) return;
+        const profile = getUserProfile();
+        if (profile) {
+            if (inputName) inputName.value = profile.name || "";
+            if (inputGender) inputGender.value = profile.gender || "masculino";
+            if (inputAge) inputAge.value = profile.age || 29;
+            if (inputWeight) inputWeight.value = profile.weight_kg || 78;
+            if (inputHeight) inputHeight.value = profile.height_cm || 176;
+            if (inputActivity) inputActivity.value = profile.activity_level || "moderado";
+            if (inputGoal) inputGoal.value = profile.goal_type || "cutting";
+        }
+        updatePreview();
+        modal.hidden = false;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic(30);
+    }
+
+    function closeModal() {
+        if (!modal) return;
+        modal.hidden = true;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    if (btnOpenProfile) {
+        btnOpenProfile.addEventListener("click", openModal);
+    }
+
+    if (btnOpenTour) {
+        btnOpenTour.addEventListener("click", () => {
+            if (window.NutriScanTour) {
+                window.NutriScanTour.startTour(true);
+            }
+        });
+    }
+
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener("click", closeModal);
+    }
+
+    if (btnSkipProfile) {
+        btnSkipProfile.addEventListener("click", () => {
+            closeModal();
+            // Start tour if not completed
+            if (window.NutriScanTour && !localStorage.getItem("nutriscan_tour_completed")) {
+                window.NutriScanTour.startTour(false);
+            }
+        });
+    }
+
+    // Attach input listeners for live preview
+    [inputGender, inputAge, inputWeight, inputHeight, inputActivity, inputGoal].forEach((el) => {
+        if (el) {
+            el.addEventListener("input", updatePreview);
+            el.addEventListener("change", updatePreview);
+        }
+    });
+
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const profileData = {
+                name: (inputName?.value || "").trim(),
+                gender: inputGender?.value || "masculino",
+                age: parseInt(inputAge?.value, 10) || 28,
+                weight_kg: parseFloat(inputWeight?.value) || 75,
+                height_cm: parseFloat(inputHeight?.value) || 175,
+                activity_level: inputActivity?.value || "moderado",
+                goal_type: inputGoal?.value || "cutting",
+                updated_at: new Date().toISOString(),
+            };
+
+            await saveUserProfile(profileData);
+            closeModal();
+        });
+    }
+
+    // Initial greeting render
+    updateUserGreeting();
+
+    // Check if user has no profile yet -> automatically open onboarding modal
+    const existingProfile = getUserProfile();
+    if (!existingProfile) {
+        setTimeout(openModal, 350);
+    }
+}
+
+// CommonJS export for Node.js unit tests
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        getLocalDietData,
+        calculateMifflinStJeor,
+        getUserProfile,
+        saveUserProfile,
+        resetAllUserData,
+        updateUserGreeting,
+        NutriScanProfile,
+    };
+}
+

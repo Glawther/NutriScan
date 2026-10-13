@@ -812,66 +812,8 @@ def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
 
     today = today_str()
     today_dt = datetime.now()
-    summary = get_diet_today_summary(date_str=today, db_path=db_path)
-    if not summary.entries:
-        demo_meals = [
-            DietDiaryCreateRequest(
-                date_str=today,
-                meal_type="Café da manhã",
-                product_name="Pão de Forma 100% Integral + 2 Ovos Mexidos",
-                source_type="foto_ficha",
-                portion_g=150.0,
-                kcal=268.0,
-                carbohydrates_g=19.0,
-                proteins_g=18.6,
-                fat_g=11.8,
-                fiber_g=4.2,
-                sodium_mg=335.0,
-            ),
-            DietDiaryCreateRequest(
-                date_str=today,
-                meal_type="Almoço",
-                product_name="Arroz Branco + Peito de Frango Grelhado + Feijão",
-                source_type="manual",
-                portion_g=380.0,
-                kcal=620.0,
-                carbohydrates_g=64.0,
-                proteins_g=52.0,
-                fat_g=14.2,
-                fiber_g=7.5,
-                sodium_mg=480.0,
-            ),
-            DietDiaryCreateRequest(
-                date_str=today,
-                meal_type="Lanche",
-                product_name="Whey Protein Concentrado 80% + Aveia em Flocos",
-                source_type="foto_ficha",
-                portion_g=70.0,
-                kcal=258.0,
-                carbohydrates_g=26.0,
-                proteins_g=29.7,
-                fat_g=4.7,
-                fiber_g=3.6,
-                sodium_mg=55.0,
-            ),
-            DietDiaryCreateRequest(
-                date_str=today,
-                meal_type="Jantar",
-                product_name="Iogurte Desnatado Proteico 15g + Pasta de Amendoim",
-                source_type="foto_ficha",
-                portion_g=192.0,
-                kcal=194.0,
-                carbohydrates_g=9.1,
-                proteins_g=19.6,
-                fat_g=8.3,
-                fiber_g=1.3,
-                sodium_mg=74.0,
-            ),
-        ]
-        for meal in demo_meals:
-            add_diary_entry(meal, db_path=db_path)
 
-    # Seed past 6 days if empty
+    # Seed past 6 days if empty (para grafico de tendencias), mas o dia de hoje comeca 100% zerado
     past_days_templates = [
         # (days_ago, water_ml, [meals])
         (
@@ -963,10 +905,6 @@ def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
         if water_stat["amount_ml"] == 0:
             log_water(amount_ml=water_ml, date_str=p_date, db_path=db_path)
 
-    # Check today's water as well
-    today_water = get_water_for_date(date_str=today, db_path=db_path)
-    if today_water["amount_ml"] == 0:
-        log_water(amount_ml=1250, date_str=today, db_path=db_path)
 
 
 def _row_to_taco_dict(row: sqlite3.Row) -> dict:
