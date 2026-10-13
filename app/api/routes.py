@@ -2,6 +2,7 @@ import base64
 from urllib.parse import quote
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse
 
 from app.config import APP_NAME, APP_VERSION
 from app.database import (
@@ -25,6 +26,8 @@ from app.database import (
 )
 from app.engine.analyzer import compare_products
 from app.engine.diet_exporter import (
+    generate_diet_report_data,
+    generate_diet_report_html,
     generate_plain_text_summary,
     generate_whatsapp_summary,
 )
@@ -191,7 +194,7 @@ async def get_diet_micronutrients_endpoint(
 async def export_diet_endpoint(
     date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
     date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
-    format: str = Query("whatsapp", description="Formato: 'whatsapp' ou 'text'"),
+    format: str = Query("whatsapp", description="Formato: 'whatsapp', 'text', 'html' ou 'json'"),
 ):
     target = date or date_str
     diary_summary = get_diet_today_summary(date_str=target)
@@ -199,6 +202,13 @@ async def export_diet_endpoint(
 
     fmt = (format or "whatsapp").lower().strip()
     diary_dict = diary_summary.model_dump()
+
+    if fmt == "html":
+        html_content = generate_diet_report_html(diary_dict, water_data=water_data)
+        return HTMLResponse(content=html_content, status_code=200)
+
+    if fmt == "json":
+        return generate_diet_report_data(diary_dict, water_data=water_data)
 
     if fmt == "text":
         summary_text = generate_plain_text_summary(diary_dict, water_data=water_data)
@@ -215,6 +225,35 @@ async def export_diet_endpoint(
         "text": summary_text,
         "whatsapp_url": whatsapp_url,
     }
+
+
+@router.get("/diet/report")
+async def get_diet_report_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    format: str = Query("html", description="Formato: 'html' ou 'json'"),
+    patient_name: Optional[str] = Query(None, description="Nome do paciente para o cabeçalho"),
+):
+    """
+    Gera relatório executivo estruturado para impressão / download em PDF.
+    format=html retorna documento completo standalone pronto para visualização e window.print().
+    format=json retorna os dados limpos com KPIs calculados, refeições agrupadas e rodapé.
+    """
+    target = date or date_str
+    diary_summary = get_diet_today_summary(date_str=target)
+    water_data = get_water_for_date(date_str=target)
+    diary_dict = diary_summary.model_dump()
+
+    profile_data = None
+    if patient_name:
+        profile_data = {"name": patient_name.strip()}
+
+    fmt = (format or "html").lower().strip()
+    if fmt == "html":
+        html_code = generate_diet_report_html(diary_dict, water_data=water_data, profile_data=profile_data)
+        return HTMLResponse(content=html_code, status_code=200)
+
+    return generate_diet_report_data(diary_dict, water_data=water_data, profile_data=profile_data)
 
 
 @router.get("/diet/water", response_model=WaterLogResponse)

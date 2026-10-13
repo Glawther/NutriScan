@@ -553,6 +553,41 @@ function renderDietToday(summary) {
     document.getElementById("limit-fat").value = Math.round(g.fat_limit_g);
     document.getElementById("limit-sodium").value = Math.round(g.sodium_limit_mg);
 
+    // Atualizar cabeçalho e rodapé de impressão / PDF
+    try {
+        const printDateEl = document.getElementById("print-header-date");
+        if (printDateEl) {
+            let fDate = currentDietDate;
+            if (fDate && fDate.includes("-")) {
+                fDate = fDate.split("-").reverse().join("/");
+            }
+            printDateEl.textContent = `Data da Dieta: ${fDate || "Hoje"}`;
+        }
+        const printPatientEl = document.getElementById("print-header-patient");
+        const printMetaEl = document.getElementById("print-header-meta");
+        const prof = typeof getUserProfile === "function" ? getUserProfile() : null;
+        if (printPatientEl) {
+            printPatientEl.textContent = prof?.name ? `Paciente / Perfil: ${prof.name}` : "Paciente / Perfil: NutriScan";
+        }
+        if (printMetaEl) {
+            const parts = [];
+            if (prof?.weight_kg || g?.weight_kg) parts.push(`Peso: ${prof?.weight_kg || g?.weight_kg}kg`);
+            if (prof?.height_cm || g?.height_cm) parts.push(`Altura: ${prof?.height_cm || g?.height_cm}cm`);
+            if (prof?.age || g?.age) parts.push(`Idade: ${prof?.age || g?.age} anos`);
+            const goalNames = { cutting: "Emagrecimento (Déficit)", manutencao: "Manutenção", bulking: "Hipertrofia" };
+            const focus = goalNames[g?.goal_type] || g?.goal_type;
+            if (focus) parts.push(`Objetivo: ${focus}`);
+            printMetaEl.textContent = parts.length > 0 ? parts.join(" • ") : "Perfil padrão configurado";
+        }
+        const printFooterTs = document.getElementById("print-footer-timestamp");
+        if (printFooterTs) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+            const dateStr = now.toLocaleDateString("pt-BR");
+            printFooterTs.textContent = `Emissão do Documento: ${dateStr} às ${timeStr}`;
+        }
+    } catch (_) {}
+
     const sourceNames = {
         foto_ficha: "Foto da ficha",
         codigo_barras: "Código EAN",
@@ -1733,6 +1768,9 @@ async function initNutriScanApp() {
 
     // Gerenciamento do Modal de Perfil & Onboarding (#modal-profile-onboarding)
     setupProfileOnboardingModal();
+
+    // Gerenciamento do Modal de Novidades (#modal-whats-new)
+    setupWhatsNewModal();
 }
 
 
@@ -1886,6 +1924,56 @@ function setupProfileOnboardingModal() {
     }
 }
 
+function setupWhatsNewModal() {
+    const modal = document.getElementById("modal-whats-new");
+    const btnOpen = document.getElementById("btn-open-whats-new");
+    const btnClose = document.getElementById("btn-whats-new-close");
+    const btnConfirm = document.getElementById("btn-whats-new-confirm");
+
+    function openModal() {
+        if (!modal) return;
+        modal.hidden = false;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        if (typeof window.triggerHaptic === "function") window.triggerHaptic(30);
+    }
+
+    function closeModal() {
+        if (!modal) return;
+        modal.hidden = true;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    if (btnOpen) {
+        btnOpen.addEventListener("click", openModal);
+    }
+
+    if (btnClose) {
+        btnClose.addEventListener("click", closeModal);
+    }
+
+    if (btnConfirm) {
+        btnConfirm.addEventListener("click", closeModal);
+    }
+
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if (modal && !modal.hidden && e.key === "Escape") {
+            closeModal();
+        }
+    });
+
+    return { openModal, closeModal };
+}
+
 if (typeof document !== "undefined") {
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", initNutriScanApp);
@@ -1904,6 +1992,7 @@ if (typeof module !== "undefined" && module.exports) {
         resetAllUserData,
         updateUserGreeting,
         NutriScanProfile,
+        setupWhatsNewModal,
     };
 }
 

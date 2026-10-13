@@ -142,7 +142,18 @@
     }
 
     function printDailyReport() {
-        if (typeof window !== "undefined") {
+        if (typeof root.triggerHaptic === "function") root.triggerHaptic(30);
+
+        // 1. Tenta acionar serviço de impressão nativo do Android WebView via NativeBridge
+        if (root.NutriScanNative && typeof root.NutriScanNative.printDietReport === "function") {
+            try {
+                root.NutriScanNative.printDietReport();
+                return;
+            } catch (_) {}
+        }
+
+        // 2. Navegadores Web normais (Chrome, Firefox, Safari, Edge): window.print() nativo
+        if (typeof window !== "undefined" && typeof window.print === "function") {
             window.print();
         }
     }

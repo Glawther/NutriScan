@@ -12,6 +12,8 @@ from app.engine.analyzer import (
     parse_additives,
 )
 from app.engine.diet_exporter import (
+    generate_diet_report_data,
+    generate_diet_report_html,
     generate_plain_text_summary,
     generate_whatsapp_summary,
 )
@@ -539,8 +541,139 @@ def test_fastapi_diet_export_endpoint():
             assert data_today["format"] == "whatsapp"
             assert "NutriScan - Resumo da Dieta" in data_today["text"]
             assert data_today["whatsapp_url"].startswith("https://api.whatsapp.com/send?text=")
+
+            # 4. Export in HTML format via /api/v1/diet/export?format=html
+            r_export_html = client.get("/api/v1/diet/export?date_str=2026-10-15&format=html")
+            assert r_export_html.status_code == 200
+            assert "text/html" in r_export_html.headers.get("content-type", "")
+            assert "NutriScan - Relatório da Dieta (15/10/2026)" in r_export_html.text
+            assert "Arroz Integral" in r_export_html.text
+            assert "Almoço" in r_export_html.text
+
+            # 5. Export in JSON format via /api/v1/diet/export?format=json
+            r_export_json = client.get("/api/v1/diet/export?date_str=2026-10-15&format=json")
+            assert r_export_json.status_code == 200
+            data_rep_json = r_export_json.json()
+            assert data_rep_json["date_formatted"] == "15/10/2026"
+            assert "kpis" in data_rep_json
+            assert "meals" in data_rep_json
+            assert "disclaimer" in data_rep_json
+
+            # 6. Standalone report endpoint /api/v1/diet/report (HTML default)
+            r_report_default = client.get("/api/v1/diet/report?date_str=2026-10-15&patient_name=Dr.+Silva")
+            assert r_report_default.status_code == 200
+            assert "text/html" in r_report_default.headers.get("content-type", "")
+            assert "Dr. Silva" in r_report_default.text
+            assert "Resumo Executivo dos KPIs Diários" in r_report_default.text
+            assert "Aviso de Responsabilidade Nutricional" in r_report_default.text or "Aviso:" in r_report_default.text
+
+            # 7. Standalone report endpoint with format=json
+            r_report_json = client.get("/api/v1/diet/report?date_str=2026-10-15&format=json&patient_name=Mariana+Costa")
+            assert r_report_json.status_code == 200
+            data_rep = r_report_json.json()
+            assert data_rep["patient"]["name"] == "Mariana Costa"
+            assert data_rep["kpis"]["calories"]["consumed"] >= 130
+            assert len(data_rep["meals"]) >= 4
         finally:
             client.delete(f"/api/v1/diet/diary/{created_id}")
+
+
+def test_diet_report_generator_engine():
+    diary_data = {
+        "date_str": "2026-10-16",
+        "consumed": {
+            "kcal": 1850.0,
+            "proteins_g": 140.0,
+            "carbohydrates_g": 180.0,
+            "fat_g": 55.0,
+            "sodium_mg": 1400.0,
+        },
+        "goals": {
+            "daily_kcal_limit": 2000.0,
+            "proteins_limit_g": 150.0,
+            "carbs_limit_g": 200.0,
+            "fat_limit_g": 65.0,
+            "sodium_limit_mg": 2000.0,
+        },
+        "entries": [
+            {
+                "meal_type": "Café da manhã",
+                "product_name": "Omelete com Queijo",
+                "portion_g": 120.0,
+                "kcal": 220.0,
+                "carbohydrates_g": 2.0,
+                "proteins_g": 18.0,
+                "fat_g": 16.0,
+            },
+            {
+                "meal_type": "Almoço",
+                "product_name": "Salmão com Legumes",
+                "portion_g": 300.0,
+                "kcal": 550.0,
+                "carbohydrates_g": 25.0,
+                "proteins_g": 45.0,
+                "fat_g": 22.0,
+            },
+            {
+                "meal_type": "Lanche",
+                "product_name": "Iogurte Natural + Frutas",
+                "portion_g": 200.0,
+                "kcal": 180.0,
+                "carbohydrates_g": 28.0,
+                "proteins_g": 10.0,
+                "fat_g": 3.0,
+            },
+            {
+                "meal_type": "Jantar",
+                "product_name": "Sopa de Frango com Legumes",
+                "portion_g": 350.0,
+                "kcal": 320.0,
+                "carbohydrates_g": 20.0,
+                "proteins_g": 35.0,
+                "fat_g": 8.0,
+            },
+        ],
+    }
+    water_data = {"amount_ml": 2200, "goal_ml": 2800}
+    profile_data = {
+        "name": "Carlos Eduardo",
+        "weight_kg": 80.0,
+        "height_cm": 180.0,
+        "age": 32,
+        "goal_type": "cutting",
+    }
+
+    # Test structured data generation
+    data = generate_diet_report_data(diary_data, water_data=water_data, profile_data=profile_data)
+    assert data["date_formatted"] == "16/10/2026"
+    assert data["patient"]["name"] == "Carlos Eduardo"
+    assert "Peso: 80.0 kg" in data["patient"]["details_line"]
+    assert "Emagrecimento" in data["patient"]["details_line"]
+    assert data["kpis"]["calories"]["consumed"] == 1850
+    assert data["kpis"]["calories"]["goal"] == 2000
+    assert data["kpis"]["calories"]["remaining"] == 150
+    assert data["kpis"]["hydration"]["consumed_ml"] == 2200
+    assert data["kpis"]["hydration"]["goal_ml"] == 2800
+
+    # Ensure all 4 meals are included
+    meal_names = [m["meal_name"] for m in data["meals"]]
+    assert "Café da manhã" in meal_names
+    assert "Almoço" in meal_names
+    assert "Lanche" in meal_names
+    assert "Jantar" in meal_names
+
+    # Test standalone HTML generation
+    html = generate_diet_report_html(diary_data, water_data=water_data, profile_data=profile_data)
+    assert "<!DOCTYPE html>" in html
+    assert "NS" in html
+    assert "NutriScan" in html
+    assert "Carlos Eduardo" in html
+    assert "16/10/2026" in html
+    assert "Omelete com Queijo" in html
+    assert "Salmão com Legumes" in html
+    assert "Sopa de Frango com Legumes" in html
+    assert "@media print" in html
+    assert "Aviso:" in html or "Não substitui" in html
 
 
 

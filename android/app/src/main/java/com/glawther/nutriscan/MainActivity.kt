@@ -180,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         webView.setBackgroundColor(Color.parseColor("#090d16"))
 
         // Register NativeBridge JavaScript Interface
-        webView.addJavascriptInterface(NativeBridge(this), "NutriScanNative")
+        webView.addJavascriptInterface(NativeBridge(this, webView), "NutriScanNative")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -345,7 +345,7 @@ class MainActivity : AppCompatActivity() {
      * Native JavaScript Interface Bridge
      * Exposes native haptic feedback, social sharing, and app environment detection to WebView JavaScript
      */
-    class NativeBridge(private val activity: Activity) {
+    class NativeBridge(private val activity: Activity, private val webView: WebView) {
 
         private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = activity.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
@@ -388,6 +388,22 @@ class MainActivity : AppCompatActivity() {
                     activity.startActivity(chooserIntent)
                 } catch (e: Exception) {
                     // Ignore share chooser errors
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun printDietReport() {
+            activity.runOnUiThread {
+                try {
+                    val printManager = activity.getSystemService(Context.PRINT_SERVICE) as? android.print.PrintManager
+                    if (printManager != null) {
+                        val printAdapter = webView.createPrintDocumentAdapter("NutriScan_Relatorio_Dieta")
+                        val jobName = "NutriScan Dieta - " + SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
+                        printManager.print(jobName, printAdapter, android.print.PrintAttributes.Builder().build())
+                    }
+                } catch (e: Exception) {
+                    // Fallback to standard window.print if available
                 }
             }
         }

@@ -58,3 +58,38 @@ test("generateDailySummaryText handles zero entries gracefully", () => {
     assert.ok(text.includes("Nenhuma refeição registrada"));
     assert.ok(text.includes("0 ml / 2500 ml"));
 });
+
+test("printDailyReport triggers window.print when in browser environment", () => {
+    let windowPrintCalled = false;
+    global.window = {
+        print: () => {
+            windowPrintCalled = true;
+        }
+    };
+    shareModule.printDailyReport();
+    assert.strictEqual(windowPrintCalled, true);
+    delete global.window;
+});
+
+test("printDailyReport prioritizes NutriScanNative on Android WebView", () => {
+    let nativePrintCalled = false;
+    let windowPrintCalled = false;
+    global.window = {
+        print: () => {
+            windowPrintCalled = true;
+        }
+    };
+    global.NutriScanNative = {
+        printDietReport: () => {
+            nativePrintCalled = true;
+        }
+    };
+
+    shareModule.printDailyReport();
+    assert.strictEqual(nativePrintCalled, true);
+    assert.strictEqual(windowPrintCalled, false);
+
+    delete global.NutriScanNative;
+    delete global.window;
+});
+

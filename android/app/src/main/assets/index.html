@@ -30,6 +30,7 @@
                 <div class="brand-actions-row">
                     <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">Perfil</button>
                     <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour guiado pelo app" aria-label="Tour do App">Tour do App</button>
+                    <button type="button" class="btn-whats-new-nav" id="btn-open-whats-new" title="Consultar novidades da versão 1.4" aria-label="Novidades da versão 1.4">Novidades v1.4</button>
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
@@ -105,6 +106,22 @@
 
         <!-- ABA 1: MINHA DIETA (HOJE) -->
         <section class="tab-panel active" role="tabpanel" id="panel-dieta" aria-labelledby="tab-btn-dieta">
+            <!-- CABEÇALHO EXECUTIVO EXCLUSIVO PARA IMPRESSÃO / PDF -->
+            <div class="print-only print-header">
+                <div class="print-brand-wrap">
+                    <div class="print-brand-logo">NS</div>
+                    <div>
+                        <h1 class="print-brand-title">NutriScan</h1>
+                        <p class="print-brand-subtitle">Relatório Diário de Dieta e Metas Nutricionais</p>
+                    </div>
+                </div>
+                <div class="print-meta-wrap">
+                    <div class="print-date" id="print-header-date">Data: Hoje</div>
+                    <div class="print-patient-name" id="print-header-patient">Paciente / Usuário: NutriScan</div>
+                    <div class="print-patient-meta" id="print-header-meta">Perfil padrão configurado</div>
+                </div>
+            </div>
+
             <!-- Navegador de Datas da Dieta -->
             <div class="diet-date-bar">
                 <button type="button" class="btn-date-nav" id="btn-date-prev" aria-label="Dia anterior">Ontem</button>
@@ -306,6 +323,17 @@
                     <div class="trends-bars-grid" id="trends-bars-container"></div>
                 </div>
             </div>
+
+            <!-- RODAPÉ EXECUTIVO EXCLUSIVO PARA IMPRESSÃO / PDF -->
+            <footer class="print-only print-footer">
+                <div class="print-disclaimer">
+                    <strong>Aviso de Responsabilidade Nutricional:</strong> Este relatório é um documento informativo gerado pelo aplicativo NutriScan com base nos registros do usuário e nas normas ANVISA (RDC 429/2020 e IN 75/2020). Não substitui prescrição médica, acompanhamento clínico individualizado ou consulta nutricional presencial.
+                </div>
+                <div class="print-issue-meta">
+                    <span id="print-footer-timestamp">Emissão: Hoje</span>
+                    <span>NutriScan v1.0 • Padrão ANVISA</span>
+                </div>
+            </footer>
         </section>
 
         <!-- ABA 2: FOTO DA FICHA TÉCNICA (TABELA NUTRICIONAL) -->
@@ -694,7 +722,7 @@
                     <div class="plate-taco-add-box">
                         <label for="plate-taco-search" class="field-label">+ Adicionar alimento da Tabela TACO:</label>
                         <div class="taco-search-input-wrap">
-                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar alimento (ex: mandioca, frango, azeite, aveia)..." autocomplete="off" />
+                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar alimento (ex: mandioca, frango, azeite, aveia)…" autocomplete="off" />
                             <div class="taco-suggestions-dropdown" id="plate-taco-suggestions" hidden></div>
                         </div>
                     </div>
@@ -844,7 +872,7 @@
                 <div class="profile-form-body">
                     <div class="profile-field-group">
                         <label class="field-label" for="profile-name">Nome <span class="text-subtle">(opcional)</span></label>
-                        <input type="text" id="profile-name" class="text-input" placeholder="Ex: Lucas, Camila..." autocomplete="name" />
+                        <input type="text" id="profile-name" class="text-input" placeholder="Ex: Lucas, Camila…" autocomplete="name" />
                     </div>
 
                     <div class="profile-grid-2">
@@ -911,6 +939,93 @@
                     <button type="button" class="btn-profile-skip" id="btn-profile-skip">Configurar mais tarde (padrão)</button>
                 </footer>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Novidades da Versão (#modal-whats-new) -->
+    <div class="whats-new-modal-backdrop" id="modal-whats-new" role="dialog" aria-modal="true" aria-labelledby="whats-new-title" hidden>
+        <div class="whats-new-bento-card" role="document">
+            <header class="whats-new-modal-header">
+                <div class="whats-new-header-info">
+                    <span class="whats-new-badge">VERSÃO 1.4.0</span>
+                    <h2 id="whats-new-title" class="whats-new-title">O que há de novo no NutriScan</h2>
+                </div>
+                <button type="button" class="btn-whats-new-close" id="btn-whats-new-close" aria-label="Fechar novidades">✕</button>
+            </header>
+
+            <div class="whats-new-body">
+                <section class="whats-new-highlight">
+                    <h3 class="whats-new-highlight-title">Redesign Minimalista</h3>
+                    <p class="whats-new-highlight-desc">Interface limpa em fundo branco com detalhes em verde esmeralda, alto contraste no padrão WCAG AA e remoção de poluição visual.</p>
+                </section>
+
+                <div class="whats-new-timeline">
+                    <article class="whats-new-entry">
+                        <div class="whats-new-entry-header">
+                            <span class="version-tag current">v1.4.0</span>
+                            <span class="version-date">Outubro 2026</span>
+                        </div>
+                        <ul class="whats-new-list">
+                            <li>Tema visual minimalista em branco e verde esmeralda com cartões organizados.</li>
+                            <li>Ajuste cuidadoso de contraste para leitura confortável em qualquer ambiente.</li>
+                            <li>Linguagem clara, direta e sem termos técnicos complicados.</li>
+                            <li>Painel de novidades acessível a qualquer momento pelo topo do aplicativo.</li>
+                        </ul>
+                    </article>
+
+                    <article class="whats-new-entry">
+                        <div class="whats-new-entry-header">
+                            <span class="version-tag">v1.3.0</span>
+                            <span class="version-date">Outubro 2026</span>
+                        </div>
+                        <ul class="whats-new-list">
+                            <li>Perfil pessoal com cálculo metabólico automático pela fórmula Mifflin-St Jeor.</li>
+                            <li>Tour guiado em 5 passos para novos usuários conhecerem cada área do app.</li>
+                            <li>Início com dados limpos para você montar seu dia alimentar do seu jeito.</li>
+                            <li>Metas seguras com piso calórico para proteger sua saúde.</li>
+                        </ul>
+                    </article>
+
+                    <article class="whats-new-entry">
+                        <div class="whats-new-entry-header">
+                            <span class="version-tag">v1.2.0</span>
+                            <span class="version-date">Outubro 2026</span>
+                        </div>
+                        <ul class="whats-new-list">
+                            <li>Scanner de foto do prato com reconhecimento de porções sem gastar sua internet.</li>
+                            <li>Mais de 150 alimentos da Tabela TACO com balanço de 6 micronutrientes essenciais.</li>
+                            <li>Adição rápida do prato inteiro direto no café, almoço ou jantar.</li>
+                        </ul>
+                    </article>
+
+                    <article class="whats-new-entry">
+                        <div class="whats-new-entry-header">
+                            <span class="version-tag">v1.1.0</span>
+                            <span class="version-date">Outubro 2026</span>
+                        </div>
+                        <ul class="whats-new-list">
+                            <li>Leitura de fotos de rótulos com alertas da ANVISA sobre excesso de açúcar, gordura e sódio.</li>
+                            <li>Leitor de código de barras pela câmera do celular com lanterna.</li>
+                            <li>Comparador de alimentos e exportação do diário para o WhatsApp.</li>
+                        </ul>
+                    </article>
+
+                    <article class="whats-new-entry">
+                        <div class="whats-new-entry-header">
+                            <span class="version-tag">v1.0.0</span>
+                            <span class="version-date">Outubro 2026</span>
+                        </div>
+                        <ul class="whats-new-list">
+                            <li>Lançamento oficial com diário alimentar completo e catálogo offline.</li>
+                            <li>Aplicativo nativo Android WebView rápido e leve.</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+
+            <footer class="whats-new-modal-footer">
+                <button type="button" class="btn-emerald-full" id="btn-whats-new-confirm">Entendido</button>
+            </footer>
         </div>
     </div>
 

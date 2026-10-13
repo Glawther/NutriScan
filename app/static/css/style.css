@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NutriScan — Bento Design System
+   NutriScan - Bento Design System
    Modular, card-based interface inspired by MacroFactor, Yuka & Apple Health
    Audited against Web Interface Guidelines & No-AI-Slop standards
    ========================================================================== */
@@ -1364,62 +1364,397 @@ h1, h2, h3, .brand-title, .product-title {
     }
 }
 
-/* Printable PDF & Window.Print Layout */
+/* ==========================================================================
+   Printable PDF & Window.Print Layout (Minimalista, Executivo e Profissional)
+   ========================================================================== */
+.print-only {
+    display: none;
+}
+
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+    }
+
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #111827 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    html,
     body {
         background-color: #ffffff !important;
         color: #111827 !important;
-        font-size: 12pt !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
+    /* Mostrar elementos exclusivos de impressão */
+    .print-only {
+        display: block !important;
+    }
+
+    /* Ocultar todos os elementos de interface de tela */
     .topbar,
     .nav-tabs,
     .mobile-bottom-nav,
+    .skip-link,
+    .diet-date-bar,
+    .quick-manual-box,
+    .goals-form,
     .btn-emerald,
     .btn-primary,
     .btn-secondary,
     .btn-secondary-full,
     .btn-primary-full,
-    .quick-manual-box,
-    .goals-form,
     .btn-camera,
+    .btn-delete,
+    .btn-water-add,
+    .btn-water-reset,
+    .btn-date-nav,
     .sample-chip,
     .chips-label,
     .ns-toast,
-    .skip-link,
+    .share-btn-group,
     #btn-share-whatsapp,
     #btn-copy-diet,
     #btn-print-diet,
-    .share-btn-group {
+    #btn-go-photo-scan,
+    #trends-widget-card,
+    .tab-panel:not(.active),
+    .cam-modal-backdrop,
+    .tour-modal-backdrop,
+    .profile-modal-backdrop,
+    .photo-controls-grid,
+    .scanner-controls-grid,
+    .compare-controls-grid,
+    input,
+    select,
+    button {
         display: none !important;
+    }
+
+    /* Garantir que a aba ativa ocupe largura total */
+    .tab-panel.active {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
     }
 
     .container,
     .main-content {
         max-width: 100% !important;
+        width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    .card {
-        background: #ffffff !important;
-        border: 1px solid #d1d5db !important;
-        box-shadow: none !important;
-        color: #111827 !important;
-        break-inside: avoid;
+    /* 1. Cabeçalho Minimalista Limpo */
+    .print-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        border-bottom: 2px solid #e5e7eb !important;
+        padding-bottom: 12px !important;
         margin-bottom: 16px !important;
     }
 
-    .data-table th,
-    .data-table td {
-        border-color: #e5e7eb !important;
+    .print-brand-wrap {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .print-brand-logo {
+        width: 38px !important;
+        height: 38px !important;
+        background: #059669 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 16px !important;
+        border-radius: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        letter-spacing: -0.5px !important;
+        border: 1px solid #047857 !important;
+    }
+
+    .print-brand-title {
+        font-size: 18pt !important;
+        font-weight: 800 !important;
         color: #111827 !important;
+        margin: 0 !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.5px !important;
+    }
+
+    .print-brand-subtitle {
+        font-size: 9pt !important;
+        color: #6b7280 !important;
+        margin: 2px 0 0 0 !important;
+    }
+
+    .print-meta-wrap {
+        text-align: right !important;
+    }
+
+    .print-date {
+        font-size: 13pt !important;
+        font-weight: 700 !important;
+        color: #059669 !important;
+    }
+
+    .print-patient-name {
+        font-size: 10pt !important;
+        font-weight: 600 !important;
+        color: #1f2937 !important;
+        margin-top: 2px !important;
+    }
+
+    .print-patient-meta {
+        font-size: 8.5pt !important;
+        color: #6b7280 !important;
+    }
+
+    /* 2. Resumo Executivo dos KPIs */
+    .diet-kpi-strip {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
     }
 
     .kpi-card {
         background: #f9fafb !important;
         border: 1px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        padding: 8px 10px !important;
         color: #111827 !important;
+        break-inside: avoid !important;
+    }
+
+    .kpi-row-top {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 4px !important;
+    }
+
+    .kpi-label {
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        color: #4b5563 !important;
+    }
+
+    .status-pill,
+    .kpi-pct {
+        font-size: 8pt !important;
+        font-weight: 600 !important;
+        background: #e5e7eb !important;
+        color: #1f2937 !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+    }
+
+    .kpi-main-numbers {
+        font-size: 12pt !important;
+        margin-bottom: 4px !important;
+    }
+
+    .kpi-value {
+        font-size: 13pt !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+    }
+
+    .kpi-divider {
+        font-size: 9pt !important;
+        color: #6b7280 !important;
+        font-weight: normal !important;
+    }
+
+    .progress-track {
+        height: 4px !important;
+        background: #e5e7eb !important;
+        border-radius: 2px !important;
+        overflow: hidden !important;
+    }
+
+    .progress-fill {
+        height: 100% !important;
+        background: #059669 !important;
+    }
+
+    /* Card de Hidratação integrado no resumo impresso */
+    .water-card {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 14px !important;
+        break-inside: avoid !important;
+    }
+
+    .water-card .section-header-inline {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 6px !important;
+    }
+
+    .water-card h3 {
+        font-size: 10.5pt !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        margin: 0 !important;
+    }
+
+    .water-kpi-main {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 8px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .water-val {
+        font-size: 13pt !important;
+        font-weight: 700 !important;
+        color: #0369a1 !important;
+    }
+
+    .water-goal-sub {
+        font-size: 9pt !important;
+        color: #6b7280 !important;
+    }
+
+    /* 3. Tabela Formatada e Limpa das Refeições */
+    .diet-grid {
+        display: block !important;
+    }
+
+    .diet-grid > .card {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        padding: 12px !important;
+        margin-bottom: 14px !important;
+        break-inside: auto !important;
+    }
+
+    .section-header-inline {
+        border-bottom: 1px solid #f3f4f6 !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .section-header-inline h2 {
+        font-size: 12pt !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        margin: 0 !important;
+    }
+
+    .section-desc {
+        font-size: 8.5pt !important;
+        color: #6b7280 !important;
+        margin: 2px 0 0 0 !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    .data-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9.5pt !important;
+    }
+
+    .data-table th {
+        background-color: #f3f4f6 !important;
+        color: #374151 !important;
+        font-weight: 700 !important;
+        font-size: 8.5pt !important;
+        text-transform: uppercase !important;
+        padding: 6px 8px !important;
+        border: 1px solid #e5e7eb !important;
+        text-align: left !important;
+    }
+
+    .data-table td {
+        padding: 6px 8px !important;
+        border: 1px solid #e5e7eb !important;
+        color: #1f2937 !important;
+    }
+
+    /* Ocultar coluna de Ação (botão remover) na impressão */
+    .data-table th:last-child,
+    .data-table td:last-child {
+        display: none !important;
+    }
+
+    .data-table tr {
+        break-inside: avoid !important;
+    }
+
+    .meal-badge {
+        display: inline-block !important;
+        font-weight: 700 !important;
+        font-size: 8pt !important;
+        color: #047857 !important;
+        background: #ecfdf5 !important;
+        padding: 2px 6px !important;
+        border-radius: 3px !important;
+        border: 1px solid #a7f3d0 !important;
+    }
+
+    .source-tag {
+        display: inline-block !important;
+        font-size: 7.5pt !important;
+        color: #6b7280 !important;
+        margin-left: 4px !important;
+    }
+
+    /* 4. Rodapé de Responsabilidade Nutricional */
+    .print-footer {
+        border-top: 1px solid #e5e7eb !important;
+        padding-top: 10px !important;
+        margin-top: 16px !important;
+        font-size: 8pt !important;
+        color: #6b7280 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+        break-inside: avoid !important;
+    }
+
+    .print-disclaimer {
+        max-width: 75% !important;
+        line-height: 1.35 !important;
+    }
+
+    .print-issue-meta {
+        text-align: right !important;
+        white-space: nowrap !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
     }
 }
 
@@ -2348,7 +2683,7 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 /* ==========================================================================
-   NutriScan — Interactive App Tour Modal & Spotlight (#modal-app-tour)
+   NutriScan - Interactive App Tour Modal & Spotlight (#modal-app-tour)
    Bento Design System, WCAG AA Contrast, Focus Management & Reduced-Motion
    ========================================================================== */
 
@@ -2968,6 +3303,216 @@ h1, h2, h3, .brand-title, .product-title {
     .brand-actions-row {
         margin-top: 6px;
         margin-left: 0;
+    }
+}
+
+/* ==========================================================================
+   Modal "O que há de novo na v1.4" e Botão Discreto de Novidades
+   ========================================================================== */
+
+.btn-whats-new-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f1f5f9;
+    border: 1px solid var(--border-card);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-whats-new-nav:hover {
+    background: var(--bg-hover);
+    border-color: var(--brand-emerald);
+    color: var(--brand-emerald);
+}
+
+.btn-whats-new-nav:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.whats-new-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9995;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    padding: 16px;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+.whats-new-modal-backdrop[hidden] {
+    display: none;
+}
+
+.whats-new-bento-card {
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    background: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 0 0 1px #e2e8f0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.whats-new-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px 22px 14px 22px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+    flex-shrink: 0;
+}
+
+.whats-new-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--brand-emerald);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.whats-new-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.btn-whats-new-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-whats-new-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.whats-new-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.whats-new-highlight {
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+}
+
+.whats-new-highlight-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-emerald);
+    margin: 0 0 6px 0;
+}
+
+.whats-new-highlight-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.whats-new-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.whats-new-entry {
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+}
+
+.whats-new-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.version-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+}
+
+.version-tag.current {
+    background: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.version-date {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.whats-new-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.whats-new-modal-footer {
+    display: flex;
+    padding: 14px 22px 18px 22px;
+    background: var(--bg-tile-elevated);
+    border-top: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .whats-new-bento-card {
+        max-height: 90vh;
+    }
+    .whats-new-body {
+        padding: 14px 16px;
+    }
+    .whats-new-modal-footer {
+        padding: 12px 16px 16px 16px;
     }
 }
 
