@@ -20,9 +20,16 @@
         <div class="container topbar-inner">
             <div class="brand-block">
                 <div class="brand-logo" aria-hidden="true">NS</div>
-                <div>
+                <div class="brand-info-wrap">
+                    <div class="brand-greeting-row">
+                        <span id="user-greeting-text" class="user-greeting">Olá! Seja bem-vindo</span>
+                    </div>
                     <h1 class="brand-title">NutriScan</h1>
                     <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
+                </div>
+                <div class="brand-actions-row">
+                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">👤 Perfil</button>
+                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour interativo pelo app" aria-label="Tour do App">🎓 Tour do App</button>
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
@@ -31,6 +38,7 @@
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" id="tab-btn-prato">5. Foto do Prato (IA)</button>
+                <button type="button" class="btn-tour-nav" id="btn-start-tour" title="Iniciar tour interativo pelo app" aria-label="Iniciar tour interativo" style="display: none;">✨ Tour do App</button>
             </nav>
         </div>
     </header>
@@ -783,10 +791,135 @@
         </div>
     </div>
 
+    <!-- Modal do Tour Interativo pelo App (#modal-app-tour) -->
+    <div class="tour-modal-backdrop" id="modal-app-tour" role="dialog" aria-modal="true" aria-labelledby="tour-step-title" aria-describedby="tour-step-desc" hidden>
+        <div class="tour-backdrop-overlay" id="tour-backdrop-overlay" aria-hidden="true"></div>
+        <div class="tour-spotlight-cutout" id="tour-spotlight-cutout" aria-hidden="true"></div>
+
+        <div class="tour-bento-card" role="document">
+            <!-- Dynamic Progress Bar -->
+            <div class="tour-progress-track" role="progressbar" id="tour-progress-bar" aria-label="Progresso do Tour" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                <div class="tour-progress-fill" id="tour-progress-fill" style="width: 20%;"></div>
+            </div>
+
+            <header class="tour-card-header">
+                <div class="tour-header-left">
+                    <span class="tour-step-badge" id="tour-step-badge">Passo 1 de 5</span>
+                </div>
+                <button type="button" class="tour-btn-close" id="btn-close-tour-modal" aria-label="Fechar tour interativo">✕</button>
+            </header>
+
+            <div class="tour-card-body">
+                <div class="tour-icon-wrap" id="tour-step-icon" aria-hidden="true">🥗</div>
+                <div class="tour-text-wrap">
+                    <h2 class="tour-title" id="tour-step-title">1. Seu Painel Diário da Dieta</h2>
+                    <p class="tour-description" id="tour-step-desc">Acompanhe seu consumo de calorias e macros calculado especialmente para o seu peso e objetivo. Registre água e veja o saldo restante de cada refeição.</p>
+                </div>
+            </div>
+
+            <!-- Dots Indicator -->
+            <div class="tour-dots-row" id="tour-dots-container" aria-hidden="true"></div>
+
+            <footer class="tour-card-footer">
+                <button type="button" class="tour-btn-skip" id="btn-skip-tour">Pular tour</button>
+                <div class="tour-btn-group-nav">
+                    <button type="button" class="tour-btn-prev" id="btn-prev-tour" style="display: none;">◀ Anterior</button>
+                    <button type="button" class="tour-btn-next" id="btn-next-tour">Próximo ▶</button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil & Onboarding do Usuário (#modal-profile-onboarding) -->
+    <div class="profile-modal-backdrop" id="modal-profile-onboarding" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" hidden>
+        <div class="profile-bento-card" role="document">
+            <header class="profile-modal-header">
+                <div class="profile-header-info">
+                    <span class="profile-badge">PERFIL & DIETA</span>
+                    <h2 id="profile-modal-title" class="profile-title">Configurar Perfil Nutricional</h2>
+                </div>
+                <button type="button" class="btn-profile-close" id="btn-profile-close" aria-label="Fechar modal de perfil">✕</button>
+            </header>
+
+            <form id="profile-onboarding-form" class="profile-form">
+                <div class="profile-form-body">
+                    <div class="profile-field-group">
+                        <label class="field-label" for="profile-name">Nome <span class="text-subtle">(opcional)</span></label>
+                        <input type="text" id="profile-name" class="text-input" placeholder="Ex: Lucas, Camila..." autocomplete="name" />
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-gender">Sexo</label>
+                            <select id="profile-gender" class="select-input">
+                                <option value="masculino" selected>Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-age">Idade (anos)</label>
+                            <input type="number" id="profile-age" class="text-input" value="28" min="14" max="110" inputmode="numeric" required />
+                        </div>
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-weight">Peso (kg)</label>
+                            <input type="number" id="profile-weight" class="text-input" value="75" min="30" max="250" step="0.5" inputmode="decimal" required />
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-height">Altura (cm)</label>
+                            <input type="number" id="profile-height" class="text-input" value="175" min="100" max="240" inputmode="numeric" required />
+                        </div>
+                    </div>
+
+                    <div class="profile-grid-2">
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-activity">Nível de atividade</label>
+                            <select id="profile-activity" class="select-input">
+                                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                                <option value="leve">Leve (exercício 1 a 3x/sem)</option>
+                                <option value="moderado" selected>Moderado (exercício 3 a 5x/sem)</option>
+                                <option value="intenso">Intenso (exercício 6 a 7x/sem)</option>
+                            </select>
+                        </div>
+                        <div class="profile-field-group">
+                            <label class="field-label" for="profile-goal">Objetivo</label>
+                            <select id="profile-goal" class="select-input">
+                                <option value="cutting" selected>Emagrecer (déficit -400 kcal)</option>
+                                <option value="manutencao">Manter peso (manutenção)</option>
+                                <option value="bulking">Ganhar Massa (superávit +350 kcal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Bar -->
+                    <div class="profile-preview-strip" id="profile-preview-strip" aria-live="polite">
+                        <div class="preview-item">
+                            <span class="preview-label">Calorias sugeridas:</span>
+                            <strong class="preview-value text-emerald" id="profile-preview-kcal">~2000 kcal</strong>
+                        </div>
+                        <span class="preview-divider" aria-hidden="true">|</span>
+                        <div class="preview-item">
+                            <span class="preview-label">Meta de Água:</span>
+                            <strong class="preview-value text-blue" id="profile-preview-water">~2625 ml</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="profile-modal-footer">
+                    <button type="submit" class="btn-emerald-full" id="btn-save-profile">Criar perfil e começar</button>
+                    <button type="button" class="btn-profile-skip" id="btn-profile-skip">Configurar mais tarde (padrão)</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
     <script src="static/js/share_export.js"></script>
     <script src="static/js/barcode_cam.js"></script>
     <script src="static/js/label_parser.js"></script>
     <script src="static/js/plate_scanner.js"></script>
+    <script src="static/js/app_tour.js"></script>
     <script src="static/js/app.js"></script>
 </body>
 </html>
