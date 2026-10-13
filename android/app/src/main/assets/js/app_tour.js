@@ -216,9 +216,20 @@
         triggerHaptic(30);
 
         // Ensure modal is visible and accessible
-        modal.hidden = false;
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
+        const applyTourOpen = () => {
+            modal.hidden = false;
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+        };
+        if (typeof document !== "undefined" && document.startViewTransition) {
+            try {
+                document.startViewTransition(applyTourOpen);
+            } catch (_) {
+                applyTourOpen();
+            }
+        } else {
+            applyTourOpen();
+        }
 
         // Progress bar percentage
         const progressFill = document.getElementById("tour-progress-fill");
@@ -277,7 +288,7 @@
             const isLast = currentStepIndex === TOUR_STEPS.length - 1;
             nextBtn.textContent = isLast ? "Concluir Tour ✓" : "Próximo ▶";
             nextBtn.setAttribute("aria-label", isLast ? "Concluir tour" : "Ir para o próximo passo");
-            // Focus next button for seamless keyboard navigation
+            // Focus next button for direct keyboard navigation
             try {
                 nextBtn.focus();
             } catch (_) {}
@@ -357,9 +368,20 @@
         if (typeof document !== "undefined") {
             const modal = document.getElementById("modal-app-tour");
             if (modal) {
-                modal.hidden = true;
-                modal.classList.remove("is-open");
-                modal.setAttribute("aria-hidden", "true");
+                const applyTourClose = () => {
+                    modal.hidden = true;
+                    modal.classList.remove("is-open");
+                    modal.setAttribute("aria-hidden", "true");
+                };
+                if (typeof document !== "undefined" && document.startViewTransition) {
+                    try {
+                        document.startViewTransition(applyTourClose);
+                    } catch (_) {
+                        applyTourClose();
+                    }
+                } else {
+                    applyTourClose();
+                }
             }
 
             const spotlightEl = document.getElementById("tour-spotlight-cutout");

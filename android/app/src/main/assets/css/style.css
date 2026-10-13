@@ -33,6 +33,7 @@
     /* Accent & Brand (Emerald Green) */
     --brand-emerald: #10b981;
     --brand-emerald-hover: #059669;
+    --brand-emerald-text: #047857;
     --brand-blue: #0284c7;
     --brand-blue-hover: #0369a1;
     --brand-danger: #dc2626;
@@ -113,6 +114,15 @@ h1, h2, h3, .brand-title, .product-title {
 .kpi-pct,
 .macro-box-val,
 .macro-box-pct,
+.water-val,
+.kpi-mini-val,
+.macro-badge,
+.stepper-input,
+.micro-tile-value,
+.micro-tile-pct,
+.plate-kpi-val,
+.compare-kpi-val,
+.diet-date-badge,
 .data-table td,
 .data-table th,
 .ean-badge,
@@ -200,12 +210,12 @@ h1, h2, h3, .brand-title, .product-title {
     background: transparent;
     color: var(--text-secondary);
     border: none;
-    padding: 7px 14px;
+    padding: 10px 16px;
     border-radius: var(--radius-sm);
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    min-height: 36px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -466,10 +476,10 @@ h1, h2, h3, .brand-title, .product-title {
     background-color: var(--bg-tile-elevated);
     color: var(--text-primary);
     border: 1px solid var(--border-card);
-    padding: 8px 14px;
-    font-size: 12.5px;
+    padding: 10px 16px;
+    font-size: 13px;
     font-weight: 600;
-    min-height: 38px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -489,9 +499,9 @@ h1, h2, h3, .brand-title, .product-title {
 .btn-primary {
     background-color: var(--brand-blue);
     color: #ffffff;
-    padding: 8px 16px;
+    padding: 10px 18px;
     font-size: 13px;
-    min-height: 38px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -504,10 +514,10 @@ h1, h2, h3, .brand-title, .product-title {
 .btn-emerald {
     background-color: var(--brand-emerald);
     color: #ffffff;
-    padding: 8px 16px;
-    font-size: 12.5px;
+    padding: 10px 18px;
+    font-size: 13px;
     font-weight: 700;
-    min-height: 38px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -730,7 +740,7 @@ h1, h2, h3, .brand-title, .product-title {
 
 .save-feedback {
     font-size: 12px;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     font-weight: 600;
     min-height: 18px;
     text-align: center;
@@ -754,7 +764,7 @@ h1, h2, h3, .brand-title, .product-title {
 
 .upload-file-label {
     font-size: 12px;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     font-weight: 600;
 }
 
@@ -1306,7 +1316,7 @@ h1, h2, h3, .brand-title, .product-title {
     }
 
     .mob-nav-btn.active {
-        color: var(--brand-emerald-hover);
+        color: var(--brand-emerald-text);
         background-color: rgba(16, 185, 129, 0.1);
         font-weight: 700;
     }
@@ -1801,10 +1811,14 @@ h1, h2, h3, .brand-title, .product-title {
     background: transparent;
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: var(--radius-sm);
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
@@ -1851,9 +1865,13 @@ h1, h2, h3, .brand-title, .product-title {
     border: 1px solid rgba(56, 189, 248, 0.25);
     color: var(--brand-blue);
     border-radius: var(--radius-sm);
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 700;
-    padding: 8px 10px;
+    padding: 10px 12px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.05s ease;
 }
@@ -1943,7 +1961,7 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .trend-col.is-today .trend-day-label {
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     font-weight: 800;
 }
 
@@ -1989,7 +2007,7 @@ h1, h2, h3, .brand-title, .product-title {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
 }
 
 .cam-title {
@@ -2004,12 +2022,13 @@ h1, h2, h3, .brand-title, .product-title {
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
     border-radius: 8px;
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
 .cam-btn-icon:hover {
@@ -2090,7 +2109,7 @@ h1, h2, h3, .brand-title, .product-title {
 .cam-btn-action,
 .cam-btn-secondary {
     flex: 1;
-    height: 40px;
+    min-height: 44px;
     border-radius: 8px;
     font-size: 13.5px;
     font-weight: 600;
@@ -2231,8 +2250,8 @@ h1, h2, h3, .brand-title, .product-title {
 .plate-preset-chip.active {
     background: var(--bg-tile-highlight);
     border-color: var(--brand-emerald);
-    color: var(--brand-emerald);
-    font-weight: 600;
+    color: var(--brand-emerald-text);
+    font-weight: 700;
 }
 
 /* Card 2: Plate Preview Viewport & Bounding Chips */
@@ -2412,12 +2431,12 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-step {
-    width: 28px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -2435,15 +2454,16 @@ h1, h2, h3, .brand-title, .product-title {
     display: inline-flex;
     align-items: center;
     padding: 0 4px;
+    height: 44px;
 }
 
 .stepper-input {
-    width: 42px;
-    height: 30px;
+    width: 46px;
+    height: 44px;
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 700;
     text-align: center;
     font-variant-numeric: tabular-nums;
@@ -2464,14 +2484,17 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .btn-remove-item {
-    width: 28px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -2541,8 +2564,8 @@ h1, h2, h3, .brand-title, .product-title {
 
 .suggest-add-badge {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--brand-emerald);
+    font-weight: 700;
+    color: var(--brand-emerald-text);
 }
 
 .taco-no-result {
@@ -2602,7 +2625,7 @@ h1, h2, h3, .brand-title, .product-title {
 
 .status-pill.pill-optimal {
     background: rgba(16, 185, 129, 0.15);
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
@@ -2694,20 +2717,21 @@ h1, h2, h3, .brand-title, .product-title {
     gap: 6px;
     background: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.35);
-    color: var(--brand-emerald);
-    padding: 6px 14px;
+    color: var(--brand-emerald-text);
+    padding: 10px 16px;
     border-radius: var(--radius-pill);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
+    min-height: 44px;
     transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     white-space: nowrap;
     margin-left: auto;
 }
 
 .btn-tour-nav:hover {
-    background: rgba(16, 185, 129, 0.22);
-    border-color: var(--brand-emerald);
+    background: var(--brand-emerald-hover);
+    border-color: var(--brand-emerald-hover);
     color: #ffffff;
 }
 
@@ -2823,7 +2847,7 @@ h1, h2, h3, .brand-title, .product-title {
     padding: 3px 10px;
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.35);
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2832,8 +2856,8 @@ h1, h2, h3, .brand-title, .product-title {
 }
 
 .tour-btn-close {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3082,8 +3106,8 @@ h1, h2, h3, .brand-title, .product-title {
 
 .user-greeting {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--brand-emerald);
+    font-weight: 700;
+    color: var(--brand-emerald-text);
     letter-spacing: 0.2px;
     display: inline-block;
 }
@@ -3102,17 +3126,23 @@ h1, h2, h3, .brand-title, .product-title {
     background: #f1f5f9;
     border: 1px solid var(--border-card);
     color: var(--text-primary);
-    padding: 6px 12px;
+    padding: 10px 16px;
     border-radius: var(--radius-pill);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
+    min-height: 44px;
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .btn-topbar-profile:hover {
     background: var(--bg-hover);
     border-color: var(--brand-emerald);
+}
+
+.btn-topbar-profile:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
 }
 
 /* Profile Onboarding Bento Modal Backdrop */
@@ -3158,7 +3188,7 @@ h1, h2, h3, .brand-title, .product-title {
 .profile-badge {
     font-size: 10px;
     font-weight: 800;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     background: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.25);
     padding: 2px 8px;
@@ -3317,18 +3347,19 @@ h1, h2, h3, .brand-title, .product-title {
     background: #f1f5f9;
     border: 1px solid var(--border-card);
     color: var(--text-primary);
-    padding: 6px 12px;
+    padding: 10px 16px;
     border-radius: var(--radius-pill);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
+    min-height: 44px;
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .btn-whats-new-nav:hover {
     background: var(--bg-hover);
     border-color: var(--brand-emerald);
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
 }
 
 .btn-whats-new-nav:focus-visible {
@@ -3380,7 +3411,7 @@ h1, h2, h3, .brand-title, .product-title {
 .whats-new-badge {
     font-size: 10px;
     font-weight: 800;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     background: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.25);
     padding: 2px 8px;
@@ -3403,8 +3434,8 @@ h1, h2, h3, .brand-title, .product-title {
     font-size: 18px;
     color: var(--text-muted);
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
@@ -3435,7 +3466,7 @@ h1, h2, h3, .brand-title, .product-title {
 .whats-new-highlight-title {
     font-size: 14px;
     font-weight: 700;
-    color: var(--brand-emerald);
+    color: var(--brand-emerald-text);
     margin: 0 0 6px 0;
 }
 
@@ -3515,6 +3546,177 @@ h1, h2, h3, .brand-title, .product-title {
         padding: 12px 16px 16px 16px;
     }
 }
+
+/* ==========================================================================
+   View Transitions API (Native Fluid Transitions & Morphing)
+   Smooth cross-fades, tab morphing, KPI pulse, and modal overlays
+   ========================================================================== */
+
+/* Interactivity during transitions: allows taps/clicks without blocking */
+::view-transition {
+    pointer-events: none;
+}
+
+/* Root cross-fade animations (160ms - 200ms) */
+::view-transition-old(root) {
+    animation: 160ms cubic-bezier(0.2, 0, 0, 1) both vt-root-fade-out;
+}
+
+::view-transition-new(root) {
+    animation: 200ms cubic-bezier(0.2, 0, 0, 1) both vt-root-fade-in;
+}
+
+@keyframes vt-root-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes vt-root-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Element-specific view transition names */
+.tab-panel.active {
+    view-transition-name: tab-panel;
+}
+
+#diet-kpi-strip {
+    view-transition-name: diet-kpi-strip;
+}
+
+#meal-list {
+    view-transition-name: meal-list;
+}
+
+#modal-profile-onboarding.is-open {
+    view-transition-name: modal-profile;
+}
+
+#modal-whats-new.is-open {
+    view-transition-name: modal-whats-new;
+}
+
+#modal-app-tour.is-open {
+    view-transition-name: modal-tour;
+}
+
+/* Tab Panel Transitions (Lateral seamless cross-fade with subtle vertical translation) */
+::view-transition-group(tab-panel) {
+    animation-duration: 210ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(tab-panel) {
+    animation: 150ms cubic-bezier(0.2, 0, 0, 1) both vt-panel-out;
+}
+
+::view-transition-new(tab-panel) {
+    animation: 210ms cubic-bezier(0.2, 0, 0, 1) both vt-panel-in;
+}
+
+@keyframes vt-panel-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes vt-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Diet KPI Strip (Calorie ring & macro bars morph fluidly without jumping) */
+::view-transition-group(diet-kpi-strip) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Meal List Transition (Smooth update when meals added/removed) */
+::view-transition-group(meal-list) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(meal-list) {
+    animation: 150ms ease-out both vt-root-fade-out;
+}
+
+::view-transition-new(meal-list) {
+    animation: 210ms ease-out both vt-root-fade-in;
+}
+
+/* Modal Overlays & Dialogs (Profile Onboarding, What's New, Tour) */
+::view-transition-group(modal-profile),
+::view-transition-group(modal-whats-new),
+::view-transition-group(modal-tour) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+    z-index: 99999;
+}
+
+::view-transition-old(modal-profile),
+::view-transition-old(modal-whats-new),
+::view-transition-old(modal-tour) {
+    animation: 150ms cubic-bezier(0.2, 0, 0, 1) both vt-modal-out;
+}
+
+::view-transition-new(modal-profile),
+::view-transition-new(modal-whats-new),
+::view-transition-new(modal-tour) {
+    animation: 220ms cubic-bezier(0.2, 0, 0, 1) both vt-modal-in;
+}
+
+@keyframes vt-modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes vt-modal-out {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.97) translateY(8px);
+    }
+}
+
+/* Reduced Motion Compliance for View Transitions */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}
+
 
 
 

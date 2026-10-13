@@ -213,22 +213,38 @@ const OFFLINE_CATALOG = [
 function switchTab(rawTabName) {
     if (typeof window.triggerHaptic === "function") window.triggerHaptic(25);
     const tabName = rawTabName === "compare" ? "comparar" : rawTabName;
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-        const isActive = btn.dataset.tab === tabName;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-selected", isActive ? "true" : "false");
-        btn.setAttribute("tabindex", isActive ? "0" : "-1");
-    });
-    document.querySelectorAll(".mob-nav-btn").forEach((btn) => {
-        const isActive = btn.dataset.tab === tabName;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-    document.querySelectorAll(".tab-panel").forEach((panel) => {
-        const isActive = panel.id === `panel-${tabName}`;
-        panel.classList.toggle("active", isActive);
-        panel.hidden = !isActive;
-    });
+
+    function applyTabSwitch(targetTab) {
+        if (typeof document === "undefined") return;
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+            const isActive = btn.dataset.tab === targetTab;
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+            btn.setAttribute("tabindex", isActive ? "0" : "-1");
+        });
+        document.querySelectorAll(".mob-nav-btn").forEach((btn) => {
+            const isActive = btn.dataset.tab === targetTab;
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        document.querySelectorAll(".tab-panel").forEach((panel) => {
+            const isActive = panel.id === `panel-${targetTab}`;
+            panel.classList.toggle("active", isActive);
+            panel.hidden = !isActive;
+        });
+    }
+
+    if (typeof document !== "undefined" && document.startViewTransition) {
+        try {
+            document.startViewTransition(() => {
+                applyTabSwitch(tabName);
+            });
+        } catch (_) {
+            applyTabSwitch(tabName);
+        }
+    } else {
+        applyTabSwitch(tabName);
+    }
 }
 window.switchTab = switchTab;
 
@@ -872,11 +888,22 @@ function renderTrends(data) {
 }
 
 window.removeDiaryItem = async function (entryId) {
+    if (typeof window.triggerHaptic === "function") window.triggerHaptic(30);
     if (isOnline()) {
         try {
             const res = await fetch(`/api/v1/diet/diary/${entryId}`, { method: "DELETE" });
             if (res.ok) {
-                await loadDietToday();
+                if (typeof document !== "undefined" && document.startViewTransition) {
+                    try {
+                        await document.startViewTransition(async () => {
+                            await loadDietToday();
+                        }).finished;
+                    } catch (_) {
+                        await loadDietToday();
+                    }
+                } else {
+                    await loadDietToday();
+                }
                 return;
             }
         } catch (_) {}
@@ -886,7 +913,18 @@ window.removeDiaryItem = async function (entryId) {
     try {
         localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
     } catch (_) {}
-    renderDietToday(buildOfflineSummary(state));
+    const summary = buildOfflineSummary(state);
+    if (typeof document !== "undefined" && document.startViewTransition) {
+        try {
+            document.startViewTransition(() => {
+                renderDietToday(summary);
+            });
+        } catch (_) {
+            renderDietToday(summary);
+        }
+    } else {
+        renderDietToday(summary);
+    }
 };
 
 async function addDiaryEntryToDiet(payload) {
@@ -899,7 +937,17 @@ async function addDiaryEntryToDiet(payload) {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                await loadDietToday();
+                if (typeof document !== "undefined" && document.startViewTransition) {
+                    try {
+                        await document.startViewTransition(async () => {
+                            await loadDietToday();
+                        }).finished;
+                    } catch (_) {
+                        await loadDietToday();
+                    }
+                } else {
+                    await loadDietToday();
+                }
                 return;
             }
         } catch (_) {}
@@ -911,7 +959,18 @@ async function addDiaryEntryToDiet(payload) {
     try {
         localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
     } catch (_) {}
-    renderDietToday(buildOfflineSummary(state));
+    const summary = buildOfflineSummary(state);
+    if (typeof document !== "undefined" && document.startViewTransition) {
+        try {
+            document.startViewTransition(() => {
+                renderDietToday(summary);
+            });
+        } catch (_) {
+            renderDietToday(summary);
+        }
+    } else {
+        renderDietToday(summary);
+    }
 }
 window.addDiaryEntryToDiet = addDiaryEntryToDiet;
 window.loadDietToday = loadDietToday;
@@ -1827,17 +1886,42 @@ function setupProfileOnboardingModal() {
             if (inputGoal) inputGoal.value = profile.goal_type || "cutting";
         }
         updatePreview();
-        modal.hidden = false;
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
+        const applyOpen = () => {
+            modal.hidden = false;
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+        };
+
+        if (typeof document !== "undefined" && document.startViewTransition) {
+            try {
+                document.startViewTransition(applyOpen);
+            } catch (_) {
+                applyOpen();
+            }
+        } else {
+            applyOpen();
+        }
+
         if (typeof window.triggerHaptic === "function") window.triggerHaptic(30);
     }
 
     function closeModal() {
         if (!modal) return;
-        modal.hidden = true;
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
+        const applyClose = () => {
+            modal.hidden = true;
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+        };
+
+        if (typeof document !== "undefined" && document.startViewTransition) {
+            try {
+                document.startViewTransition(applyClose);
+            } catch (_) {
+                applyClose();
+            }
+        } else {
+            applyClose();
+        }
     }
 
     if (btnOpenProfile) {
@@ -1873,11 +1957,13 @@ function setupProfileOnboardingModal() {
         }
     });
 
-    window.addEventListener("keydown", (e) => {
-        if (!modal.hidden && e.key === "Escape") {
-            closeModal();
-        }
-    });
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+        window.addEventListener("keydown", (e) => {
+            if (!modal.hidden && e.key === "Escape") {
+                closeModal();
+            }
+        });
+    }
 
     // Attach input listeners for live preview
     [inputGender, inputAge, inputWeight, inputHeight, inputActivity, inputGoal].forEach((el) => {
@@ -1932,17 +2018,42 @@ function setupWhatsNewModal() {
 
     function openModal() {
         if (!modal) return;
-        modal.hidden = false;
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
+        const applyOpen = () => {
+            modal.hidden = false;
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+        };
+
+        if (typeof document !== "undefined" && document.startViewTransition) {
+            try {
+                document.startViewTransition(applyOpen);
+            } catch (_) {
+                applyOpen();
+            }
+        } else {
+            applyOpen();
+        }
+
         if (typeof window.triggerHaptic === "function") window.triggerHaptic(30);
     }
 
     function closeModal() {
         if (!modal) return;
-        modal.hidden = true;
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
+        const applyClose = () => {
+            modal.hidden = true;
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+        };
+
+        if (typeof document !== "undefined" && document.startViewTransition) {
+            try {
+                document.startViewTransition(applyClose);
+            } catch (_) {
+                applyClose();
+            }
+        } else {
+            applyClose();
+        }
     }
 
     if (btnOpen) {
@@ -1965,11 +2076,13 @@ function setupWhatsNewModal() {
         });
     }
 
-    window.addEventListener("keydown", (e) => {
-        if (modal && !modal.hidden && e.key === "Escape") {
-            closeModal();
-        }
-    });
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+        window.addEventListener("keydown", (e) => {
+            if (modal && !modal.hidden && e.key === "Escape") {
+                closeModal();
+            }
+        });
+    }
 
     return { openModal, closeModal };
 }
@@ -1993,6 +2106,8 @@ if (typeof module !== "undefined" && module.exports) {
         updateUserGreeting,
         NutriScanProfile,
         setupWhatsNewModal,
+        setupProfileOnboardingModal,
+        switchTab,
     };
 }
 

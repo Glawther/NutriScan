@@ -28,9 +28,9 @@
                     <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
                 </div>
                 <div class="brand-actions-row">
-                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">Perfil</button>
-                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour guiado pelo app" aria-label="Tour do App">Tour do App</button>
-                    <button type="button" class="btn-whats-new-nav" id="btn-open-whats-new" title="Consultar novidades da versão 1.4" aria-label="Novidades da versão 1.4">Novidades v1.4</button>
+                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário" aria-haspopup="dialog" aria-expanded="false">Perfil</button>
+                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour guiado pelo app" aria-label="Tour do App" aria-haspopup="dialog" aria-expanded="false">Tour do App</button>
+                    <button type="button" class="btn-whats-new-nav" id="btn-open-whats-new" title="Consultar novidades da versão 1.4" aria-label="Novidades da versão 1.4" aria-haspopup="dialog" aria-expanded="false">Novidades v1.4</button>
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
@@ -147,7 +147,7 @@
                         </div>
                     </div>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="meal-list">
                         <table class="data-table" id="diary-table">
                             <thead>
                                 <tr>
@@ -202,7 +202,7 @@
                                 <input type="number" id="manual-fat" name="manual_fat" class="text-input" value="1.2" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div class="manual-btn-col">
-                                <button class="btn-primary" id="btn-add-manual">Lançar</button>
+                                <button class="btn-primary" id="btn-add-manual">Registrar refeição</button>
                             </div>
                         </div>
                     </div>
@@ -253,7 +253,7 @@
                             </div>
                         </div>
 
-                        <button class="btn-secondary-full" id="btn-calc-mifflin">Calcular meta sugerida pelo meu corpo</button>
+                        <button class="btn-secondary-full" id="btn-calc-mifflin">Calcular sugestão de metas pelo perfil</button>
 
                         <div class="limits-divider">Limites diários configurados</div>
 
@@ -327,11 +327,11 @@
             <!-- RODAPÉ EXECUTIVO EXCLUSIVO PARA IMPRESSÃO / PDF -->
             <footer class="print-only print-footer">
                 <div class="print-disclaimer">
-                    <strong>Aviso de Responsabilidade Nutricional:</strong> Este relatório é um documento informativo gerado pelo aplicativo NutriScan com base nos registros do usuário e nas normas ANVISA (RDC 429/2020 e IN 75/2020). Não substitui prescrição médica, acompanhamento clínico individualizado ou consulta nutricional presencial.
+                    <strong>Aviso informativo:</strong> Este relatório reúne os registros alimentares do usuário e toma como referência os parâmetros da ANVISA (RDC 429/2020 e IN 75/2020). Tem finalidade exclusiva de acompanhamento e apoio informativo, não substituindo orientação, diagnóstico ou prescrição médica e nutricional profissional.
                 </div>
                 <div class="print-issue-meta">
                     <span id="print-footer-timestamp">Emissão: Hoje</span>
-                    <span>NutriScan v1.0 • Padrão ANVISA</span>
+                    <span>NutriScan v1.4 • Padrão ANVISA</span>
                 </div>
             </footer>
         </section>
@@ -480,7 +480,7 @@
                                 spellcheck="false"
                             />
                             <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
-                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner">Câmera ao vivo</button>
+                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner" aria-haspopup="dialog" aria-expanded="false">Câmera ao vivo</button>
                         </div>
                     </div>
                 </div>
@@ -745,7 +745,7 @@
                 <div class="card plate-action-card">
                     <div class="plate-action-bar">
                         <div class="meal-select-wrap">
-                            <label for="plate-meal-select" class="field-label">Lançar no diário como:</label>
+                            <label for="plate-meal-select" class="field-label">Registrar no diário como:</label>
                             <select id="plate-meal-select" name="plate_meal" class="select-input">
                                 <option value="Café da manhã">Café da manhã</option>
                                 <option value="Almoço" selected>Almoço</option>
@@ -754,7 +754,7 @@
                             </select>
                         </div>
                         <button type="button" class="btn-emerald btn-lg" id="btn-add-plate-diet">
-                            Adicionar prato completo à refeição
+                            Registrar prato na refeição
                         </button>
                     </div>
                 </div>
@@ -763,24 +763,24 @@
     </main>
 
     <!-- BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ANDROID -->
-    <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
-        <button class="mob-nav-btn active" data-tab="dieta" aria-label="Minha Dieta">
+    <nav class="mobile-bottom-nav" role="tablist" aria-label="Navegação móvel">
+        <button class="mob-nav-btn active" role="tab" aria-selected="true" aria-controls="panel-dieta" data-tab="dieta" aria-label="Minha Dieta">
             <span class="mob-nav-icon" aria-hidden="true">◉</span>
             <span>Dieta</span>
         </button>
-        <button class="mob-nav-btn" data-tab="foto" aria-label="Foto da Ficha Técnica">
+        <button class="mob-nav-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" aria-label="Foto da Ficha Técnica">
             <span class="mob-nav-icon" aria-hidden="true">▣</span>
             <span>Ficha</span>
         </button>
-        <button class="mob-nav-btn" data-tab="scanner" aria-label="Código de Barras">
+        <button class="mob-nav-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" aria-label="Código de Barras">
             <span class="mob-nav-icon" aria-hidden="true">|||</span>
             <span>Barras</span>
         </button>
-        <button class="mob-nav-btn" data-tab="comparar" aria-label="Comparar Alimentos">
+        <button class="mob-nav-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" aria-label="Comparar Alimentos">
             <span class="mob-nav-icon" aria-hidden="true">⇄</span>
             <span>Comparar</span>
         </button>
-        <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato">
+        <button class="mob-nav-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" aria-label="Foto do Prato">
             <span class="mob-nav-icon" aria-hidden="true">⊞</span>
             <span>Prato</span>
         </button>

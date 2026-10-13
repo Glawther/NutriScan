@@ -19,7 +19,7 @@ No primeiro acesso (ou pelo botão `👤 Perfil`), o app oferece um assistente d
 ### 2. Tour Guiado Interativo pelo App
 Para orientar quem está usando o app pela primeira vez, o assistente inclui um tour interativo de 5 passos com efeito spotlight (destaque escurecido com foco visual), transição automática de abas e feedback tátil (vibração háptica):
 1. **Minha Dieta:** visão geral do saldo de calorias, macros e água.
-2. **Foto do Prato com IA:** identificação de refeições por visão computacional offline.
+2. **Foto do Prato:** estimativa de porções por visão computacional offline.
 3. **Foto da Ficha Técnica:** leitura de tabelas nutricionais em embalagens.
 4. **Código de Barras:** leitura em tempo real por câmera com selos da ANVISA.
 5. **Exportação:** envio direto do relatório alimentar para o WhatsApp do nutricionista.
@@ -54,11 +54,11 @@ Leitor de código de barras integrado com suporte à API nativa `BarcodeDetector
 ![Consulta de produto no NutriScan](docs/screenshots/nutriscan_produto.png)
 ![Scanner por Câmera ao Vivo](docs/screenshots/nutriscan_camera_modal.png)
 
-### 6. Foto do Prato com IA de Visão Computacional (100% Offline)
-Permite tirar foto do prato de comida ou selecionar exemplos pré-configurados. Um motor de visão computacional local analisa a área do prato, identifica os agrupamentos de cores (folhosos, feijão, arroz, proteínas grelhadas, tubérculos) e estima as gramaturas com base na tabela TACO (UNICAMP), sem nenhuma dependência de APIs externas pagas:
+### 6. Foto do Prato com Reconhecimento Visual (100% Offline)
+Permite tirar foto do prato de comida ou selecionar exemplos pré-configurados. Um motor de visão computacional local analisa a área do prato, identifica os agrupamentos de cores (folhosos, feijão, arroz, proteínas grelhadas, tubérculos) e estima as gramaturas com base na tabela TACO (UNICAMP), sem nenhuma dependência de conexões externas:
 - **Ajuste interativo de porções:** botões `[ - ] [ 150 ] g [ + ]` recalculam instantaneamente calorias e nutrientes.
-- **Painel de Micronutrientes (IDR ANVISA):** barras comparativas com as metas oficiais de Cálcio, Ferro, Potássio, Magnésio, Vitamina C e limite de Sódio.
-- **Lançamento em 1 clique:** adiciona todos os alimentos identificados diretamente à refeição do diário.
+- **Painel de Micronutrientes (IDR ANVISA):** barras comparativas com as metas de referência de Cálcio, Ferro, Potássio, Magnésio, Vitamina C e limite de Sódio.
+- **Registro direto da refeição:** adiciona todos os alimentos identificados diretamente ao diário alimentar.
 
 ![Foto do Prato com IA de Visão no NutriScan](docs/screenshots/nutriscan_prato_ia.png)
 
