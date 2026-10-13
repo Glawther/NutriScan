@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NutriScan | Consulta nutricional e leitura de rótulos</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand-block">
+                <div class="brand-logo">NS</div>
+                <div>
+                    <h1 class="brand-title">NutriScan</h1>
+                    <p class="brand-subtitle">Consulta nutricional e leitura de rótulos (Open Food Facts + ANVISA)</p>
+                </div>
+            </div>
+            <nav class="nav-tabs" role="tablist">
+                <button class="tab-btn active" data-tab="scanner" id="tab-btn-scanner">1. Consultar produto</button>
+                <button class="tab-btn" data-tab="compare" id="tab-btn-compare">2. Comparar alimentos</button>
+                <button class="tab-btn" data-tab="history" id="tab-btn-history">3. Histórico salvo</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="kpi-strip" id="kpi-strip">
+            <div class="kpi-card">
+                <span class="kpi-label">Produtos no banco local</span>
+                <strong class="kpi-value" id="kpi-total">0</strong>
+                <span class="kpi-meta"> Cache SQLite + Open Food Facts</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Com alerta frontal ANVISA</span>
+                <strong class="kpi-value text-amber" id="kpi-anvisa">0</strong>
+                <span class="kpi-meta">Limites da RDC 429/2020</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Ultraprocessados (NOVA 4)</span>
+                <strong class="kpi-value text-rose" id="kpi-nova4">0</strong>
+                <span class="kpi-meta">Classificação guia alimentar USP</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">In natura / mín. processados</span>
+                <strong class="kpi-value text-emerald" id="kpi-nova1">0</strong>
+                <span class="kpi-meta">Grupo NOVA 1 sem aditivos</span>
+            </div>
+        </section>
+
+        <!-- ABA 1: CONSULTAR PRODUTO -->
+        <section class="tab-panel active" id="panel-scanner">
+            <div class="card search-card">
+                <div class="search-row">
+                    <div class="search-input-wrap">
+                        <label for="barcode-input" class="field-label">Código de barras EAN-13 ou nome do produto</label>
+                        <div class="input-action-group">
+                            <input
+                                type="text"
+                                id="barcode-input"
+                                class="text-input"
+                                placeholder="Ex: 3017620422003, 7894900011517 ou digite o nome do alimento..."
+                                value="3017620422003"
+                            />
+                            <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-chips">
+                    <span class="chips-label">Amostras rápidas:</span>
+                    <button class="chip-btn active" data-barcode="3017620422003">Nutella (3017620422003)</button>
+                    <button class="chip-btn" data-barcode="7894900011517">Coca-Cola Original (7894900011517)</button>
+                    <button class="chip-btn" data-barcode="7622210691071">Bis Ao Leite (7622210691071)</button>
+                    <button class="chip-btn" data-barcode="7892840222949">Doritos Nacho (7892840222949)</button>
+                    <button class="chip-btn" data-barcode="7891000053508">Aveia Quaker (7891000053508)</button>
+                    <button class="chip-btn" data-barcode="7891025101604">Iogurte Natural (7891025101604)</button>
+                </div>
+            </div>
+
+            <div class="scanner-grid" id="product-result-container">
+                <div class="card product-main-card">
+                    <div class="product-header">
+                        <div>
+                            <span class="ean-badge" id="prod-ean">EAN 3017620422003</span>
+                            <h2 class="product-title" id="prod-name">Carregando...</h2>
+                            <p class="product-subtitle" id="prod-meta">Marca e categoria</p>
+                        </div>
+                        <span class="unit-pill" id="prod-unit">Base: 100g</span>
+                    </div>
+
+                    <div class="anvisa-box">
+                        <div class="section-header-inline">
+                            <h3>Rotulagem nutricional frontal (ANVISA RDC 429/2020)</h3>
+                            <span class="threshold-note" id="anvisa-threshold-note">Cortes para sólidos (100g)</span>
+                        </div>
+                        <div class="anvisa-Seals-row" id="anvisa-seals"></div>
+                    </div>
+
+                    <div class="scores-row">
+                        <div class="score-box">
+                            <span class="score-box-title">Nutri-Score (A a E)</span>
+                            <div class="nutriscore-bar" id="nutriscore-bar">
+                                <span class="ns-step ns-a" data-grade="A">A</span>
+                                <span class="ns-step ns-b" data-grade="B">B</span>
+                                <span class="ns-step ns-c" data-grade="C">C</span>
+                                <span class="ns-step ns-d" data-grade="D">D</span>
+                                <span class="ns-step ns-e" data-grade="E">E</span>
+                            </div>
+                        </div>
+                        <div class="score-box">
+                            <span class="score-box-title">Grau de processamento (NOVA / USP)</span>
+                            <div class="nova-display">
+                                <span class="nova-badge" id="nova-badge">NOVA 4</span>
+                                <span class="nova-text" id="nova-label">Ultraprocessado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ingredients-block">
+                        <h3>Lista de ingredientes e alergênicos</h3>
+                        <p class="ingredients-text" id="prod-ingredients"></p>
+                        <div class="allergens-row" id="prod-allergens"></div>
+                    </div>
+                </div>
+
+                <div class="card nutrition-side-card">
+                    <h3>Tabela nutricional (por 100g / 100ml)</h3>
+                    <table class="data-table compact-table">
+                        <thead>
+                            <tr>
+                                <th>Nutriente</th>
+                                <th>Quantidade</th>
+                                <th>Referência ANVISA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nutrition-tbody"></tbody>
+                    </table>
+
+                    <div class="additives-section">
+                        <div class="section-header-inline">
+                            <h3>Aditivos identificados no rótulo</h3>
+                            <span class="count-pill" id="additives-count-pill">0 aditivos</span>
+                        </div>
+                        <div id="additives-list" class="additives-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: COMPARAR ALIMENTOS -->
+        <section class="tab-panel" id="panel-compare">
+            <div class="card compare-controls-card">
+                <div class="compare-selectors-grid">
+                    <div>
+                        <label for="compare-select-a" class="field-label">Produto A</label>
+                        <select id="compare-select-a" class="select-input"></select>
+                    </div>
+                    <div>
+                        <label for="compare-select-b" class="field-label">Produto B</label>
+                        <select id="compare-select-b" class="select-input"></select>
+                    </div>
+                    <div class="compare-btn-wrap">
+                        <button class="btn-primary" id="btn-run-compare">Comparar composição</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compare-summary-grid" id="compare-cards-row">
+                <div class="card compare-prod-card" id="comp-card-a"></div>
+                <div class="card compare-prod-card" id="comp-card-b"></div>
+            </div>
+
+            <div class="card">
+                <div class="section-header-inline">
+                    <h3>Diferença nutricional por 100g / 100ml</h3>
+                    <span class="threshold-note">Comparativo direto entre os dois produtos selecionados</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th id="th-prod-a">Produto A</th>
+                            <th id="th-prod-b">Produto B</th>
+                            <th>Diferença (A vs B)</th>
+                            <th>Melhor perfil no indicador</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compare-deltas-tbody"></tbody>
+                </table>
+                <div class="compare-notes-box" id="compare-notes"></div>
+            </div>
+        </section>
+
+        <!-- ABA 3: HISTÓRICO SALVO -->
+        <section class="tab-panel" id="panel-history">
+            <div class="card">
+                <div class="section-header-inline">
+                    <div>
+                        <h3>Produtos avaliados e salvos no SQLite</h3>
+                        <p class="section-desc">Registros armazenados localmente em <code>nutriscan.db</code> para consulta offline e comparação.</p>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código EAN</th>
+                            <th>Produto</th>
+                            <th>Marca</th>
+                            <th>Nutri-Score</th>
+                            <th>Grupo NOVA</th>
+                            <th>Alertas ANVISA</th>
+                            <th>Kcal / 100g</th>
+                            <th>Açúcares</th>
+                            <th>Sódio</th>
+                            <th>Ficha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

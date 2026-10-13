@@ -1,0 +1,10 @@
+services:
+  nutriscan:
+    build: .
+    container_name: nutriscan
+    ports:
+      - "8096:8096"
+    environment:
+      - PORT=8096
+      - DATABASE_PATH=/app/nutriscan.db
+    restart: unless-stopped
