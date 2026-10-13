@@ -28,8 +28,8 @@
                     <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
                 </div>
                 <div class="brand-actions-row">
-                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">👤 Perfil</button>
-                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour interativo pelo app" aria-label="Tour do App">🎓 Tour do App</button>
+                    <button type="button" class="btn-topbar-profile" id="btn-open-profile" title="Configurar meu perfil de dieta" aria-label="Abrir perfil de usuário">Perfil</button>
+                    <button type="button" class="btn-tour-nav" id="btn-open-tour" title="Iniciar tour guiado pelo app" aria-label="Tour do App">Tour do App</button>
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
@@ -107,26 +107,26 @@
         <section class="tab-panel active" role="tabpanel" id="panel-dieta" aria-labelledby="tab-btn-dieta">
             <!-- Navegador de Datas da Dieta -->
             <div class="diet-date-bar">
-                <button type="button" class="btn-date-nav" id="btn-date-prev" aria-label="Dia anterior">◀ Ontem</button>
+                <button type="button" class="btn-date-nav" id="btn-date-prev" aria-label="Dia anterior">Ontem</button>
                 <div class="diet-current-date-wrap">
                     <span class="diet-date-badge" id="diet-date-badge">HOJE</span>
                     <strong class="diet-date-text" id="diet-date-text">Hoje</strong>
                 </div>
-                <button type="button" class="btn-date-nav" id="btn-date-next" aria-label="Próximo dia">Amanhã ▶</button>
+                <button type="button" class="btn-date-nav" id="btn-date-next" aria-label="Próximo dia">Amanhã</button>
             </div>
 
             <div class="diet-grid">
                 <div class="card">
                     <div class="section-header-inline">
-                        <div>
+                        <div class="section-title-wrap">
                             <h2>Refeições registradas hoje</h2>
                             <p class="section-desc" id="diet-status-subtitle">Acompanhe cada refeição e o saldo restante do seu limite diário.</p>
                         </div>
                         <div class="btn-group-inline share-btn-group">
-                            <button class="btn-secondary" id="btn-share-whatsapp" title="Compartilhar resumo da dieta no WhatsApp">📲 WhatsApp</button>
-                            <button class="btn-secondary" id="btn-copy-diet" title="Copiar resumo para a área de transferência">📋 Copiar</button>
-                            <button class="btn-secondary" id="btn-print-diet" title="Imprimir ou salvar relatório em PDF">🖨️ Imprimir PDF</button>
-                            <button class="btn-emerald" id="btn-go-photo-scan">+ Ler foto de ficha técnica</button>
+                            <button class="btn-secondary" id="btn-share-whatsapp" title="Compartilhar resumo da dieta no WhatsApp">WhatsApp</button>
+                            <button class="btn-secondary" id="btn-copy-diet" title="Copiar resumo para a área de transferência">Copiar</button>
+                            <button class="btn-secondary" id="btn-print-diet" title="Imprimir ou salvar relatório em PDF">Imprimir PDF</button>
+                            <button class="btn-emerald" id="btn-go-photo-scan">Ler ficha técnica</button>
                         </div>
                     </div>
 
@@ -273,8 +273,8 @@
                 <!-- Card de Hidratação Diária -->
                 <div class="card water-card" id="water-widget-card">
                     <div class="section-header-inline">
-                        <div>
-                            <h3>💧 Hidratação Diária</h3>
+                        <div class="section-title-wrap">
+                            <h3>Hidratação Diária</h3>
                             <p class="section-desc">Meta diária: 35ml por kg de peso corporal</p>
                         </div>
                         <span class="unit-pill" id="water-pct-badge">0%</span>
@@ -297,8 +297,8 @@
                 <!-- Card de Tendência dos Últimos 7 Dias -->
                 <div class="card trends-card" id="trends-widget-card">
                     <div class="section-header-inline">
-                        <div>
-                            <h3>📊 Tendência dos Últimos 7 Dias</h3>
+                        <div class="section-title-wrap">
+                            <h3>Tendência dos Últimos 7 Dias</h3>
                             <p class="section-desc">Consumo calórico vs meta diária</p>
                         </div>
                         <span class="kpi-pct text-emerald" id="trends-compliance-badge">100% no alvo</span>
@@ -452,7 +452,7 @@
                                 spellcheck="false"
                             />
                             <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
-                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner" style="display: inline-flex; align-items: center; gap: 6px;">📷 Câmera ao vivo</button>
+                            <button type="button" class="btn-emerald" id="btn-open-cam-scanner">Câmera ao vivo</button>
                         </div>
                     </div>
                 </div>
@@ -616,9 +616,8 @@
 
                     <div class="plate-capture-box">
                         <label class="plate-camera-dropzone" for="plate-photo-input">
-                            <span class="dropzone-icon" aria-hidden="true">📸</span>
-                            <strong class="dropzone-title">Tirar foto com a câmera ou anexar imagem</strong>
-                            <span class="dropzone-hint">Aceita fotos de smartphones Android, iOS ou arquivos (.jpg, .png)</span>
+                            <strong class="dropzone-title">Tirar foto ou selecionar imagem</strong>
+                            <span class="dropzone-hint">Arquivos (.jpg, .png) ou câmera do celular</span>
                             <input type="file" id="plate-photo-input" name="plate_photo" accept="image/*" capture="environment" class="sr-only" />
                         </label>
                     </div>
@@ -627,16 +626,16 @@
                         <span class="field-label">Pratos rápidos de referência:</span>
                         <div class="plate-chips-row" role="group" aria-label="Pratos prontos de exemplo">
                             <button type="button" class="chip-btn plate-preset-chip active" data-preset="prato_feito">
-                                🍛 Prato Feito
+                                Prato Feito
                             </button>
                             <button type="button" class="chip-btn plate-preset-chip" data-preset="omelete_fitness">
-                                🍳 Omelete Fitness
+                                Omelete Fitness
                             </button>
                             <button type="button" class="chip-btn plate-preset-chip" data-preset="salmao_legumes">
-                                🐟 Salmão com Legumes
+                                Salmão com Legumes
                             </button>
                             <button type="button" class="chip-btn plate-preset-chip" data-preset="acai_completo">
-                                🫐 Açaí Completo
+                                Açaí Completo
                             </button>
                         </div>
                     </div>
@@ -754,7 +753,7 @@
             <span>Comparar</span>
         </button>
         <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato">
-            <span class="mob-nav-icon" aria-hidden="true">🍽️</span>
+            <span class="mob-nav-icon" aria-hidden="true">⊞</span>
             <span>Prato</span>
         </button>
     </nav>
@@ -810,7 +809,7 @@
             </header>
 
             <div class="tour-card-body">
-                <div class="tour-icon-wrap" id="tour-step-icon" aria-hidden="true">🥗</div>
+                <div class="tour-icon-wrap" id="tour-step-icon" aria-hidden="true">1</div>
                 <div class="tour-text-wrap">
                     <h2 class="tour-title" id="tour-step-title">1. Seu Painel Diário da Dieta</h2>
                     <p class="tour-description" id="tour-step-desc">Acompanhe seu consumo de calorias e macros calculado especialmente para o seu peso e objetivo. Registre água e veja o saldo restante de cada refeição.</p>

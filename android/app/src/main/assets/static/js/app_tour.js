@@ -25,7 +25,7 @@
         {
             stepNumber: 1,
             badge: "Passo 1 de 5",
-            icon: "🥗",
+            icon: "1",
             title: "1. Seu Painel Diário da Dieta",
             description: "Acompanhe seu consumo de calorias e macros calculado especialmente para o seu peso e objetivo. Registre água e veja o saldo restante de cada refeição.",
             tab: "dieta",
@@ -34,7 +34,7 @@
         {
             stepNumber: 2,
             badge: "Passo 2 de 5",
-            icon: "🍽️",
+            icon: "2",
             title: "2. Estimativa de Prato por Foto",
             description: "Tire foto do seu prato. O app detecta os alimentos, estima as porções e calcula calorias, macros e micronutrientes pela Tabela TACO de forma offline.",
             tab: "prato",
@@ -43,7 +43,7 @@
         {
             stepNumber: 3,
             badge: "Passo 3 de 5",
-            icon: "📷",
+            icon: "3",
             title: "3. Leitor de Ficha Técnica por Foto",
             description: "Fotografe a tabela nutricional na embalagem de suplementos ou alimentos (whey, iogurte, pão). O leitor calcula a porção consumida proporcionalmente.",
             tab: "foto",
@@ -52,7 +52,7 @@
         {
             stepNumber: 4,
             badge: "Passo 4 de 5",
-            icon: "🔍",
+            icon: "4",
             title: "4. Scanner de Código de Barras por Câmera",
             description: "Aponte a câmera para produtos de supermercado e veja imediatamente os selos de advertência da ANVISA (Alto em Açúcar, Sódio ou Gordura) e o Nutri-Score.",
             tab: "scanner",
@@ -61,7 +61,7 @@
         {
             stepNumber: 5,
             badge: "Passo 5 de 5",
-            icon: "📲",
+            icon: "5",
             title: "5. Exportação para WhatsApp",
             description: "Envie o resumo completo da sua alimentação diária com 1 clique direto no WhatsApp do seu nutricionista ou médico.",
             tab: "dieta",
