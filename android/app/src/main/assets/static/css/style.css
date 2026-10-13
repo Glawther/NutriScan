@@ -738,14 +738,6 @@ h1, h2, h3, .brand-title, .product-title {
     margin-top: 6px;
 }
 
-.save-feedback {
-    font-size: 12px;
-    color: var(--brand-emerald-text);
-    font-weight: 600;
-    min-height: 18px;
-    text-align: center;
-}
-
 /* Photo Scanner Tab */
 .photo-controls-grid {
     display: grid;
@@ -972,23 +964,6 @@ h1, h2, h3, .brand-title, .product-title {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.anvisa-seal-icon {
-    font-size: 12px;
-}
-
-.anvisa-clean-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    border-radius: var(--radius-sm);
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
 /* Nutri-Score & NOVA Badges */
 .scores-row {
     display: grid;
@@ -1060,12 +1035,6 @@ h1, h2, h3, .brand-title, .product-title {
     background-color: #dc2626;
 }
 
-.nova-text {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
 /* Ingredients & Additives */
 .ingredients-block {
     background-color: var(--bg-tile-elevated);
@@ -1087,16 +1056,6 @@ h1, h2, h3, .brand-title, .product-title {
     gap: 6px;
     flex-wrap: wrap;
     margin-top: 8px;
-}
-
-.allergen-pill {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .add-barcode-to-diet-bar {
@@ -2205,10 +2164,6 @@ h1, h2, h3, .brand-title, .product-title {
     background: var(--bg-tile-highlight);
     outline: 2px solid var(--border-focus);
     outline-offset: 2px;
-}
-
-.dropzone-icon {
-    font-size: 28px;
 }
 
 .dropzone-title {

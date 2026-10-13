@@ -1751,13 +1751,6 @@ async function initNutriScanApp() {
         });
     }
 
-    const btnGoPhoto = document.getElementById("btn-go-photo-scan");
-    if (btnGoPhoto) {
-        btnGoPhoto.addEventListener("click", () => {
-            switchTab("foto");
-        });
-    }
-
     // Navegador de data
     const btnDatePrev = document.getElementById("btn-date-prev");
     const btnDateNext = document.getElementById("btn-date-next");
@@ -1809,16 +1802,7 @@ async function initNutriScanApp() {
     await scanProduct(document.getElementById("barcode-input").value || "3017620422003");
     await runComparison();
 
-    // Iniciar Tour Interativo se clicado no botão ou se solicitado via URL (?tour=1)
-    const btnStartTour = document.getElementById("btn-start-tour");
-    if (btnStartTour) {
-        btnStartTour.addEventListener("click", () => {
-            if (window.NutriScanTour) {
-                window.NutriScanTour.startTour(true);
-            }
-        });
-    }
-
+    // Iniciar Tour Interativo se solicitado via URL (?tour=1)
     if (params.get("tour") === "1") {
         setTimeout(() => {
             if (window.NutriScanTour) window.NutriScanTour.startTour(true);
