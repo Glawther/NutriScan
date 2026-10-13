@@ -33,12 +33,12 @@
                 </div>
             </div>
             <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
-                <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-dieta" data-tab="dieta" id="tab-btn-dieta">1. Minha Dieta (Hoje)</button>
-                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
-                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
-                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
-                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" id="tab-btn-prato">5. Foto do Prato (IA)</button>
-                <button type="button" class="btn-tour-nav" id="btn-start-tour" title="Iniciar tour interativo pelo app" aria-label="Iniciar tour interativo" style="display: none;">✨ Tour do App</button>
+                <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-dieta" data-tab="dieta" id="tab-btn-dieta">Minha Dieta</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" id="tab-btn-foto">Ficha Técnica</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">Código de Barras</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">Comparar Alimentos</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" id="tab-btn-prato">Foto do Prato</button>
+                <button type="button" class="btn-tour-nav" id="btn-start-tour" title="Iniciar tour guiado pelo app" aria-label="Iniciar tour guiado" style="display: none;">Tour do App</button>
             </nav>
         </div>
     </header>
@@ -608,10 +608,10 @@
                 <div class="card plate-input-card">
                     <div class="section-header-inline">
                         <div>
-                            <h2>1. Foto do Prato & IA de Visão</h2>
-                            <p class="section-desc">Tire uma foto do seu prato de comida ou escolha uma das refeições prontas abaixo.</p>
+                            <h2>Foto do Prato</h2>
+                            <p class="section-desc">Tire uma foto do seu prato ou selecione um dos exemplos abaixo.</p>
                         </div>
-                        <span class="count-pill" id="plate-scan-status">Pronto para escanear</span>
+                        <span class="count-pill" id="plate-scan-status">Pronto para identificar</span>
                     </div>
 
                     <div class="plate-capture-box">
@@ -645,8 +645,8 @@
                 <!-- CARD 2: Visão do Prato com Etiquetas Bounding Chips -->
                 <div class="card plate-vision-card">
                     <div class="section-header-inline">
-                        <h3>2. Identificação Visual dos Alimentos</h3>
-                        <span class="status-pill" id="plate-detected-pill">IA Visão Ativa</span>
+                        <h3>Identificação dos Alimentos</h3>
+                        <span class="status-pill" id="plate-detected-pill">Análise visual</span>
                     </div>
                     <div class="plate-preview-viewport">
                         <img id="plate-preview-img" class="plate-viewport-image" src="" alt="Prato visualizado" width="480" height="360" />
@@ -684,8 +684,8 @@
                 <div class="card plate-items-card">
                     <div class="section-header-inline">
                         <div>
-                            <h3>3. Alimentos no Prato & Gramaturas</h3>
-                            <p class="section-desc">Ajuste os gramas de cada porção em tempo real. Calorias e micronutrientes são recalculados instantaneamente.</p>
+                            <h3>Alimentos no Prato</h3>
+                            <p class="section-desc">Ajuste os gramas de cada alimento. Os nutrientes são recalculados na hora.</p>
                         </div>
                     </div>
 
@@ -693,9 +693,9 @@
 
                     <!-- Autocomplete TACO para adicionar alimento extra -->
                     <div class="plate-taco-add-box">
-                        <label for="plate-taco-search" class="field-label">+ Adicionar alimento extra da Tabela TACO:</label>
+                        <label for="plate-taco-search" class="field-label">+ Adicionar alimento da Tabela TACO:</label>
                         <div class="taco-search-input-wrap">
-                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar no banco TACO (ex: mandioca, frango, azeite, aveia)…" autocomplete="off" />
+                            <input type="text" id="plate-taco-search" name="plate_taco_search" class="text-input" placeholder="Buscar alimento (ex: mandioca, frango, azeite, aveia)..." autocomplete="off" />
                             <div class="taco-suggestions-dropdown" id="plate-taco-suggestions" hidden></div>
                         </div>
                     </div>
@@ -705,8 +705,8 @@
                 <div class="card plate-micros-card">
                     <div class="section-header-inline">
                         <div>
-                            <h3>4. Micronutrientes do Prato (% IDR ANVISA)</h3>
-                            <p class="section-desc">Metas baseadas na IN 75/2020 e RDC 429/2020 para adultos.</p>
+                            <h3>Micronutrientes (% IDR ANVISA)</h3>
+                            <p class="section-desc">Valores diários de referência para adultos (IN 75/2020 e RDC 429/2020).</p>
                         </div>
                         <span class="status-pill" id="plate-micros-badge">Balanço Nutricional</span>
                     </div>
@@ -739,23 +739,23 @@
     <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
         <button class="mob-nav-btn active" data-tab="dieta" aria-label="Minha Dieta">
             <span class="mob-nav-icon" aria-hidden="true">◉</span>
-            <span>Minha Dieta</span>
+            <span>Dieta</span>
         </button>
         <button class="mob-nav-btn" data-tab="foto" aria-label="Foto da Ficha Técnica">
             <span class="mob-nav-icon" aria-hidden="true">▣</span>
-            <span>Foto Ficha</span>
+            <span>Ficha</span>
         </button>
-        <button class="mob-nav-btn" data-tab="scanner" aria-label="Código de Barras EAN">
+        <button class="mob-nav-btn" data-tab="scanner" aria-label="Código de Barras">
             <span class="mob-nav-icon" aria-hidden="true">|||</span>
-            <span>Rótulo EAN</span>
+            <span>Barras</span>
         </button>
         <button class="mob-nav-btn" data-tab="comparar" aria-label="Comparar Alimentos">
             <span class="mob-nav-icon" aria-hidden="true">⇄</span>
             <span>Comparar</span>
         </button>
-        <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato com IA">
+        <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato">
             <span class="mob-nav-icon" aria-hidden="true">🍽️</span>
-            <span>Prato IA</span>
+            <span>Prato</span>
         </button>
     </nav>
 

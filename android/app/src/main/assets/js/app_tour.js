@@ -35,8 +35,8 @@
             stepNumber: 2,
             badge: "Passo 2 de 5",
             icon: "🍽️",
-            title: "2. Reconhecimento de Prato 100% Offline",
-            description: "Tire foto do seu almoço ou jantar! A inteligência artificial identifica alimentos, estima porções e calcula macros e micronutrientes da Tabela TACO sem gastar internet.",
+            title: "2. Estimativa de Prato por Foto",
+            description: "Tire foto do seu prato. O app detecta os alimentos, estima as porções e calcula calorias, macros e micronutrientes pela Tabela TACO de forma offline.",
             tab: "prato",
             targetSelector: "#panel-prato"
         },

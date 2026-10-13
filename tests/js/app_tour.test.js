@@ -149,11 +149,11 @@ test("NutriScanTour exports required methods and defines exact 5 walkthrough ste
     assert.ok(step1.description.includes("calorias e macros"));
     assert.strictEqual(step1.targetSelector, "#diet-kpi-strip");
 
-    // Passo 2: Foto do Prato com IA
+    // Passo 2: Foto do Prato
     const step2 = tourModule.TOUR_STEPS[1];
     assert.strictEqual(step2.stepNumber, 2);
     assert.strictEqual(step2.tab, "prato");
-    assert.strictEqual(step2.title, "2. Reconhecimento de Prato 100% Offline");
+    assert.strictEqual(step2.title, "2. Estimativa de Prato por Foto");
     assert.ok(step2.description.includes("Tabela TACO"));
     assert.strictEqual(step2.targetSelector, "#panel-prato");
 
@@ -239,7 +239,7 @@ test("Full interactive tour walkthrough: tab switching, haptics, UI updates, ste
     assert.strictEqual(tourModule.getCurrentStepIndex(), 1);
     assert.strictEqual(switchedTabs[switchedTabs.length - 1], "prato");
     assert.strictEqual(mockDom.elements["tour-step-badge"].textContent, "Passo 2 de 5");
-    assert.strictEqual(mockDom.elements["tour-step-title"].textContent, "2. Reconhecimento de Prato 100% Offline");
+    assert.strictEqual(mockDom.elements["tour-step-title"].textContent, "2. Estimativa de Prato por Foto");
     assert.strictEqual(mockDom.elements["btn-prev-tour"].style.display, "inline-flex");
     assert.strictEqual(mockDom.elements["tour-progress-fill"].style.width, "40%");
 
