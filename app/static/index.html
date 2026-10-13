@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0b0f17" />
+    <meta name="theme-color" content="#090d16" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>NutriScan | Dieta Diária, Leitor de Foto da Ficha Técnica e Rótulos ANVISA</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" href="/static/css/style.css" />
+    <title>NutriScan - Dieta Diária, Leitor de Foto da Ficha Técnica e Rótulos ANVISA</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="static/css/style.css" />
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
     <header class="topbar">
         <div class="container topbar-inner">
             <div class="brand-block">
-                <div class="brand-logo">NS</div>
+                <div class="brand-logo" aria-hidden="true">NS</div>
                 <div>
                     <h1 class="brand-title">NutriScan</h1>
                     <p class="brand-subtitle">Dieta diária, leitor de foto da ficha técnica e rotulagem ANVISA</p>
                 </div>
             </div>
-            <nav class="nav-tabs" role="tablist">
-                <button class="tab-btn active" data-tab="dieta" id="tab-btn-dieta">1. Minha Dieta (Hoje)</button>
-                <button class="tab-btn" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
-                <button class="tab-btn" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
-                <button class="tab-btn" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
+            <nav class="nav-tabs" role="tablist" aria-label="Navegação principal por abas">
+                <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-dieta" data-tab="dieta" id="tab-btn-dieta">1. Minha Dieta (Hoje)</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
             </nav>
         </div>
     </header>
 
-    <main class="container main-content">
+    <main class="container main-content" id="main-content">
         <!-- FAIXA DE PROGRESSO DIÁRIO DA DIETA (SEMPRE VISÍVEL NO TOPO) -->
-        <section class="diet-kpi-strip" id="diet-kpi-strip">
+        <section class="diet-kpi-strip" id="diet-kpi-strip" aria-label="Resumo do consumo diário">
             <div class="kpi-card kpi-card-highlight">
                 <div class="kpi-row-top">
                     <span class="kpi-label">Calorias hoje vs limite diário</span>
@@ -90,7 +92,7 @@
         </section>
 
         <!-- ABA 1: MINHA DIETA (HOJE) -->
-        <section class="tab-panel active" id="panel-dieta">
+        <section class="tab-panel active" role="tabpanel" id="panel-dieta" aria-labelledby="tab-btn-dieta">
             <div class="diet-grid">
                 <div class="card">
                     <div class="section-header-inline">
@@ -103,28 +105,30 @@
                         </div>
                     </div>
 
-                    <table class="data-table" id="diary-table">
-                        <thead>
-                            <tr>
-                                <th>Refeição</th>
-                                <th>Alimento / Produto</th>
-                                <th>Porção</th>
-                                <th>Calorias</th>
-                                <th>Carb</th>
-                                <th>Prot</th>
-                                <th>Gord</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="diary-tbody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="data-table" id="diary-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Refeição</th>
+                                    <th scope="col">Alimento / Produto</th>
+                                    <th scope="col">Porção</th>
+                                    <th scope="col">Calorias</th>
+                                    <th scope="col">Carb</th>
+                                    <th scope="col">Prot</th>
+                                    <th scope="col">Gord</th>
+                                    <th scope="col">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diary-tbody"></tbody>
+                        </table>
+                    </div>
 
                     <div class="quick-manual-box">
                         <h3>Adicionar alimento avulso à dieta</h3>
                         <div class="manual-form-grid">
                             <div>
                                 <label class="field-label" for="manual-meal">Refeição</label>
-                                <select id="manual-meal" class="select-input">
+                                <select id="manual-meal" name="manual_meal" class="select-input">
                                     <option value="Café da manhã">Café da manhã</option>
                                     <option value="Almoço">Almoço</option>
                                     <option value="Lanche" selected>Lanche</option>
@@ -133,27 +137,27 @@
                             </div>
                             <div>
                                 <label class="field-label" for="manual-name">Alimento</label>
-                                <input type="text" id="manual-name" class="text-input" placeholder="Ex: Banana prata + Aveia" />
+                                <input type="text" id="manual-name" name="manual_name" class="text-input" placeholder="Ex: Banana prata + Aveia…" autocomplete="off" spellcheck="false" />
                             </div>
                             <div>
                                 <label class="field-label" for="manual-portion">Porção (g)</label>
-                                <input type="number" id="manual-portion" class="text-input" value="100" min="1" />
+                                <input type="number" id="manual-portion" name="manual_portion" class="text-input" value="100" min="1" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="manual-kcal">Kcal</label>
-                                <input type="number" id="manual-kcal" class="text-input" value="130" min="0" />
+                                <input type="number" id="manual-kcal" name="manual_kcal" class="text-input" value="130" min="0" inputmode="numeric" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="manual-carb">Carb (g)</label>
-                                <input type="number" id="manual-carb" class="text-input" value="27" min="0" step="0.1" />
+                                <input type="number" id="manual-carb" name="manual_carb" class="text-input" value="27" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="manual-prot">Prot (g)</label>
-                                <input type="number" id="manual-prot" class="text-input" value="3.5" min="0" step="0.1" />
+                                <input type="number" id="manual-prot" name="manual_prot" class="text-input" value="3.5" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="manual-fat">Gord (g)</label>
-                                <input type="number" id="manual-fat" class="text-input" value="1.2" min="0" step="0.1" />
+                                <input type="number" id="manual-fat" name="manual_fat" class="text-input" value="1.2" min="0" step="0.1" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div class="manual-btn-col">
                                 <button class="btn-primary" id="btn-add-manual">Lançar</button>
@@ -174,7 +178,7 @@
                         <div class="form-row-2">
                             <div>
                                 <label class="field-label" for="goal-type">Objetivo da dieta</label>
-                                <select id="goal-type" class="select-input">
+                                <select id="goal-type" name="goal_type" class="select-input">
                                     <option value="cutting">Emagrecer (déficit calórico)</option>
                                     <option value="manutencao">Manter peso atual</option>
                                     <option value="bulking">Ganhar massa muscular (superávit)</option>
@@ -183,7 +187,7 @@
                             </div>
                             <div>
                                 <label class="field-label" for="goal-activity">Ritmo de treino / atividade</label>
-                                <select id="goal-activity" class="select-input">
+                                <select id="goal-activity" name="goal_activity" class="select-input">
                                     <option value="sedentario">Sedentário</option>
                                     <option value="leve">Leve (1 a 3x / semana)</option>
                                     <option value="moderado" selected>Moderado (3 a 5x / semana)</option>
@@ -195,15 +199,15 @@
                         <div class="form-row-3">
                             <div>
                                 <label class="field-label" for="goal-weight">Peso (kg)</label>
-                                <input type="number" id="goal-weight" class="text-input" value="78" min="35" max="250" step="0.5" />
+                                <input type="number" id="goal-weight" name="goal_weight" class="text-input" value="78" min="35" max="250" step="0.5" inputmode="decimal" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="goal-height">Altura (cm)</label>
-                                <input type="number" id="goal-height" class="text-input" value="176" min="120" max="230" />
+                                <input type="number" id="goal-height" name="goal_height" class="text-input" value="176" min="120" max="230" inputmode="numeric" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="goal-age">Idade</label>
-                                <input type="number" id="goal-age" class="text-input" value="29" min="14" max="100" />
+                                <input type="number" id="goal-age" name="goal_age" class="text-input" value="29" min="14" max="100" inputmode="numeric" autocomplete="off" />
                             </div>
                         </div>
 
@@ -214,38 +218,38 @@
                         <div class="form-row-2">
                             <div>
                                 <label class="field-label" for="limit-kcal">Limite de calorias (kcal/dia)</label>
-                                <input type="number" id="limit-kcal" class="text-input" value="2000" min="800" max="6000" step="10" />
+                                <input type="number" id="limit-kcal" name="limit_kcal" class="text-input" value="2000" min="800" max="6000" step="10" inputmode="numeric" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="limit-prot">Meta de proteínas (g/dia)</label>
-                                <input type="number" id="limit-prot" class="text-input" value="150" min="20" max="400" />
+                                <input type="number" id="limit-prot" name="limit_prot" class="text-input" value="150" min="20" max="400" inputmode="numeric" autocomplete="off" />
                             </div>
                         </div>
 
                         <div class="form-row-3">
                             <div>
                                 <label class="field-label" for="limit-carb">Carboidratos (g)</label>
-                                <input type="number" id="limit-carb" class="text-input" value="200" min="10" max="800" />
+                                <input type="number" id="limit-carb" name="limit_carb" class="text-input" value="200" min="10" max="800" inputmode="numeric" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="limit-fat">Gorduras (g)</label>
-                                <input type="number" id="limit-fat" class="text-input" value="65" min="10" max="300" />
+                                <input type="number" id="limit-fat" name="limit_fat" class="text-input" value="65" min="10" max="300" inputmode="numeric" autocomplete="off" />
                             </div>
                             <div>
                                 <label class="field-label" for="limit-sodium">Sódio máx (mg)</label>
-                                <input type="number" id="limit-sodium" class="text-input" value="2000" min="500" max="5000" step="50" />
+                                <input type="number" id="limit-sodium" name="limit_sodium" class="text-input" value="2000" min="500" max="5000" step="50" inputmode="numeric" autocomplete="off" />
                             </div>
                         </div>
 
                         <button class="btn-primary-full" id="btn-save-goals">Salvar limite diário</button>
-                        <div class="save-feedback" id="goals-feedback"></div>
+                        <div class="save-feedback" id="goals-feedback" role="status" aria-live="polite"></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ABA 2: FOTO DA FICHA TÉCNICA (TABELA NUTRICIONAL) -->
-        <section class="tab-panel" id="panel-foto">
+        <section class="tab-panel" role="tabpanel" id="panel-foto" aria-labelledby="tab-btn-foto" hidden>
             <div class="card">
                 <div class="photo-controls-grid">
                     <div>
@@ -257,6 +261,7 @@
                             <input
                                 type="file"
                                 id="label-photo-input"
+                                name="label_photo"
                                 accept="image/*"
                                 capture="environment"
                                 style="display: none;"
@@ -275,11 +280,11 @@
                     <div class="portion-control-box">
                         <div>
                             <label class="field-label" for="photo-portion-input">2. Quantidade que vai comer (g/ml)</label>
-                            <input type="number" id="photo-portion-input" class="text-input" value="45" min="1" max="2000" />
+                            <input type="number" id="photo-portion-input" name="photo_portion" class="text-input" value="45" min="1" max="2000" inputmode="decimal" autocomplete="off" />
                         </div>
                         <div>
                             <label class="field-label" for="photo-meal-select">Refeição de destino</label>
-                            <select id="photo-meal-select" class="select-input">
+                            <select id="photo-meal-select" name="photo_meal" class="select-input">
                                 <option value="Café da manhã">Café da manhã</option>
                                 <option value="Almoço">Almoço</option>
                                 <option value="Lanche" selected>Lanche</option>
@@ -300,11 +305,11 @@
                         <span class="unit-pill" id="ocr-engine-badge">Leitor ANVISA RDC 429</span>
                     </div>
                     <div class="label-image-frame">
-                        <img id="label-preview-img" src="/static/samples/rotulo_whey.png" alt="Foto da tabela nutricional" />
+                        <img id="label-preview-img" src="static/samples/rotulo_whey.png" alt="Foto da tabela nutricional do produto" width="480" height="280" loading="lazy" />
                     </div>
                     <div class="ocr-text-wrap">
                         <label class="field-label" for="ocr-raw-textarea">Texto identificado na ficha técnica (você pode editar ou colar os dados do rótulo):</label>
-                        <textarea id="ocr-raw-textarea" class="ocr-textarea" rows="5"></textarea>
+                        <textarea id="ocr-raw-textarea" name="ocr_raw_text" class="ocr-textarea" rows="5" spellcheck="false"></textarea>
                     </div>
                 </div>
 
@@ -341,17 +346,19 @@
                         </div>
                     </div>
 
-                    <table class="data-table compact-table">
-                        <thead>
-                            <tr>
-                                <th>Nutriente extraído</th>
-                                <th id="th-label-base">No rótulo (30g)</th>
-                                <th id="th-consumed-base">Sua porção (45g)</th>
-                                <th>Impacto na meta diária</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ocr-breakdown-tbody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="data-table compact-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nutriente extraído</th>
+                                    <th scope="col" id="th-label-base">No rótulo (30g)</th>
+                                    <th scope="col" id="th-consumed-base">Sua porção (45g)</th>
+                                    <th scope="col">Impacto na meta diária</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ocr-breakdown-tbody"></tbody>
+                        </table>
+                    </div>
 
                     <div class="anvisa-box" style="margin-top: 12px; margin-bottom: 12px;">
                         <div class="section-header-inline">
@@ -368,7 +375,7 @@
         </section>
 
         <!-- ABA 3: CÓDIGO DE BARRAS (OPEN FOOD FACTS) -->
-        <section class="tab-panel" id="panel-scanner">
+        <section class="tab-panel" role="tabpanel" id="panel-scanner" aria-labelledby="tab-btn-scanner" hidden>
             <div class="card search-card">
                 <div class="search-row">
                     <div class="search-input-wrap">
@@ -377,9 +384,12 @@
                             <input
                                 type="text"
                                 id="barcode-input"
+                                name="barcode_search"
                                 class="text-input"
-                                placeholder="Ex: 3017620422003, 7894900011517 ou digite o nome do alimento..."
+                                placeholder="Ex: 3017620422003, 7894900011517 ou digite o nome do alimento…"
                                 value="3017620422003"
+                                autocomplete="off"
+                                spellcheck="false"
                             />
                             <button class="btn-primary" id="btn-scan">Analisar rótulo</button>
                         </div>
@@ -401,7 +411,7 @@
                     <div class="product-header">
                         <div>
                             <span class="ean-badge" id="prod-ean">EAN 3017620422003</span>
-                            <h2 class="product-title" id="prod-name">Carregando...</h2>
+                            <h2 class="product-title" id="prod-name">Carregando…</h2>
                             <p class="product-subtitle" id="prod-meta">Marca e categoria</p>
                         </div>
                         <span class="unit-pill" id="prod-unit">Base: 100g</span>
@@ -430,7 +440,7 @@
                             <span class="score-box-title">Grau de processamento (NOVA / USP)</span>
                             <div class="nova-display">
                                 <span class="nova-badge" id="nova-badge">NOVA 4</span>
-                                <span class="nova-text" id="nova-label">Ultraprocessado</span>
+                                <span class="nova-label" id="nova-label">Ultraprocessado</span>
                             </div>
                         </div>
                     </div>
@@ -444,11 +454,11 @@
                     <div class="add-barcode-to-diet-bar">
                         <div>
                             <label class="field-label" for="barcode-portion-g">Porção consumida (g/ml)</label>
-                            <input type="number" id="barcode-portion-g" class="text-input" value="30" min="1" max="1000" />
+                            <input type="number" id="barcode-portion-g" name="barcode_portion" class="text-input" value="30" min="1" max="1000" inputmode="decimal" autocomplete="off" />
                         </div>
                         <div>
                             <label class="field-label" for="barcode-meal-type">Refeição</label>
-                            <select id="barcode-meal-type" class="select-input">
+                            <select id="barcode-meal-type" name="barcode_meal" class="select-input">
                                 <option value="Café da manhã">Café da manhã</option>
                                 <option value="Almoço">Almoço</option>
                                 <option value="Lanche" selected>Lanche</option>
@@ -461,16 +471,18 @@
 
                 <div class="card nutrition-side-card">
                     <h3>Tabela nutricional (por 100g / 100ml)</h3>
-                    <table class="data-table compact-table">
-                        <thead>
-                            <tr>
-                                <th>Nutriente</th>
-                                <th>Quantidade</th>
-                                <th>Referência ANVISA</th>
-                            </tr>
-                        </thead>
-                        <tbody id="nutrition-tbody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="data-table compact-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nutriente</th>
+                                    <th scope="col">Quantidade</th>
+                                    <th scope="col">Referência ANVISA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nutrition-tbody"></tbody>
+                        </table>
+                    </div>
 
                     <div class="additives-section">
                         <div class="section-header-inline">
@@ -484,16 +496,16 @@
         </section>
 
         <!-- ABA 4: COMPARAR ALIMENTOS -->
-        <section class="tab-panel" id="panel-comparar">
+        <section class="tab-panel" role="tabpanel" id="panel-comparar" aria-labelledby="tab-btn-comparar" hidden>
             <div class="card compare-controls-card">
                 <div class="compare-selectors-grid">
                     <div>
                         <label for="compare-select-a" class="field-label">Produto A</label>
-                        <select id="compare-select-a" class="select-input"></select>
+                        <select id="compare-select-a" name="compare_a" class="select-input"></select>
                     </div>
                     <div>
                         <label for="compare-select-b" class="field-label">Produto B</label>
-                        <select id="compare-select-b" class="select-input"></select>
+                        <select id="compare-select-b" name="compare_b" class="select-input"></select>
                     </div>
                     <div class="compare-btn-wrap">
                         <button class="btn-primary" id="btn-run-compare">Comparar composição</button>
@@ -511,44 +523,46 @@
                     <h3>Diferença nutricional por 100g / 100ml</h3>
                     <span class="threshold-note">Comparativo direto entre os dois produtos selecionados</span>
                 </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Indicador</th>
-                            <th id="th-prod-a">Produto A</th>
-                            <th id="th-prod-b">Produto B</th>
-                            <th>Diferença (A vs B)</th>
-                            <th>Melhor perfil no indicador</th>
-                        </tr>
-                    </thead>
-                    <tbody id="compare-deltas-tbody"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Indicador</th>
+                                <th scope="col" id="th-prod-a">Produto A</th>
+                                <th scope="col" id="th-prod-b">Produto B</th>
+                                <th scope="col">Diferença (A vs B)</th>
+                                <th scope="col">Melhor perfil no indicador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compare-deltas-tbody"></tbody>
+                    </table>
+                </div>
                 <div class="compare-notes-box" id="compare-notes"></div>
             </div>
         </section>
     </main>
 
     <!-- BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ANDROID -->
-    <nav class="mobile-bottom-nav" aria-label="Navegação mobile">
-        <button class="mob-nav-btn active" data-tab="dieta">
-            <span class="mob-nav-icon">◉</span>
+    <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
+        <button class="mob-nav-btn active" data-tab="dieta" aria-label="Minha Dieta">
+            <span class="mob-nav-icon" aria-hidden="true">◉</span>
             <span>Minha Dieta</span>
         </button>
-        <button class="mob-nav-btn" data-tab="foto">
-            <span class="mob-nav-icon">▣</span>
+        <button class="mob-nav-btn" data-tab="foto" aria-label="Foto da Ficha Técnica">
+            <span class="mob-nav-icon" aria-hidden="true">▣</span>
             <span>Foto Ficha</span>
         </button>
-        <button class="mob-nav-btn" data-tab="scanner">
-            <span class="mob-nav-icon">|||</span>
+        <button class="mob-nav-btn" data-tab="scanner" aria-label="Código de Barras EAN">
+            <span class="mob-nav-icon" aria-hidden="true">|||</span>
             <span>Rótulo EAN</span>
         </button>
-        <button class="mob-nav-btn" data-tab="comparar">
-            <span class="mob-nav-icon">⇄</span>
+        <button class="mob-nav-btn" data-tab="comparar" aria-label="Comparar Alimentos">
+            <span class="mob-nav-icon" aria-hidden="true">⇄</span>
             <span>Comparar</span>
         </button>
     </nav>
 
-    <script src="/static/js/label_parser.js"></script>
-    <script src="/static/js/app.js"></script>
+    <script src="static/js/label_parser.js"></script>
+    <script src="static/js/app.js"></script>
 </body>
 </html>

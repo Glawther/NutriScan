@@ -101,13 +101,20 @@ const OFFLINE_CATALOG = [
 function switchTab(rawTabName) {
     const tabName = rawTabName === "compare" ? "comparar" : rawTabName;
     document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
+        const isActive = btn.dataset.tab === tabName;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        btn.setAttribute("tabindex", isActive ? "0" : "-1");
     });
     document.querySelectorAll(".mob-nav-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
+        const isActive = btn.dataset.tab === tabName;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
     });
     document.querySelectorAll(".tab-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.id === `panel-${tabName}`);
+        const isActive = panel.id === `panel-${tabName}`;
+        panel.classList.toggle("active", isActive);
+        panel.hidden = !isActive;
     });
 }
 
@@ -305,7 +312,7 @@ function renderDietToday(summary) {
                 <td>${e.carbohydrates_g}g</td>
                 <td class="text-emerald"><strong>${e.proteins_g}g</strong></td>
                 <td>${e.fat_g}g</td>
-                <td><button class="btn-delete" onclick="removeDiaryItem(${e.id})">Remover</button></td>
+                <td><button class="btn-delete" aria-label="Remover ${e.product_name} da dieta" onclick="removeDiaryItem(${e.id})">Remover</button></td>
             </tr>`;
         })
         .join("");
