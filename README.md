@@ -29,7 +29,15 @@ Leitor de código de barras integrado com suporte à API nativa `BarcodeDetector
 ![Consulta de produto no NutriScan](docs/screenshots/nutriscan_produto.png)
 ![Scanner por Câmera ao Vivo](docs/screenshots/nutriscan_camera_modal.png)
 
-### 4. Versão Mobile e Aplicativo Android (.APK)
+### 4. Foto do Prato com IA de Visão Computacional (100% Offline)
+Permite tirar foto do prato de comida ou selecionar exemplos pré-configurados. Um motor de visão computacional local analisa a área do prato, identifica os agrupamentos de cores (folhosos, feijão, arroz, proteínas grelhadas, tubérculos) e estima as gramaturas com base na tabela TACO (UNICAMP), sem nenhuma dependência de APIs externas pagas:
+- **Ajuste interativo de porções:** botões `[ - ] [ 150 ] g [ + ]` recalculam instantaneamente calorias e nutrientes.
+- **Painel de Micronutrientes (IDR ANVISA):** barras comparativas com as metas oficiais de Cálcio, Ferro, Potássio, Magnésio, Vitamina C e limite de Sódio.
+- **Lançamento em 1 clique:** adiciona todos os alimentos identificados diretamente à refeição do diário.
+
+![Foto do Prato com IA de Visão no NutriScan](docs/screenshots/nutriscan_prato_ia.png)
+
+### 5. Versão Mobile e Aplicativo Android (.APK)
 Interface responsiva em formato Bento com barra inferior de navegação e suporte a PWA. A pasta `android/` contém um projeto nativo em Kotlin/WebView com:
 - **Splash Screen nativa:** inicialização instantânea no tema escuro `#090d16` sem tela em branco.
 - **Feedback tátil:** vibração háptica nativa ao escanear códigos e registrar refeições via `NativeBridge`.
@@ -38,6 +46,8 @@ Interface responsiva em formato Bento com barra inferior de navegação e suport
 
 <p align="center">
   <img src="docs/screenshots/nutriscan_mobile_android.png" alt="NutriScan no Celular Android" width="340" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/nutriscan_prato_mobile.png" alt="NutriScan Prato IA Mobile" width="340" />
 </p>
 
 ## Como baixar o APK para Android
@@ -45,7 +55,7 @@ Interface responsiva em formato Bento com barra inferior de navegação e suport
 O fluxo do GitHub Actions (`.github/workflows/android-apk.yml`) compila os APKs automaticamente em cada release e push.
 
 1. Acesse a aba **Releases** no repositório [Glawther/NutriScan](https://github.com/Glawther/NutriScan/releases).
-2. Baixe o arquivo `app-debug.apk` ou `NutriScan-v1.4.0.apk`.
+2. Baixe o arquivo `app-debug.apk` ou `NutriScan-v1.5.0.apk`.
 3. Instale diretamente no celular Android (habilite a instalação de fontes confiáveis nas configurações do aparelho).
 
 ## Como executar localmente
@@ -69,14 +79,14 @@ Acesse `http://127.0.0.1:8096` no navegador. A documentação OpenAPI fica em `h
 ## Testes
 
 ```bash
-# Testes da API e regras nutricionais (Python)
+# Testes da API, visão computacional e regras nutricionais (Python)
 pytest tests/ -v
 
-# Testes dos parsers e câmera (JavaScript)
-node --test tests/js/label_parser.test.js tests/js/barcode_cam.test.js
+# Testes dos parsers, câmera e estimador de prato (JavaScript)
+node --test tests/js/label_parser.test.js tests/js/barcode_cam.test.js tests/js/plate_scanner.test.js
 ```
-
 
 ## Licença
 
 MIT.
+

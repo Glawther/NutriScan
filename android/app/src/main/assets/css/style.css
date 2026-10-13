@@ -1,0 +1,2263 @@
+/* ==========================================================================
+   NutriScan — Bento Design System
+   Modular, card-based interface inspired by MacroFactor, Yuka & Apple Health
+   Audited against Web Interface Guidelines & No-AI-Slop standards
+   ========================================================================== */
+
+:root {
+    /* Bento Canvas & Tile Surfaces */
+    --bg-canvas: #090d16;
+    --bg-tile: #111827;
+    --bg-tile-elevated: #162032;
+    --bg-tile-highlight: rgba(16, 185, 129, 0.05);
+    --bg-hover: #1e293b;
+
+    /* Borders & Dividers */
+    --border-subtle: #1e293b;
+    --border-card: rgba(255, 255, 255, 0.08);
+    --border-card-highlight: rgba(16, 185, 129, 0.35);
+    --border-focus: #38bdf8;
+
+    /* Typography Colors */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Semantics & Functional Colors */
+    --color-kcal: #10b981;
+    --color-prot: #38bdf8;
+    --color-carb: #f59e0b;
+    --color-fat: #fb7185;
+    --color-sodium: #a78bfa;
+
+    /* Accent & Brand */
+    --brand-emerald: #10b981;
+    --brand-emerald-hover: #059669;
+    --brand-blue: #3b82f6;
+    --brand-blue-hover: #2563eb;
+    --brand-danger: #ef4444;
+
+    /* Radii & Geometry (Bento modular curves) */
+    --radius-tile: 14px;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-pill: 9999px;
+
+    /* Shadows & Elevation */
+    --tile-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --tile-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    /* Fonts */
+    --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Reset & Box Sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Accessibility: Skip Link */
+.skip-link {
+    position: absolute;
+    top: -60px;
+    left: 16px;
+    background: var(--brand-blue);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 13px;
+    z-index: 99999;
+    text-decoration: none;
+    transition: top 0.15s ease-out;
+}
+
+.skip-link:focus-visible {
+    top: 14px;
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* Base Body Styles */
+body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus Management (Web Guidelines: visible focus ring without layout shift) */
+:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, .brand-title, .product-title {
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+}
+
+/* Numeric & Tabular Alignment */
+.kpi-value,
+.kpi-divider,
+.kpi-pct,
+.macro-box-val,
+.macro-box-pct,
+.data-table td,
+.data-table th,
+.ean-badge,
+.unit-pill,
+.count-pill,
+.status-pill {
+    font-variant-numeric: tabular-nums;
+}
+
+.container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 0 22px;
+}
+
+/* Header & Top Bar */
+.topbar {
+    background-color: rgba(9, 13, 22, 0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.brand-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #032313;
+    font-weight: 800;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.brand-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Navigation Tabs (Bento Segmented Pills) */
+.nav-tabs {
+    display: flex;
+    background-color: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    gap: 4px;
+}
+
+.tab-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tile-elevated);
+}
+
+.tab-btn.active {
+    background-color: var(--brand-emerald);
+    color: #032313;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Main Content Wrapper */
+.main-content {
+    padding-top: 18px;
+    padding-bottom: 36px;
+}
+
+/* Bento Daily Diet KPI Strip */
+.diet-kpi-strip {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.kpi-card {
+    background-color: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--tile-shadow);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.kpi-card:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.kpi-card-highlight {
+    border-color: var(--border-card-highlight);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(17, 24, 39, 1) 100%);
+}
+
+.kpi-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.kpi-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.kpi-pct {
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+    background-color: rgba(16, 185, 129, 0.16);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pill.exceeded {
+    background-color: rgba(239, 68, 68, 0.18);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.kpi-main-numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+    font-family: var(--font-mono);
+}
+
+.kpi-divider {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.progress-track {
+    width: 100%;
+    height: 7px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fill-emerald { background-color: var(--color-kcal); }
+.fill-blue { background-color: var(--color-prot); }
+.fill-amber { background-color: var(--color-carb); }
+.fill-rose { background-color: var(--color-fat); }
+
+.text-emerald { color: var(--color-kcal); }
+.text-amber { color: var(--color-carb); }
+.text-rose { color: var(--color-fat); }
+
+/* Tab Panels */
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Bento Cards (Tiles) */
+.card {
+    background-color: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--tile-shadow);
+}
+
+.diet-grid {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.section-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.section-header-inline h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.section-header-inline h3,
+.nutrition-side-card h3,
+.ingredients-block h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.section-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Form Fields & Controls */
+.field-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.input-action-group {
+    display: flex;
+    gap: 10px;
+}
+
+.text-input,
+.select-input,
+.ocr-textarea {
+    width: 100%;
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    color: var(--text-primary);
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.text-input:focus-visible,
+.select-input:focus-visible,
+.ocr-textarea:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 1px;
+    border-color: var(--border-focus);
+}
+
+.ocr-textarea {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+/* Buttons (Modern Bento Touch Affordance) */
+.btn-primary,
+.btn-emerald,
+.btn-secondary-full,
+.btn-primary-full,
+.btn-emerald-full,
+.btn-delete,
+.btn-camera {
+    font-family: inherit;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    border: none;
+    transition: background-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-primary {
+    background-color: var(--brand-blue);
+    color: #ffffff;
+    padding: 8px 16px;
+    font-size: 13px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary:hover {
+    background-color: var(--brand-blue-hover);
+}
+
+.btn-emerald {
+    background-color: var(--brand-emerald);
+    color: #032313;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-emerald:hover {
+    background-color: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+.btn-emerald-full {
+    width: 100%;
+    background-color: var(--brand-emerald);
+    color: #032313;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 800;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-emerald-full:hover {
+    background-color: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+.btn-primary-full {
+    width: 100%;
+    background-color: var(--brand-blue);
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.btn-primary-full:hover {
+    background-color: var(--brand-blue-hover);
+}
+
+.btn-secondary-full {
+    width: 100%;
+    background-color: var(--bg-tile-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-card);
+    padding: 9px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.btn-secondary-full:hover {
+    background-color: #1f2c42;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-delete {
+    background-color: transparent;
+    color: var(--brand-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: var(--brand-danger);
+}
+
+.btn-camera {
+    background-color: var(--brand-emerald);
+    color: #032313;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.btn-camera:hover {
+    background-color: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+/* Tables & Data Presentation */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: left;
+}
+
+.data-table th,
+.data-table td {
+    padding: 9px 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.data-table th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.data-table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.data-table.compact-table th,
+.data-table.compact-table td {
+    padding: 7px 9px;
+    font-size: 12px;
+}
+
+.meal-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    background-color: var(--bg-tile-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-card);
+}
+
+.source-tag {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-muted);
+}
+
+/* Manual Entry Box */
+.quick-manual-box {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.quick-manual-box h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.manual-form-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr auto;
+    gap: 8px;
+    align-items: end;
+}
+
+.manual-btn-col button {
+    height: 38px;
+}
+
+/* Goals Setup Form */
+.goals-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.limits-divider {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 0 4px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-top: 6px;
+}
+
+.save-feedback {
+    font-size: 12px;
+    color: var(--brand-emerald);
+    font-weight: 600;
+    min-height: 18px;
+    text-align: center;
+}
+
+/* Photo Scanner Tab */
+.photo-controls-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    align-items: start;
+}
+
+.upload-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.upload-file-label {
+    font-size: 12px;
+    color: var(--brand-emerald);
+    font-weight: 600;
+}
+
+.quick-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.chips-label {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.sample-chip,
+.chip-btn {
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 32px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sample-chip:hover,
+.chip-btn:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.sample-chip.active,
+.chip-btn.active {
+    background-color: rgba(56, 189, 248, 0.12);
+    border-color: var(--color-prot);
+    color: #7dd3fc;
+    font-weight: 600;
+}
+
+.portion-control-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+}
+
+.scanner-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.label-image-frame {
+    width: 100%;
+    background-color: #030712;
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    margin-bottom: 12px;
+}
+
+.label-image-frame img {
+    max-width: 100%;
+    max-height: 380px;
+    object-fit: contain;
+    display: block;
+}
+
+.ocr-text-wrap {
+    margin-top: 8px;
+}
+
+/* Product & Macro Bento Results */
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.ean-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+}
+
+.product-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+
+.product-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+.unit-pill,
+.count-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Macro Result Bento Tiles */
+.macro-result-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.macro-box {
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.macro-box-kcal {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(22, 32, 50, 1) 100%);
+}
+
+.macro-box-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.macro-box-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.macro-box-pct {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ANVISA Warning Seals (Official RDC 429/2020 High Contrast) */
+.anvisa-box {
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.anvisa-Seals-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.anvisa-seal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.anvisa-seal-icon {
+    font-size: 12px;
+}
+
+.anvisa-clean-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Nutri-Score & NOVA Badges */
+.scores-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.score-box {
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.score-box-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nutriscore-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.ns-step {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 6px;
+    opacity: 0.28;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ns-step.active {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ns-a { background-color: #038141; color: #ffffff; }
+.ns-b { background-color: #85bb2f; color: #04250d; }
+.ns-c { background-color: #fecb02; color: #2a2000; }
+.ns-d { background-color: #ee8100; color: #ffffff; }
+.ns-e { background-color: #e63e11; color: #ffffff; }
+
+.nova-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.nova-badge {
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    font-weight: 800;
+    font-size: 12px;
+    color: #ffffff;
+    background-color: #dc2626;
+}
+
+.nova-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Ingredients & Additives */
+.ingredients-block {
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.ingredients-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.allergens-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.allergen-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.add-barcode-to-diet-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 14px;
+}
+
+.additives-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.additives-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.additive-item {
+    font-size: 12px;
+    padding: 6px 10px;
+    background-color: var(--bg-canvas);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.additive-code {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: #93c5fd;
+    font-size: 11.5px;
+}
+
+/* Compare View */
+.compare-selectors-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.compare-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.compare-notes-box {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background-color: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+/* Mobile Bottom Navigation (Native App Feel) */
+.mobile-bottom-nav {
+    display: none;
+}
+
+/* Responsive Breakpoints & Mobile Optimization */
+@media (max-width: 900px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .nav-tabs {
+        display: none;
+    }
+
+    .main-content {
+        padding-bottom: 84px;
+    }
+
+    .diet-kpi-strip {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .diet-grid,
+    .scanner-grid,
+    .photo-controls-grid,
+    .compare-selectors-grid,
+    .compare-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manual-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .macro-result-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .portion-control-box,
+    .add-barcode-to-diet-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .portion-control-box button,
+    .add-barcode-to-diet-bar button {
+        grid-column: span 2;
+        width: 100%;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px;
+        font-size: 11.5px;
+    }
+
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(17, 24, 39, 0.96);
+        backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border-card);
+        z-index: 999;
+        padding: 4px 2px max(6px, env(safe-area-inset-bottom, 6px));
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .mob-nav-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 11px;
+        font-weight: 600;
+        min-height: 48px;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .mob-nav-btn:hover {
+        color: var(--text-primary);
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .mob-nav-btn.active {
+        color: var(--brand-emerald);
+        background-color: rgba(16, 185, 129, 0.08);
+    }
+
+    .mob-nav-icon {
+        font-size: 16px;
+        line-height: 1;
+    }
+}
+
+/* Reduced Motion Preference (Web Guidelines) */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Toast Notification Feedback */
+.ns-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: #064e3b;
+    color: #ecfdf5;
+    border: 1px solid #10b981;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.ns-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+    .ns-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 74px;
+        text-align: center;
+    }
+}
+
+/* Printable PDF & Window.Print Layout */
+@media print {
+    body {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        font-size: 12pt !important;
+    }
+
+    .topbar,
+    .nav-tabs,
+    .mobile-bottom-nav,
+    .btn-emerald,
+    .btn-primary,
+    .btn-secondary,
+    .btn-secondary-full,
+    .btn-primary-full,
+    .quick-manual-box,
+    .goals-form,
+    .btn-camera,
+    .sample-chip,
+    .chips-label,
+    .ns-toast,
+    .skip-link,
+    #btn-share-whatsapp,
+    #btn-copy-diet,
+    #btn-print-diet,
+    .share-btn-group {
+        display: none !important;
+    }
+
+    .container,
+    .main-content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        box-shadow: none !important;
+        color: #111827 !important;
+        break-inside: avoid;
+        margin-bottom: 16px !important;
+    }
+
+    .data-table th,
+    .data-table td {
+        border-color: #e5e7eb !important;
+        color: #111827 !important;
+    }
+
+    .kpi-card {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        color: #111827 !important;
+    }
+}
+
+/* ==========================================================================
+   Date Navigator, Water Tracker, 7-Day Trends & Camera Barcode Scanner
+   ========================================================================== */
+
+/* Date Navigator Bar */
+.diet-date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    padding: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.diet-current-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.diet-date-badge {
+    background-color: var(--brand-emerald);
+    color: #090d16;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.04em;
+}
+
+.diet-date-text {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.btn-date-nav {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-date-nav:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Water Widget */
+.water-card {
+    margin-top: 14px;
+}
+
+.water-kpi-main {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 12px 0 8px;
+}
+
+.water-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--brand-blue);
+    font-family: var(--font-mono);
+}
+
+.water-goal-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.water-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.btn-water-add {
+    background-color: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--brand-blue);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-water-add:hover {
+    background-color: rgba(56, 189, 248, 0.2);
+}
+
+.btn-water-add:active {
+    transform: scale(0.97);
+}
+
+.btn-water-reset {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-water-reset:hover {
+    background: var(--bg-hover);
+    color: var(--brand-danger);
+}
+
+/* 7-Day Trends Widget */
+.trends-card {
+    margin-top: 14px;
+}
+
+.trends-bars-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 120px;
+    margin-top: 16px;
+    padding-bottom: 24px;
+    position: relative;
+}
+
+.trend-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.trend-bar-track {
+    width: 100%;
+    max-width: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.trend-bar-fill {
+    width: 100%;
+    border-radius: 4px;
+    background: var(--brand-emerald);
+    transition: height 0.4s ease;
+}
+
+.trend-bar-fill.over-goal {
+    background: var(--color-carb);
+}
+
+.trend-day-label {
+    position: absolute;
+    bottom: -22px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.trend-col.is-today .trend-day-label {
+    color: var(--brand-emerald);
+    font-weight: 800;
+}
+
+/* Bento Camera Barcode Scanner Modal */
+.cam-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(9, 13, 22, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.cam-modal-backdrop[hidden] {
+    display: none;
+}
+
+.cam-bento-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-tile);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-tile);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cam-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.cam-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--brand-emerald);
+}
+
+.cam-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 2px;
+}
+
+.cam-btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cam-btn-icon:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.cam-viewfinder-frame {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cam-video-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cam-reticle {
+    position: absolute;
+    width: 240px;
+    height: 150px;
+    pointer-events: none;
+}
+
+.cam-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--brand-emerald);
+}
+
+.cam-corner.top-left { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: 6px; }
+.cam-corner.top-right { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: 6px; }
+.cam-corner.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: 6px; }
+.cam-corner.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: 6px; }
+
+.cam-laser-line {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    height: 2px;
+    background: var(--brand-emerald);
+    box-shadow: 0 0 10px var(--brand-emerald);
+    animation: scanLaser 2s ease-in-out infinite alternate;
+}
+
+@keyframes scanLaser {
+    0% { top: 10%; opacity: 0.8; }
+    100% { top: 90%; opacity: 0.8; }
+}
+
+.cam-status-pill {
+    position: absolute;
+    bottom: 12px;
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.cam-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--bg-tile-elevated);
+}
+
+.cam-btn-action,
+.cam-btn-secondary {
+    flex: 1;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+
+.cam-btn-action {
+    background: var(--brand-emerald);
+    color: #090d16;
+    border: none;
+}
+
+.cam-btn-action:hover {
+    background: var(--brand-emerald-hover);
+}
+
+.cam-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+.cam-btn-secondary:hover {
+    background: var(--bg-hover);
+}
+
+/* ==========================================================================
+   Bento Design System: Food Plate Scanner & Micronutrients Dashboard (#panel-prato)
+   ========================================================================== */
+
+.plate-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.plate-input-card {
+    grid-column: span 12;
+}
+
+.plate-vision-card {
+    grid-column: span 7;
+}
+
+.plate-items-card {
+    grid-column: span 5;
+}
+
+.plate-micros-card {
+    grid-column: span 12;
+}
+
+.plate-action-card {
+    grid-column: span 12;
+}
+
+@media (max-width: 992px) {
+    .plate-vision-card,
+    .plate-items-card {
+        grid-column: span 12;
+    }
+}
+
+/* Card 1: Camera Dropzone & Presets */
+.plate-capture-box {
+    margin: 14px 0;
+}
+
+.plate-camera-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 16px;
+    background: var(--bg-tile-elevated);
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius-tile);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.plate-camera-dropzone:hover {
+    border-color: var(--brand-emerald);
+    background: var(--bg-tile-highlight);
+}
+
+.dropzone-icon {
+    font-size: 28px;
+}
+
+.dropzone-title {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.dropzone-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.plate-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.plate-preset-chip {
+    padding: 7px 14px;
+    font-size: 12.5px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.plate-preset-chip:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.plate-preset-chip.active {
+    background: var(--bg-tile-highlight);
+    border-color: var(--brand-emerald);
+    color: var(--brand-emerald);
+    font-weight: 600;
+}
+
+/* Card 2: Plate Preview Viewport & Bounding Chips */
+.plate-preview-viewport {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+    max-height: 380px;
+    border-radius: var(--radius-md);
+    background: #020617;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 14px;
+}
+
+.plate-viewport-image {
+    width: 100%;
+    height: 100%;
+    max-height: 380px;
+    object-fit: cover;
+    display: block;
+}
+
+.plate-bounding-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.plate-bound-box {
+    position: absolute;
+    transform: translate(-10%, -10%);
+    pointer-events: auto;
+    transition: transform 0.15s ease;
+}
+
+.plate-bound-box:hover {
+    transform: translate(-10%, -10%) scale(1.05);
+    z-index: 10;
+}
+
+.plate-bound-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(9, 13, 22, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand-emerald);
+    box-shadow: 0 0 6px var(--brand-emerald);
+}
+
+.plate-quick-kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-tile-elevated);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+    .plate-quick-kpi-bar {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.kpi-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-mini-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.kpi-mini-val {
+    font-size: 13.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Card 3: Items List & Steppers */
+.plate-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.plate-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease;
+}
+
+.plate-item-row:hover {
+    border-color: var(--border-card);
+}
+
+.item-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    display: block;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.macro-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.macro-badge.kcal { background: rgba(16, 185, 129, 0.15); color: var(--color-kcal); }
+.macro-badge.carb { background: rgba(245, 158, 11, 0.15); color: var(--color-carb); }
+.macro-badge.prot { background: rgba(56, 189, 248, 0.15); color: var(--color-prot); }
+.macro-badge.fat { background: rgba(251, 113, 133, 0.15); color: var(--color-fat); }
+
+.item-stepper-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stepper-controls {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.btn-step {
+    width: 28px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-step:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.stepper-input-box {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.stepper-input {
+    width: 42px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-right: 2px;
+}
+
+.btn-remove-item {
+    width: 28px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-remove-item:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--brand-danger);
+    color: var(--brand-danger);
+}
+
+/* TACO Search & Dropdown */
+.plate-taco-add-box {
+    position: relative;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+}
+
+.taco-search-input-wrap {
+    position: relative;
+}
+
+.taco-suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--tile-shadow-hover);
+    z-index: 1000;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.taco-suggest-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.taco-suggest-item:last-child {
+    border-bottom: none;
+}
+
+.taco-suggest-item:hover {
+    background: var(--bg-hover);
+}
+
+.suggest-info strong {
+    display: block;
+    font-size: 12.5px;
+}
+
+.suggest-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.suggest-add-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-emerald);
+}
+
+.taco-no-result {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* Card 4: Bento Micronutrients Dashboard */
+.plate-micros-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+    .plate-micros-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .plate-micros-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.micro-card-tile {
+    background: var(--bg-tile-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.micro-card-tile:hover {
+    border-color: var(--border-card);
+    transform: translateY(-2px);
+}
+
+.micro-tile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.micro-tile-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.status-pill.pill-optimal {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--brand-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pill.pill-adequate {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--brand-blue);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.status-pill.pill-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-carb);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-pill.pill-low {
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.status-pill.pill-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--brand-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.micro-tile-body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.micro-tile-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.micro-tile-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.micro-tile-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.micro-idr-ref {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Card 5: Action Card */
+.plate-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.meal-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+

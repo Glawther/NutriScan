@@ -6,12 +6,15 @@ from typing import Dict, List, Optional
 
 from app.config import DATABASE_PATH
 from app.models.schemas import (
+    DailyMicronutrientsResponse,
     DailyTrendItem,
     DietDiaryCreateRequest,
     DietDiaryEntry,
     DietGoals,
     DietGoalsUpdateRequest,
     DietTodaySummary,
+    MicronutrientIDRComparison,
+    MicronutrientTotals,
     ProductAnalysis,
     WaterLogCreate,
     WaterLogResponse,
@@ -20,6 +23,19 @@ from app.models.schemas import (
 from app.services.openfoodfacts import get_fallback_catalog
 
 _db_lock = threading.Lock()
+
+ANVISA_IDR_SPECS = [
+    {"key": "calcium_mg", "nutrient": "Cálcio", "unit": "mg", "idr_goal": 1000.0, "is_max": False},
+    {"key": "iron_mg", "nutrient": "Ferro", "unit": "mg", "idr_goal": 14.0, "is_max": False},
+    {"key": "potassium_mg", "nutrient": "Potássio", "unit": "mg", "idr_goal": 3500.0, "is_max": False},
+    {"key": "sodium_mg", "nutrient": "Sódio", "unit": "mg", "idr_goal": 2000.0, "is_max": True},
+    {"key": "magnesium_mg", "nutrient": "Magnésio", "unit": "mg", "idr_goal": 260.0, "is_max": False},
+    {"key": "phosphorus_mg", "nutrient": "Fósforo", "unit": "mg", "idr_goal": 700.0, "is_max": False},
+    {"key": "vitamin_c_mg", "nutrient": "Vitamina C", "unit": "mg", "idr_goal": 100.0, "is_max": False},
+    {"key": "zinc_mg", "nutrient": "Zinco", "unit": "mg", "idr_goal": 7.0, "is_max": False},
+]
+
+ANVISA_IDR_ADULTOS = {spec["key"]: spec for spec in ANVISA_IDR_SPECS}
 
 
 def today_str() -> str:
@@ -86,10 +102,33 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                     fat_g REAL NOT NULL,
                     fiber_g REAL NOT NULL,
                     sodium_mg REAL NOT NULL,
+                    calcium_mg REAL NOT NULL DEFAULT 0.0,
+                    iron_mg REAL NOT NULL DEFAULT 0.0,
+                    potassium_mg REAL NOT NULL DEFAULT 0.0,
+                    magnesium_mg REAL NOT NULL DEFAULT 0.0,
+                    phosphorus_mg REAL NOT NULL DEFAULT 0.0,
+                    vitamin_c_mg REAL NOT NULL DEFAULT 0.0,
+                    zinc_mg REAL NOT NULL DEFAULT 0.0,
                     created_at TEXT NOT NULL
                 )
                 """
             )
+            # Schema migration for diet_diary new micronutrient columns
+            table_info = conn.execute("PRAGMA table_info(diet_diary)").fetchall()
+            existing_columns = {row["name"] for row in table_info}
+            new_columns = [
+                ("calcium_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("iron_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("potassium_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("magnesium_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("phosphorus_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("vitamin_c_mg", "REAL NOT NULL DEFAULT 0.0"),
+                ("zinc_mg", "REAL NOT NULL DEFAULT 0.0"),
+            ]
+            for col_name, col_type in new_columns:
+                if col_name not in existing_columns:
+                    conn.execute(f"ALTER TABLE diet_diary ADD COLUMN {col_name} {col_type}")
+
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS diet_water (
@@ -100,6 +139,66 @@ def init_db(db_path: str = DATABASE_PATH) -> None:
                 )
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS taco_foods (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    energy_kcal REAL NOT NULL,
+                    carbohydrates_g REAL NOT NULL,
+                    proteins_g REAL NOT NULL,
+                    fat_g REAL NOT NULL,
+                    fiber_g REAL NOT NULL,
+                    calcium_mg REAL NOT NULL DEFAULT 0.0,
+                    iron_mg REAL NOT NULL DEFAULT 0.0,
+                    sodium_mg REAL NOT NULL DEFAULT 0.0,
+                    potassium_mg REAL NOT NULL DEFAULT 0.0,
+                    magnesium_mg REAL NOT NULL DEFAULT 0.0,
+                    phosphorus_mg REAL NOT NULL DEFAULT 0.0,
+                    vitamin_c_mg REAL NOT NULL DEFAULT 0.0,
+                    zinc_mg REAL NOT NULL DEFAULT 0.0,
+                    visual_color_tags TEXT NOT NULL DEFAULT '[]'
+                )
+                """
+            )
+
+            # Check if taco_foods is populated
+            taco_count = conn.execute("SELECT COUNT(*) AS c FROM taco_foods").fetchone()["c"]
+            if taco_count == 0:
+                from app.database.taco_foods import get_taco_catalog
+                catalog = get_taco_catalog()
+                for food in catalog:
+                    tags_json = json.dumps(food.get("visual_color_tags", []), ensure_ascii=False)
+                    conn.execute(
+                        """
+                        INSERT INTO taco_foods (
+                            name, category, energy_kcal, carbohydrates_g, proteins_g,
+                            fat_g, fiber_g, calcium_mg, iron_mg, sodium_mg,
+                            potassium_mg, magnesium_mg, phosphorus_mg, vitamin_c_mg,
+                            zinc_mg, visual_color_tags
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            food["name"],
+                            food["category"],
+                            food.get("energy_kcal", 0.0),
+                            food.get("carbohydrates_g", 0.0),
+                            food.get("proteins_g", 0.0),
+                            food.get("fat_g", 0.0),
+                            food.get("fiber_g", 0.0),
+                            food.get("calcium_mg", 0.0),
+                            food.get("iron_mg", 0.0),
+                            food.get("sodium_mg", 0.0),
+                            food.get("potassium_mg", 0.0),
+                            food.get("magnesium_mg", 0.0),
+                            food.get("phosphorus_mg", 0.0),
+                            food.get("vitamin_c_mg", 0.0),
+                            food.get("zinc_mg", 0.0),
+                            tags_json,
+                        ),
+                    )
+
             row = conn.execute("SELECT id FROM diet_goals WHERE id = 1").fetchone()
             if not row:
                 conn.execute(
@@ -345,8 +444,10 @@ def add_diary_entry(req: DietDiaryCreateRequest, db_path: str = DATABASE_PATH) -
                 """
                 INSERT INTO diet_diary (
                     date_str, meal_type, product_name, source_type, portion_g,
-                    kcal, carbohydrates_g, proteins_g, fat_g, fiber_g, sodium_mg, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    kcal, carbohydrates_g, proteins_g, fat_g, fiber_g, sodium_mg,
+                    calcium_mg, iron_mg, potassium_mg, magnesium_mg, phosphorus_mg, vitamin_c_mg, zinc_mg,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     d_str,
@@ -360,6 +461,13 @@ def add_diary_entry(req: DietDiaryCreateRequest, db_path: str = DATABASE_PATH) -
                     round(req.fat_g, 1),
                     round(req.fiber_g, 1),
                     round(req.sodium_mg, 1),
+                    round(getattr(req, "calcium_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "iron_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "potassium_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "magnesium_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "phosphorus_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "vitamin_c_mg", 0.0) or 0.0, 1),
+                    round(getattr(req, "zinc_mg", 0.0) or 0.0, 1),
                     now_iso,
                 ),
             )
@@ -446,6 +554,84 @@ def get_diet_today_summary(date_str: Optional[str] = None, db_path: str = DATABA
         within_kcal_limit=within_limit,
         entries=entries,
     )
+
+
+def get_daily_micronutrients(date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
+    init_db(db_path)
+    target_date = date_str or today_str()
+
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            row = conn.execute(
+                """
+                SELECT
+                    COALESCE(SUM(calcium_mg), 0.0) AS calcium_mg,
+                    COALESCE(SUM(iron_mg), 0.0) AS iron_mg,
+                    COALESCE(SUM(sodium_mg), 0.0) AS sodium_mg,
+                    COALESCE(SUM(potassium_mg), 0.0) AS potassium_mg,
+                    COALESCE(SUM(magnesium_mg), 0.0) AS magnesium_mg,
+                    COALESCE(SUM(phosphorus_mg), 0.0) AS phosphorus_mg,
+                    COALESCE(SUM(vitamin_c_mg), 0.0) AS vitamin_c_mg,
+                    COALESCE(SUM(zinc_mg), 0.0) AS zinc_mg
+                FROM diet_diary
+                WHERE date_str = ?
+                """,
+                (target_date,),
+            ).fetchone()
+        finally:
+            conn.close()
+
+    totals = {
+        "calcium_mg": round(float(row["calcium_mg"] or 0.0), 1),
+        "iron_mg": round(float(row["iron_mg"] or 0.0), 1),
+        "sodium_mg": round(float(row["sodium_mg"] or 0.0), 1),
+        "potassium_mg": round(float(row["potassium_mg"] or 0.0), 1),
+        "magnesium_mg": round(float(row["magnesium_mg"] or 0.0), 1),
+        "phosphorus_mg": round(float(row["phosphorus_mg"] or 0.0), 1),
+        "vitamin_c_mg": round(float(row["vitamin_c_mg"] or 0.0), 1),
+        "zinc_mg": round(float(row["zinc_mg"] or 0.0), 1),
+    }
+
+    comparisons = []
+    for spec in ANVISA_IDR_SPECS:
+        key = spec["key"]
+        consumed = totals.get(key, 0.0)
+        goal = spec["idr_goal"]
+        pct = round((consumed / goal) * 100.0, 1) if goal > 0 else 0.0
+
+        if spec["is_max"]:
+            if pct > 100.0:
+                status = "Atenção: Alto"
+            elif pct <= 75.0:
+                status = "Excelente"
+            else:
+                status = "Adequado"
+        else:
+            if pct >= 100.0:
+                status = "Excelente"
+            elif pct >= 70.0:
+                status = "Adequado"
+            else:
+                status = "Abaixo da meta"
+
+        comparisons.append(
+            {
+                "nutrient": spec["nutrient"],
+                "unit": spec["unit"],
+                "consumed": consumed,
+                "idr_goal": goal,
+                "pct_idr": pct,
+                "status": status,
+            }
+        )
+
+    return {
+        "date_str": target_date,
+        "totals": totals,
+        "comparisons": comparisons,
+    }
+
 
 
 def get_water_for_date(date_str: Optional[str] = None, db_path: str = DATABASE_PATH) -> dict:
@@ -781,4 +967,104 @@ def seed_demo_data_if_empty(db_path: str = DATABASE_PATH) -> None:
     today_water = get_water_for_date(date_str=today, db_path=db_path)
     if today_water["amount_ml"] == 0:
         log_water(amount_ml=1250, date_str=today, db_path=db_path)
+
+
+def _row_to_taco_dict(row: sqlite3.Row) -> dict:
+    d = dict(row)
+    if "visual_color_tags" in d and isinstance(d["visual_color_tags"], str):
+        try:
+            d["visual_color_tags"] = json.loads(d["visual_color_tags"])
+        except Exception:
+            d["visual_color_tags"] = []
+    return d
+
+
+def search_taco_foods(query: str, limit: int = 20, db_path: str = DATABASE_PATH) -> list[dict]:
+    """
+    Searches TACO foods by name or category.
+    """
+    init_db(db_path)
+    q = (query or "").strip().lower()
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            if not q:
+                rows = conn.execute(
+                    "SELECT * FROM taco_foods ORDER BY name ASC LIMIT ?",
+                    (limit,),
+                ).fetchall()
+            else:
+                like_term = f"%{q}%"
+                rows = conn.execute(
+                    """
+                    SELECT * FROM taco_foods
+                    WHERE LOWER(name) LIKE ? OR LOWER(category) LIKE ?
+                    ORDER BY
+                        CASE
+                            WHEN LOWER(name) = ? THEN 1
+                            WHEN LOWER(name) LIKE ? THEN 2
+                            ELSE 3
+                        END,
+                        name ASC
+                    LIMIT ?
+                    """,
+                    (like_term, like_term, q, f"{q}%", limit),
+                ).fetchall()
+            return [_row_to_taco_dict(r) for r in rows]
+        finally:
+            conn.close()
+
+
+def get_taco_food_by_id(food_id: int, db_path: str = DATABASE_PATH) -> Optional[dict]:
+    """
+    Retrieves a single TACO food by its primary key ID.
+    """
+    init_db(db_path)
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            row = conn.execute(
+                "SELECT * FROM taco_foods WHERE id = ?",
+                (food_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return _row_to_taco_dict(row)
+        finally:
+            conn.close()
+
+
+def find_matching_food_by_visual_tags(
+    color: str, category: Optional[str] = None, db_path: str = DATABASE_PATH
+) -> list[dict]:
+    """
+    Finds TACO foods that contain the given visual color tag, optionally filtering by category.
+    """
+    init_db(db_path)
+    c = (color or "").strip().lower()
+    with _db_lock:
+        conn = _get_connection(db_path)
+        try:
+            if category:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM taco_foods
+                    WHERE LOWER(category) = LOWER(?)
+                    ORDER BY name ASC
+                    """,
+                    (category.strip(),),
+                ).fetchall()
+            else:
+                rows = conn.execute("SELECT * FROM taco_foods ORDER BY name ASC").fetchall()
+
+            results = []
+            for r in rows:
+                item = _row_to_taco_dict(r)
+                tags = [t.lower() for t in item.get("visual_color_tags", [])]
+                if not c or c in tags:
+                    results.append(item)
+            return results
+        finally:
+            conn.close()
+
 

@@ -30,6 +30,7 @@
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-foto" data-tab="foto" id="tab-btn-foto">2. Foto da Ficha Técnica</button>
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-scanner" data-tab="scanner" id="tab-btn-scanner">3. Código de Barras</button>
                 <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comparar" data-tab="comparar" id="tab-btn-comparar">4. Comparar Alimentos</button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-prato" data-tab="prato" id="tab-btn-prato">5. Foto do Prato (IA)</button>
             </nav>
         </div>
     </header>
@@ -592,6 +593,138 @@
                 <div class="compare-notes-box" id="compare-notes"></div>
             </div>
         </section>
+        <!-- ABA 5: FOTO DO PRATO (IA) & MICRONUTRIENTES -->
+        <section class="tab-panel" role="tabpanel" id="panel-prato" aria-labelledby="tab-btn-prato" hidden>
+            <div class="plate-bento-grid">
+                <!-- CARD 1: Upload / Câmera + Pratos Prontos Bento Tile -->
+                <div class="card plate-input-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h2>1. Foto do Prato & IA de Visão</h2>
+                            <p class="section-desc">Tire uma foto do seu prato de comida ou escolha uma das refeições prontas abaixo.</p>
+                        </div>
+                        <span class="count-pill" id="plate-scan-status">Pronto para escanear</span>
+                    </div>
+
+                    <div class="plate-capture-box">
+                        <label class="plate-camera-dropzone" for="plate-photo-input">
+                            <span class="dropzone-icon" aria-hidden="true">📸</span>
+                            <strong class="dropzone-title">Tirar foto com a câmera ou anexar imagem</strong>
+                            <span class="dropzone-hint">Aceita fotos de smartphones Android, iOS ou arquivos (.jpg, .png)</span>
+                            <input type="file" id="plate-photo-input" name="plate_photo" accept="image/*" capture="environment" class="sr-only" />
+                        </label>
+                    </div>
+
+                    <div class="plate-presets-section">
+                        <span class="field-label">Pratos rápidos de referência:</span>
+                        <div class="plate-chips-row" role="group" aria-label="Pratos prontos de exemplo">
+                            <button type="button" class="chip-btn plate-preset-chip active" data-preset="prato_feito">
+                                🍛 Prato Feito
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="omelete_fitness">
+                                🍳 Omelete Fitness
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="salmao_legumes">
+                                🐟 Salmão com Legumes
+                            </button>
+                            <button type="button" class="chip-btn plate-preset-chip" data-preset="acai_completo">
+                                🫐 Açaí Completo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Visão do Prato com Etiquetas Bounding Chips -->
+                <div class="card plate-vision-card">
+                    <div class="section-header-inline">
+                        <h3>2. Identificação Visual dos Alimentos</h3>
+                        <span class="status-pill" id="plate-detected-pill">IA Visão Ativa</span>
+                    </div>
+                    <div class="plate-preview-viewport">
+                        <img id="plate-preview-img" class="plate-viewport-image" src="" alt="Prato visualizado" />
+                        <div class="plate-bounding-overlay" id="plate-bounding-overlay"></div>
+                    </div>
+                    <div class="plate-quick-kpi-bar">
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Calorias</span>
+                            <strong class="kpi-mini-val text-emerald" id="plate-total-kcal">0 kcal</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Carboidratos</span>
+                            <strong class="kpi-mini-val text-amber" id="plate-total-carbs">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Proteínas</span>
+                            <strong class="kpi-mini-val text-blue" id="plate-total-prot">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Gorduras</span>
+                            <strong class="kpi-mini-val text-rose" id="plate-total-fat">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Fibras</span>
+                            <strong class="kpi-mini-val text-violet" id="plate-total-fiber">0g</strong>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-lbl">Peso Total</span>
+                            <strong class="kpi-mini-val" id="plate-total-weight">0g</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Alimentos Detectados com Gramatura Editável e Adição TACO -->
+                <div class="card plate-items-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>3. Alimentos no Prato & Gramaturas</h3>
+                            <p class="section-desc">Ajuste as gramas de cada porção em tempo real. Calorias e micronutrientes se recalculam instantaneamente.</p>
+                        </div>
+                    </div>
+
+                    <div class="plate-items-list" id="plate-items-list"></div>
+
+                    <!-- Autocomplete TACO para adicionar alimento extra -->
+                    <div class="plate-taco-add-box">
+                        <label for="plate-taco-search" class="field-label">+ Adicionar alimento extra da Tabela TACO:</label>
+                        <div class="taco-search-input-wrap">
+                            <input type="text" id="plate-taco-search" class="text-input" placeholder="Buscar no banco TACO (ex: mandioca, frango, azeite, aveia)..." autocomplete="off" />
+                            <div class="taco-suggestions-dropdown" id="plate-taco-suggestions" hidden></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: Bento Micronutrientes (% IDR ANVISA) -->
+                <div class="card plate-micros-card">
+                    <div class="section-header-inline">
+                        <div>
+                            <h3>4. Micronutrientes do Prato (% IDR ANVISA)</h3>
+                            <p class="section-desc">Metas baseadas na IN 75/2020 e RDC 429/2020 para adultos.</p>
+                        </div>
+                        <span class="status-pill" id="plate-micros-badge">Balanço Nutricional</span>
+                    </div>
+
+                    <div class="plate-micros-grid" id="plate-micros-grid"></div>
+                </div>
+
+                <!-- CARD 5: Ação de Lançamento na Dieta -->
+                <div class="card plate-action-card">
+                    <div class="plate-action-bar">
+                        <div class="meal-select-wrap">
+                            <label for="plate-meal-select" class="field-label">Lançar no diário como:</label>
+                            <select id="plate-meal-select" name="plate_meal" class="select-input">
+                                <option value="Café da manhã">Café da manhã</option>
+                                <option value="Almoço" selected>Almoço</option>
+                                <option value="Lanche">Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-emerald btn-lg" id="btn-add-plate-diet">
+                            Adicionar prato completo à refeição
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ANDROID -->
@@ -611,6 +744,10 @@
         <button class="mob-nav-btn" data-tab="comparar" aria-label="Comparar Alimentos">
             <span class="mob-nav-icon" aria-hidden="true">⇄</span>
             <span>Comparar</span>
+        </button>
+        <button class="mob-nav-btn" data-tab="prato" aria-label="Foto do Prato com IA">
+            <span class="mob-nav-icon" aria-hidden="true">🍽️</span>
+            <span>Prato IA</span>
         </button>
     </nav>
 
@@ -649,6 +786,7 @@
     <script src="static/js/share_export.js"></script>
     <script src="static/js/barcode_cam.js"></script>
     <script src="static/js/label_parser.js"></script>
+    <script src="static/js/plate_scanner.js"></script>
     <script src="static/js/app.js"></script>
 </body>
 </html>

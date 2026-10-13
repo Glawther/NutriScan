@@ -7,16 +7,20 @@ from app.config import APP_NAME, APP_VERSION
 from app.database import (
     add_diary_entry,
     delete_diary_entry,
+    find_matching_food_by_visual_tags,
     get_7day_trends,
     get_cached_product,
+    get_daily_micronutrients,
     get_diet_goals,
     get_diet_today_summary,
     get_metrics,
+    get_taco_food_by_id,
     get_water_for_date,
     list_history,
     log_water,
     reset_water_for_date,
     save_product,
+    search_taco_foods,
     update_diet_goals,
 )
 from app.engine.analyzer import compare_products
@@ -31,6 +35,7 @@ from app.engine.label_ocr import (
 )
 from app.models.schemas import (
     ComparisonResponse,
+    DailyMicronutrientsResponse,
     DietDiaryCreateRequest,
     DietDiaryEntry,
     DietGoals,
@@ -80,6 +85,42 @@ async def search_endpoint(q: str = Query("", description="Nome, marca ou código
     for item in results:
         save_product(item)
     return results
+
+
+@router.get("/foods/search")
+async def search_taco_foods_endpoint(
+    q: str = Query("", description="Termo de busca para alimento TACO (ex: arroz, frango, feijão)"),
+    limit: int = Query(20, ge=1, le=100, description="Limite máximo de resultados"),
+):
+    """
+    Busca alimentos na Tabela Brasileira de Composição de Alimentos (TACO/TBCA) offline.
+    """
+    return search_taco_foods(query=q, limit=limit)
+
+
+@router.get("/foods/by-visual-tags")
+async def get_foods_by_visual_tags_endpoint(
+    color: str = Query(..., description="Cor visual (ex: green, white, brown, red, yellow)"),
+    category: Optional[str] = Query(None, description="Categoria opcional"),
+):
+    """
+    Filtra alimentos da base TACO pelas tags de cores visuais (ex: 'green' para hortaliças).
+    """
+    return find_matching_food_by_visual_tags(color=color, category=category)
+
+
+@router.get("/foods/{food_id}")
+async def get_taco_food_endpoint(food_id: int):
+    """
+    Retorna os detalhes nutricionais completos (macro e micronutrientes per 100g) de um alimento TACO.
+    """
+    food = get_taco_food_by_id(food_id)
+    if not food:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Alimento TACO com ID {food_id} não encontrado no catálogo.",
+        )
+    return food
 
 
 @router.get("/product/{barcode}", response_model=ProductAnalysis)
@@ -134,6 +175,16 @@ async def get_diet_day_endpoint(
 ):
     target = date or date_str
     return get_diet_today_summary(date_str=target)
+
+
+@router.get("/diet/micronutrients", response_model=DailyMicronutrientsResponse)
+async def get_diet_micronutrients_endpoint(
+    date: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+    date_str: Optional[str] = Query(None, description="Data YYYY-MM-DD"),
+):
+    target = date or date_str
+    return get_daily_micronutrients(date_str=target)
+
 
 
 @router.get("/diet/export")
@@ -315,3 +366,65 @@ async def scan_label_photo_endpoint(request: Request):
         image_url=image_url,
         ocr_engine=ocr_engine,
     )
+
+
+from app.engine.plate_vision import (
+    SAMPLE_PLATES,
+    analyze_food_plate_image,
+)
+from app.models.schemas import PlateAnalysisResponse
+
+
+@router.get("/plate-samples")
+async def list_plate_samples_endpoint():
+    items = []
+    for key, spec in SAMPLE_PLATES.items():
+        items.append({
+            "sample_id": key,
+            "plate_name": spec["plate_name"],
+            "description": spec["description"],
+            "plate_diameter_cm": spec["plate_diameter_cm"],
+            "image_url": f"/static/samples/pratos/{spec['filename']}",
+            "items_count": len(spec["items"]),
+        })
+    return items
+
+
+@router.post("/scan-plate-photo", response_model=PlateAnalysisResponse)
+async def scan_plate_photo_endpoint(request: Request):
+    content_type = request.headers.get("content-type", "").lower()
+    img_bytes: Optional[bytes] = None
+    sample_id: Optional[str] = None
+
+    if "application/json" in content_type:
+        body = await request.json()
+        sample_id = body.get("sample_id")
+        image_base64 = body.get("image_base64")
+        if image_base64:
+            encoded = image_base64.split(",")[-1]
+            try:
+                img_bytes = base64.b64decode(encoded)
+            except Exception:
+                img_bytes = None
+    else:
+        form = await request.form()
+        sample_id = str(form.get("sample_id") or "").strip() or None
+        upload = form.get("file")
+        if upload is not None and hasattr(upload, "read"):
+            img_bytes = await upload.read()
+
+    goals = get_diet_goals()
+    daily_goals = {
+        "daily_kcal_limit": goals.daily_kcal_limit,
+        "carbs_limit_g": goals.carbs_limit_g,
+        "proteins_limit_g": goals.proteins_limit_g,
+        "fat_limit_g": goals.fat_limit_g,
+        "sodium_limit_mg": goals.sodium_limit_mg,
+    }
+
+    result = analyze_food_plate_image(
+        image_bytes=img_bytes,
+        sample_id=sample_id,
+        daily_goals=daily_goals,
+    )
+    return result

@@ -529,3 +529,400 @@ def test_fastapi_diet_export_endpoint():
 
 
 
+
+
+def test_plate_vision_engine_analysis():
+    from app.engine.plate_vision import (
+        ANVISA_IDR,
+        SAMPLE_PLATES,
+        TACO_DATABASE,
+        analyze_food_plate_image,
+        calculate_plate_composition,
+        classify_color,
+    )
+
+    # 1. Test color classification heuristics
+    assert classify_color(50, 150, 40) == "green"
+    assert classify_color(220, 40, 30) == "red_orange"
+    assert classify_color(240, 190, 30) == "yellow_gold"
+    assert classify_color(60, 20, 70) == "purple_dark"
+    assert classify_color(130, 80, 50) == "brown_dark"
+    assert classify_color(245, 245, 240) in ("white_grain", "plate_background")
+
+    # 2. Test TACO database and calculation
+    items_weights = [("arroz_branco", 150.0), ("feijao_carioca", 100.0), ("frango_grelhado", 130.0), ("salada_verde", 60.0)]
+    comp = calculate_plate_composition(items_weights)
+    assert comp["total_weight_g"] == 440.0
+    assert len(comp["items"]) == 4
+    assert comp["totals"]["kcal"] > 400.0
+    assert comp["totals"]["proteins_g"] > 45.0
+    assert comp["micronutrients"]["potassium_mg"] > 500.0
+    assert comp["anvisa_idr_impact_pct"]["kcal_pct"] > 0.0
+
+    # 3. Test analysis with sample_id
+    res_sample = analyze_food_plate_image(sample_id="omelete_fitness")
+    assert res_sample["sample_id"] == "omelete_fitness"
+    assert "Omelete" in res_sample["plate_name"]
+    assert any(it["food_name"] == "Omelete de ovos inteiros" for it in res_sample["items"])
+    assert any("Queijo" in it["food_name"] for it in res_sample["items"])
+
+    # 4. Fallback without image
+    res_empty = analyze_food_plate_image(image_bytes=None, sample_id=None)
+    assert res_empty["sample_id"] == "prato_feito"
+    assert res_empty["totals"]["kcal"] > 0
+
+
+def test_fastapi_scan_plate_photo_endpoints():
+    with TestClient(app) as client:
+        # Test GET /api/v1/plate-samples
+        r_list = client.get("/api/v1/plate-samples")
+        assert r_list.status_code == 200
+        samples = r_list.json()
+        assert len(samples) >= 4
+        sample_keys = [s["sample_id"] for s in samples]
+        assert "prato_feito" in sample_keys
+        assert "acai_banana" in sample_keys
+
+        # Test POST /api/v1/scan-plate-photo with JSON sample_id
+        r_plate = client.post(
+            "/api/v1/scan-plate-photo",
+            json={"sample_id": "salmao_legumes"},
+        )
+        assert r_plate.status_code == 200
+        data = r_plate.json()
+        assert "Salmão" in data["plate_name"]
+        assert data["total_weight_g"] == 340.0
+        assert data["confidence"] > 0.8
+        assert data["micronutrients"]["vitamin_c_mg"] > 30.0
+
+        # Test POST /api/v1/scan-plate-photo with multipart file upload
+        from pathlib import Path
+        img_path = Path("app/static/samples/pratos/prato_feito.png")
+        if img_path.exists():
+            with open(img_path, "rb") as f:
+                r_file = client.post(
+                    "/api/v1/scan-plate-photo",
+                    files={"file": ("prato_teste.png", f, "image/png")},
+                )
+            assert r_file.status_code == 200
+            file_data = r_file.json()
+            assert "Prato Feito" in file_data["plate_name"]
+            assert len(file_data["items"]) >= 3
+            assert file_data["totals"]["kcal"] > 300
+
+
+def test_taco_database_search_and_micronutrients():
+    from app.database import (
+        find_matching_food_by_visual_tags,
+        get_taco_food_by_id,
+        search_taco_foods,
+    )
+    from app.database.taco_foods import get_taco_catalog
+
+    catalog = get_taco_catalog()
+    assert len(catalog) >= 150, f"Catalog should contain 150+ foods, got {len(catalog)}"
+
+    # 1. Test search_taco_foods for staple foods
+    rice_results = search_taco_foods("arroz")
+    assert len(rice_results) >= 2
+    assert any("Arroz branco" in f["name"] for f in rice_results)
+
+    bean_results = search_taco_foods("feijão")
+    assert len(bean_results) >= 2
+    assert any("Feijão carioca" in f["name"] for f in bean_results)
+
+    chicken_results = search_taco_foods("frango")
+    assert len(chicken_results) >= 2
+    assert any("Peito de frango grelhado" in f["name"] for f in chicken_results)
+
+    tilapia_results = search_taco_foods("tilápia")
+    assert len(tilapia_results) >= 1
+
+    sweet_potato_results = search_taco_foods("batata doce")
+    assert len(sweet_potato_results) >= 1
+
+    # 2. Test get_taco_food_by_id and micronutrient integrity
+    first_food = rice_results[0]
+    food_id = first_food["id"]
+    food_by_id = get_taco_food_by_id(food_id)
+    assert food_by_id is not None
+    assert food_by_id["name"] == first_food["name"]
+
+    # Verify all macronutrient and micronutrient fields exist and have proper types
+    expected_fields = [
+        "energy_kcal", "carbohydrates_g", "proteins_g", "fat_g", "fiber_g",
+        "calcium_mg", "iron_mg", "sodium_mg", "potassium_mg",
+        "magnesium_mg", "phosphorus_mg", "vitamin_c_mg", "zinc_mg",
+        "visual_color_tags", "category"
+    ]
+    for field in expected_fields:
+        assert field in food_by_id, f"Field '{field}' missing in TACO food"
+
+    # Test nutrient ranges for chicken breast
+    grilled_chicken = next(f for f in chicken_results if "Peito de frango grelhado" in f["name"])
+    assert grilled_chicken["proteins_g"] > 25.0
+    assert grilled_chicken["fat_g"] < 10.0
+    assert grilled_chicken["potassium_mg"] > 200.0
+
+    # 3. Test find_matching_food_by_visual_tags
+    green_foods = find_matching_food_by_visual_tags("green")
+    assert len(green_foods) >= 10
+    green_names = [f["name"] for f in green_foods]
+    assert any("Brócolis" in n or "Alface" in n or "Couve" in n for n in green_names)
+
+    green_veggies = find_matching_food_by_visual_tags("green", category="Verduras e legumes")
+    assert len(green_veggies) >= 5
+    assert all(f["category"] == "Verduras e legumes" for f in green_veggies)
+
+    white_foods = find_matching_food_by_visual_tags("white")
+    assert len(white_foods) >= 10
+    assert any("Arroz branco" in f["name"] for f in white_foods)
+
+
+def test_fastapi_taco_foods_endpoints():
+    with TestClient(app) as client:
+        # 1. GET /api/v1/foods/search
+        r_search = client.get("/api/v1/foods/search?q=banana")
+        assert r_search.status_code == 200
+        bananas = r_search.json()
+        assert len(bananas) >= 2
+        assert any("Banana prata" in b["name"] for b in bananas)
+
+        # 2. GET /api/v1/foods/by-visual-tags
+        r_tags = client.get("/api/v1/foods/by-visual-tags?color=purple")
+        assert r_tags.status_code == 200
+        purple_foods = r_tags.json()
+        assert len(purple_foods) >= 1
+        assert any("Açaí" in p["name"] or "Beterraba" in p["name"] or "Repolho roxo" in p["name"] for p in purple_foods)
+
+        # 3. GET /api/v1/foods/{food_id}
+        first_banana_id = bananas[0]["id"]
+        r_food = client.get(f"/api/v1/foods/{first_banana_id}")
+        assert r_food.status_code == 200
+        banana_data = r_food.json()
+        assert banana_data["id"] == first_banana_id
+        assert "energy_kcal" in banana_data
+        assert "potassium_mg" in banana_data
+        assert banana_data["potassium_mg"] > 200.0
+
+        # 4. Non-existent food_id returns 404
+        r_not_found = client.get("/api/v1/foods/999999")
+        assert r_not_found.status_code == 404
+
+
+def test_micronutrient_aggregation_and_idr_engine():
+    from app.database import add_diary_entry, get_daily_micronutrients, init_db
+    from app.models.schemas import DietDiaryCreateRequest
+
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
+        test_db = tmp.name
+
+    try:
+        init_db(test_db)
+        test_date = "2026-10-15"
+
+        # 1. Initially empty day has 0.0 totals and "Abaixo da meta" / "Excelente" (for sodium)
+        empty_res = get_daily_micronutrients(date_str=test_date, db_path=test_db)
+        assert empty_res["date_str"] == test_date
+        assert empty_res["totals"]["calcium_mg"] == 0.0
+        assert empty_res["totals"]["iron_mg"] == 0.0
+        assert empty_res["totals"]["sodium_mg"] == 0.0
+        assert len(empty_res["comparisons"]) == 8
+
+        # 2. Add two balanced meals
+        meal1 = DietDiaryCreateRequest(
+            date_str=test_date,
+            meal_type="Café da manhã",
+            product_name="Iogurte com Aveia e Frutas",
+            portion_g=200.0,
+            kcal=250.0,
+            calcium_mg=400.0,
+            iron_mg=3.0,
+            sodium_mg=150.0,
+            potassium_mg=600.0,
+            magnesium_mg=80.0,
+            phosphorus_mg=250.0,
+            vitamin_c_mg=45.0,
+            zinc_mg=2.0,
+        )
+        add_diary_entry(meal1, db_path=test_db)
+
+        meal2 = DietDiaryCreateRequest(
+            date_str=test_date,
+            meal_type="Almoço",
+            product_name="Prato Feito Tradicional",
+            portion_g=400.0,
+            kcal=650.0,
+            calcium_mg=650.0,
+            iron_mg=12.0,
+            sodium_mg=2100.0,
+            potassium_mg=3000.0,
+            magnesium_mg=200.0,
+            phosphorus_mg=500.0,
+            vitamin_c_mg=60.0,
+            zinc_mg=5.5,
+        )
+        add_diary_entry(meal2, db_path=test_db)
+
+        # 3. Aggregation check
+        daily = get_daily_micronutrients(date_str=test_date, db_path=test_db)
+        totals = daily["totals"]
+
+        assert totals["calcium_mg"] == 1050.0
+        assert totals["iron_mg"] == 15.0
+        assert totals["sodium_mg"] == 2250.0
+        assert totals["potassium_mg"] == 3600.0
+        assert totals["magnesium_mg"] == 280.0
+        assert totals["phosphorus_mg"] == 750.0
+        assert totals["vitamin_c_mg"] == 105.0
+        assert totals["zinc_mg"] == 7.5
+
+        # 4. Check ANVISA IDR comparisons
+        comps = {c["nutrient"]: c for c in daily["comparisons"]}
+
+        # Cálcio: goal 1000 mg -> 1050 mg = 105.0% -> "Excelente"
+        assert comps["Cálcio"]["idr_goal"] == 1000.0
+        assert comps["Cálcio"]["consumed"] == 1050.0
+        assert comps["Cálcio"]["pct_idr"] == 105.0
+        assert comps["Cálcio"]["status"] == "Excelente"
+
+        # Ferro: goal 14 mg -> 15 mg = 107.1% -> "Excelente"
+        assert comps["Ferro"]["idr_goal"] == 14.0
+        assert comps["Ferro"]["consumed"] == 15.0
+        assert comps["Ferro"]["pct_idr"] == 107.1
+        assert comps["Ferro"]["status"] == "Excelente"
+
+        # Sódio: goal 2000 mg (limite máximo) -> 2250 mg = 112.5% -> "Atenção: Alto"
+        assert comps["Sódio"]["idr_goal"] == 2000.0
+        assert comps["Sódio"]["consumed"] == 2250.0
+        assert comps["Sódio"]["pct_idr"] == 112.5
+        assert comps["Sódio"]["status"] == "Atenção: Alto"
+
+        # Potássio: goal 3500 mg -> 3600 mg = 102.9% -> "Excelente"
+        assert comps["Potássio"]["idr_goal"] == 3500.0
+        assert comps["Potássio"]["pct_idr"] == 102.9
+        assert comps["Potássio"]["status"] == "Excelente"
+
+        # Magnésio: goal 260 mg -> 280 mg = 107.7% -> "Excelente"
+        assert comps["Magnésio"]["idr_goal"] == 260.0
+        assert comps["Magnésio"]["pct_idr"] == 107.7
+        assert comps["Magnésio"]["status"] == "Excelente"
+
+        # Fósforo: goal 700 mg -> 750 mg = 107.1% -> "Excelente"
+        assert comps["Fósforo"]["idr_goal"] == 700.0
+        assert comps["Fósforo"]["pct_idr"] == 107.1
+        assert comps["Fósforo"]["status"] == "Excelente"
+
+        # Vitamina C: goal 100 mg -> 105 mg = 105.0% -> "Excelente"
+        assert comps["Vitamina C"]["idr_goal"] == 100.0
+        assert comps["Vitamina C"]["pct_idr"] == 105.0
+        assert comps["Vitamina C"]["status"] == "Excelente"
+
+        # Zinco: goal 7 mg -> 7.5 mg = 107.1% -> "Excelente"
+        assert comps["Zinco"]["idr_goal"] == 7.0
+        assert comps["Zinco"]["pct_idr"] == 107.1
+        assert comps["Zinco"]["status"] == "Excelente"
+
+        # 5. Test "Adequado" and "Abaixo da meta" statuses
+        test_date2 = "2026-10-16"
+        meal_partial = DietDiaryCreateRequest(
+            date_str=test_date2,
+            meal_type="Lanche",
+            product_name="Lanche Leve",
+            portion_g=100.0,
+            kcal=180.0,
+            calcium_mg=750.0,  # 75% da IDR -> "Adequado"
+            iron_mg=5.0,       # 35.7% da IDR -> "Abaixo da meta"
+            sodium_mg=1700.0,  # 85% do limite -> "Adequado"
+            potassium_mg=1000.0,
+            magnesium_mg=100.0,
+            phosphorus_mg=200.0,
+            vitamin_c_mg=20.0,
+            zinc_mg=2.0,
+        )
+        add_diary_entry(meal_partial, db_path=test_db)
+        daily2 = get_daily_micronutrients(date_str=test_date2, db_path=test_db)
+        comps2 = {c["nutrient"]: c for c in daily2["comparisons"]}
+
+        assert comps2["Cálcio"]["status"] == "Adequado"
+        assert comps2["Ferro"]["status"] == "Abaixo da meta"
+        assert comps2["Sódio"]["status"] == "Adequado"
+
+    finally:
+        if os.path.exists(test_db):
+            os.remove(test_db)
+
+
+def test_fastapi_diet_micronutrients_endpoint():
+    with TestClient(app) as client:
+        # 1. GET /api/v1/diet/micronutrients (default today)
+        r = client.get("/api/v1/diet/micronutrients")
+        assert r.status_code == 200
+        data = r.json()
+        assert "date_str" in data
+        assert "totals" in data
+        assert "comparisons" in data
+
+        # Verify all 8 fields in totals
+        expected_nutrients = [
+            "calcium_mg", "iron_mg", "sodium_mg", "potassium_mg",
+            "magnesium_mg", "phosphorus_mg", "vitamin_c_mg", "zinc_mg"
+        ]
+        for nutr in expected_nutrients:
+            assert nutr in data["totals"]
+            assert isinstance(data["totals"][nutr], (int, float))
+
+        # Verify comparisons list has 8 items
+        assert len(data["comparisons"]) == 8
+        for comp in data["comparisons"]:
+            assert "nutrient" in comp
+            assert "unit" in comp
+            assert "consumed" in comp
+            assert "idr_goal" in comp
+            assert "pct_idr" in comp
+            assert comp["status"] in ("Excelente", "Adequado", "Abaixo da meta", "Atenção: Alto")
+
+        # 2. GET /api/v1/diet/micronutrients with specific date
+        test_date = "2026-10-20"
+        r_date = client.get(f"/api/v1/diet/micronutrients?date={test_date}")
+        assert r_date.status_code == 200
+        data_date = r_date.json()
+        assert data_date["date_str"] == test_date
+
+        # 3. Add an entry via POST /api/v1/diet/diary and verify reflection in micronutrients
+        meal_payload = {
+            "date_str": test_date,
+            "meal_type": "Almoço",
+            "product_name": "Salmão com Brócolis e Batata",
+            "source_type": "manual",
+            "portion_g": 350.0,
+            "kcal": 520.0,
+            "carbohydrates_g": 35.0,
+            "proteins_g": 42.0,
+            "fat_g": 18.0,
+            "fiber_g": 5.0,
+            "sodium_mg": 450.0,
+            "calcium_mg": 280.0,
+            "iron_mg": 4.5,
+            "potassium_mg": 850.0,
+            "magnesium_mg": 95.0,
+            "phosphorus_mg": 380.0,
+            "vitamin_c_mg": 65.0,
+            "zinc_mg": 2.2,
+        }
+        r_post = client.post("/api/v1/diet/diary", json=meal_payload)
+        assert r_post.status_code == 200
+        created_entry = r_post.json()
+        assert created_entry["calcium_mg"] == 280.0
+        assert created_entry["vitamin_c_mg"] == 65.0
+
+        # Query micronutrients endpoint again for that date
+        r_after = client.get(f"/api/v1/diet/micronutrients?date={test_date}")
+        assert r_after.status_code == 200
+        after_data = r_after.json()
+        assert after_data["totals"]["calcium_mg"] >= 280.0
+        assert after_data["totals"]["vitamin_c_mg"] >= 65.0
+        assert after_data["totals"]["potassium_mg"] >= 850.0
+
+        # Cleanup created entry
+        client.delete(f"/api/v1/diet/diary/{created_entry['id']}")

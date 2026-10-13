@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+﻿from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -11,6 +11,7 @@ from app.api.routes import router as api_router
 from app.config import APP_NAME, APP_VERSION, HOST, PORT
 from app.database import seed_demo_data_if_empty
 from app.engine.label_ocr import ensure_sample_label_images
+from app.engine.plate_vision import ensure_sample_plate_images
 
 STATIC_DIR = Path(__file__).resolve().parent / "app" / "static"
 
@@ -18,6 +19,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "app" / "static"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ensure_sample_label_images(STATIC_DIR)
+    ensure_sample_plate_images(STATIC_DIR)
     seed_demo_data_if_empty()
     yield
 
@@ -26,8 +28,8 @@ app = FastAPI(
     title=APP_NAME,
     version=APP_VERSION,
     description=(
-        "Controle de dieta diária, leitura de foto de ficha técnica nutricional (padrão ANVISA RDC 429/2020) "
-        "e consulta de alimentos via Open Food Facts."
+        "Controle de dieta diária, leitura de foto de ficha técnica nutricional (padrão ANVISA RDC 429/2020), "
+        "visão computacional de prato e consulta de alimentos via Open Food Facts."
     ),
     lifespan=lifespan,
 )

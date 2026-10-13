@@ -108,6 +108,13 @@ class DietDiaryEntry(BaseModel):
     fat_g: float
     fiber_g: float
     sodium_mg: float
+    calcium_mg: float = 0.0
+    iron_mg: float = 0.0
+    potassium_mg: float = 0.0
+    magnesium_mg: float = 0.0
+    phosphorus_mg: float = 0.0
+    vitamin_c_mg: float = 0.0
+    zinc_mg: float = 0.0
     created_at: str
 
 
@@ -123,6 +130,13 @@ class DietDiaryCreateRequest(BaseModel):
     fat_g: float = Field(0.0, ge=0.0)
     fiber_g: float = Field(0.0, ge=0.0)
     sodium_mg: float = Field(0.0, ge=0.0)
+    calcium_mg: float = Field(0.0, ge=0.0)
+    iron_mg: float = Field(0.0, ge=0.0)
+    potassium_mg: float = 0.0
+    magnesium_mg: float = 0.0
+    phosphorus_mg: float = 0.0
+    vitamin_c_mg: float = 0.0
+    zinc_mg: float = 0.0
 
 
 class DietTodaySummary(BaseModel):
@@ -187,3 +201,82 @@ class WeeklyTrendsResponse(BaseModel):
     compliance_rate: float
     total_water_liters: float
 
+
+class MicronutrientTotals(BaseModel):
+    calcium_mg: float = Field(0.0, description="Cálcio em miligramas")
+    iron_mg: float = Field(0.0, description="Ferro em miligramas")
+    sodium_mg: float = Field(0.0, description="Sódio em miligramas")
+    potassium_mg: float = Field(0.0, description="Potássio em miligramas")
+    magnesium_mg: float = Field(0.0, description="Magnésio em miligramas")
+    phosphorus_mg: float = Field(0.0, description="Fósforo em miligramas")
+    vitamin_c_mg: float = Field(0.0, description="Vitamina C em miligramas")
+    zinc_mg: float = Field(0.0, description="Zinco em miligramas")
+
+
+class MicronutrientIDRComparison(BaseModel):
+    nutrient: str = Field(..., description="Nome do nutriente")
+    unit: str = Field("mg", description="Unidade de medida")
+    consumed: float = Field(..., description="Quantidade total consumida")
+    idr_goal: float = Field(..., description="Meta ou limite de IDR ANVISA")
+    pct_idr: float = Field(..., description="Percentual atingido em relação à IDR")
+    status: str = Field(..., description="Status de adequação: Excelente | Adequado | Abaixo da meta | Atenção: Alto")
+
+
+class DailyMicronutrientsResponse(BaseModel):
+    date_str: str
+    totals: MicronutrientTotals
+    comparisons: List[MicronutrientIDRComparison]
+
+
+
+
+class PlateItemDetail(BaseModel):
+    food_key: str
+    food_name: str
+    category: str
+    weight_g: float
+    kcal: float
+    carbohydrates_g: float
+    proteins_g: float
+    fat_g: float
+    fiber_g: float
+    calcium_mg: float = 0.0
+    iron_mg: float = 0.0
+    sodium_mg: float = 0.0
+    potassium_mg: float = 0.0
+    vitamin_c_mg: float = 0.0
+    magnesium_mg: float = 0.0
+    zinc_mg: float = 0.0
+
+
+class PlateAnalysisTotals(BaseModel):
+    kcal: float
+    carbohydrates_g: float
+    proteins_g: float
+    fat_g: float
+    fiber_g: float
+
+
+class PlateMicronutrients(BaseModel):
+    calcium_mg: float
+    iron_mg: float
+    sodium_mg: float
+    potassium_mg: float
+    vitamin_c_mg: float
+    magnesium_mg: float
+    zinc_mg: float
+
+
+class PlateAnalysisResponse(BaseModel):
+    plate_name: str
+    confidence: float
+    total_weight_g: float
+    plate_diameter_cm: float = 25.0
+    sample_id: Optional[str] = None
+    description: Optional[str] = None
+    items: List[PlateItemDetail]
+    totals: PlateAnalysisTotals
+    micronutrients: PlateMicronutrients
+    daily_goal_impact_pct: Dict[str, float]
+    anvisa_idr_impact_pct: Dict[str, float]
+    heuristic_clusters: Optional[Dict[str, int]] = None

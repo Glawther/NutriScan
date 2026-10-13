@@ -145,6 +145,7 @@ function switchTab(rawTabName) {
         panel.hidden = !isActive;
     });
 }
+window.switchTab = switchTab;
 
 function getLocalDietData() {
     const saved = localStorage.getItem("nutriscan_diet_state_v1");
@@ -512,6 +513,8 @@ async function addDiaryEntryToDiet(payload) {
     localStorage.setItem("nutriscan_diet_state_v1", JSON.stringify(state));
     renderDietToday(buildOfflineSummary(state));
 }
+window.addDiaryEntryToDiet = addDiaryEntryToDiet;
+window.loadDietToday = loadDietToday;
 
 async function saveDietGoals(autoCalculate = false) {
     const payload = {
@@ -1253,7 +1256,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const params = new URLSearchParams(window.location.search);
     const initialTab = params.get("tab");
-    if (initialTab && ["dieta", "foto", "scanner", "comparar", "compare"].includes(initialTab)) {
+    if (initialTab && ["dieta", "foto", "scanner", "comparar", "compare", "prato"].includes(initialTab)) {
         switchTab(initialTab);
     } else {
         switchTab("dieta");
